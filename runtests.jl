@@ -22,3 +22,15 @@ f=(exp(x)*(sqrt(1-x)*sqrt(x+1)))
 x=Fun(identity,[-1,2])
 f=(exp(x)*(sqrt(2-x)*sqrt(x+1)))
 @test_approx_eq (Hilbert()*f)[.1] 2.1380903070701673244
+
+x=Fun(identity)
+w=1/sqrt(1-x^2)
+H=Hilbert()
+B=ldirichlet(space(x))
+
+for a in [sqrt(sqrt(5)-2)/2,1.,10.]
+    L=H[w]+1/a/sqrt(1+a^2)*x
+    u=[B,L]\[1.]
+    usol = (1+a^2)/(x^2+a^2)
+    @test norm(u-usol) <= eps(100/a)
+end
