@@ -34,3 +34,24 @@ for a in [sqrt(sqrt(5)-2)/2,1.,10.]
     usol = (1+a^2)/(x^2+a^2)
     @test norm(u-usol) <= eps(100/a)
 end
+
+
+
+Γ=Circle()∪Circle(0.5)
+f=devec([Fun(z->z^(-1),Γ[1]),Fun(z->z,Γ[2])])
+A=I-(f-1)*Cauchy(-1)
+u=A\(f-1)
+@test_approx_eq 1+cauchy(u,.1) 1
+@test_approx_eq 1+cauchy(u,.8) 1/0.8
+@test_approx_eq 1+cauchy(u,2.) 1
+
+
+
+
+
+x = Fun(identity)
+w = 1/sqrt(1-x^2)
+H = Hilbert(space(w))
+@test_approx_eq  (H[w]*exp(x))[.1] hilbert(w*exp(x))[.1]
+
+
