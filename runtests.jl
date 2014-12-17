@@ -24,9 +24,10 @@ f=(exp(x)*(sqrt(2-x)*sqrt(x+1)))
 @test_approx_eq (Hilbert()*f)[.1] 2.1380903070701673244
 
 x=Fun(identity)
+d=domain(x)
 w=1/sqrt(1-x^2)
-H=Hilbert()
-B=ldirichlet(space(x))
+H=Hilbert(d)
+B=ldirichlet(d)
 
 for a in [sqrt(sqrt(5)-2)/2,1.,10.]
     L=H[w]+1/a/sqrt(1+a^2)*x
