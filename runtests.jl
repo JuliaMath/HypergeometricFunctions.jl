@@ -39,7 +39,7 @@ end
 
 
 Γ=Circle()∪Circle(0.5)
-f=devec([Fun(z->z^(-1),Γ[1]),Fun(z->z,Γ[2])])
+f=depiece([Fun(z->z^(-1),Γ[1]),Fun(z->z,Γ[2])])
 A=I-(f-1)*Cauchy(-1)
 u=A\(f-1)
 @test_approx_eq 1+cauchy(u,.1) 1
