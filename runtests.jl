@@ -61,3 +61,6 @@ w = sqrt(1-x^2)
 H = Hilbert(space(w))
 @test_approx_eq (H[w]*exp(x))[.1] hilbert(w*exp(x))[.1]
 
+println("Example test")
+
+include("ExamplesTest.jl")
