@@ -71,6 +71,9 @@ z=Fun(identity,d2);
 C=Cauchy(Space(d1),Space(d2))
 @test norm((C*Fun(exp,d1)-Fun(exp,d2)).coefficients)<100eps()
 
+C2=Cauchy(Space(d2),Space(d1))
+@test norm((C2*Fun(z->exp(1/z)-1,d2)-Fun(z->exp(1/z)-1,d1)).coefficients)<10000eps()
+
 
 
 println("Example test")
