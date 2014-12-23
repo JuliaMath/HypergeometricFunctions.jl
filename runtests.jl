@@ -61,6 +61,18 @@ w = sqrt(1-x^2)
 H = Hilbert(space(w))
 @test_approx_eq (H[w]*exp(x))[.1] hilbert(w*exp(x))[.1]
 
+
+
+c1=0.5+0.1;r1=3.;
+c2=-0.1+.2im;r2=0.3;
+d1=Circle(c1,r1)
+d2=Circle(c2,r2)
+z=Fun(identity,d2);
+C=Cauchy(Space(d1),Space(d2))
+@test norm((C*Fun(exp,d1)-Fun(exp,d2)).coefficients)<100eps()
+
+
+
 println("Example test")
 
 include("ExamplesTest.jl")
