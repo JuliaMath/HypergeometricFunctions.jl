@@ -78,7 +78,7 @@ c1=0.1+.1im;r1=.4;
 c2=-2.+.2im;r2=0.3;
 d1=Circle(c1,r1)
 d2=Circle(c2,r2)
-@test norm((Cauchy(d1,d2)*Fun(z->exp(1/z)-1,d1)+Fun(z->exp(1/z)-1,d2)).coefficients)<10eps()
+@test norm((Cauchy(d1,d2)*Fun(z->exp(1/z)-1,d1)+Fun(z->exp(1/z)-1,d2)).coefficients)<200eps()
 
 println("Example test")
 
