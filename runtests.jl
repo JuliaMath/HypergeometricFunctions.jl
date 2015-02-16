@@ -80,6 +80,10 @@ d1=Circle(c1,r1)
 d2=Circle(c2,r2)
 @test norm((Cauchy(d1,d2)*Fun(z->exp(1/z)-1,d1)+Fun(z->exp(1/z)-1,d2)).coefficients)<200eps()
 
+println("KernelFun test")
+
+include("KernelFunTest.jl")
+
 println("Example test")
 
 include("ExamplesTest.jl")
