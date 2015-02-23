@@ -1,5 +1,6 @@
 using ApproxFun, SIE, Base.Test
 
+println("Hilbert test")
 
 x=Fun(identity)
 f=(exp(x)/(sqrt(1-x)*sqrt(x+1)))
@@ -37,19 +38,6 @@ for a in [sqrt(sqrt(5)-2)/2,1.,10.]
 end
 
 
-
-Γ=Circle()∪Circle(0.5)
-f=depiece([Fun(z->z^(-1),Γ[1]),Fun(z->z,Γ[2])])
-A=I-(f-1)*Cauchy(-1)
-u=A\(f-1)
-@test_approx_eq 1+cauchy(u,.1) 1
-@test_approx_eq 1+cauchy(u,.8) 1/0.8
-@test_approx_eq 1+cauchy(u,2.) 1
-
-
-
-
-
 x = Fun(identity)
 w = 1/sqrt(1-x^2)
 H = Hilbert(space(w))
@@ -62,6 +50,44 @@ H = Hilbert(space(w))
 @test_approx_eq (H[w]*exp(x))[.1] hilbert(w*exp(x))[.1]
 
 
+println("Stieltjes test")
+
+ds1 = JacobiWeight(-.5,-.5,ApproxFun.ChebyshevDirichlet{1,1}())
+ds2 = JacobiWeight(-.5,-.5,Chebyshev())
+rs = Chebyshev([2.,4.+3im])
+f1 = Fun(x->exp(x)/sqrt(1-x^2),ds1)
+f2 = Fun(x->exp(x)/sqrt(1-x^2),ds2)
+S = Stieltjes(ds1,rs)
+
+z = 3.+1.5im
+@test_approx_eq (S*f1)[z] stieltjes(f2,z) #val,err = quadgk(x->f1[x]./(z-x),-1.,1.)
+# Operator 1.1589646343327578 - 0.7273679005911196im
+# Function 1.1589646343327455 - 0.7273679005911283im
+
+
+ds1 = JacobiWeight(.5,.5,Ultraspherical{1}())
+ds2 = JacobiWeight(.5,.5,Chebyshev())
+rs = Chebyshev([2.,4.])
+f1 = Fun(x->exp(x)*sqrt(1-x^2),ds1)
+f2 = Fun(x->exp(x)*sqrt(1-x^2),ds2)
+S = Stieltjes(ds1,rs)
+
+z = 3.
+@test_approx_eq (S*f1)[z] stieltjes(f2,z) #val,err = quadgk(x->f1[x]./(z-x),-1.,1.;reltol=eps())
+# Operator 0.6616422557285478 + 0.0im
+# Function 0.661642255728541 - 0.0im
+
+
+
+println("Cauchy test")
+
+Γ=Circle()∪Circle(0.5)
+f=depiece([Fun(z->z^(-1),Γ[1]),Fun(z->z,Γ[2])])
+A=I-(f-1)*Cauchy(-1)
+u=A\(f-1)
+@test_approx_eq 1+cauchy(u,.1) 1
+@test_approx_eq 1+cauchy(u,.8) 1/0.8
+@test_approx_eq 1+cauchy(u,2.) 1
 
 c1=0.5+0.1;r1=3.;
 c2=-0.1+.2im;r2=0.3;
