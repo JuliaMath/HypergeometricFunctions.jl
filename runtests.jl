@@ -124,6 +124,13 @@ x=Fun(identity)
 f=exp(x)*sqrt(1-x^2)
 @test_approx_eq Stieltjes(space(f),z)*f stieltjes(f,z)
 
+a=Arc(0.,1.,0.,π/2)
+ζ=Fun(identity,a)
+f=Fun(exp,a)*sqrt(abs((ζ-1)*(ζ-im)))
+H=Hilbert()
+z=exp(.1im)
+@test_approx_eq (H*f)[z] hilbert(f,z)
+
 println("KernelFun test")
 
 include("KernelFunTest.jl")
