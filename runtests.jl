@@ -77,7 +77,31 @@ z = 3.
 # Operator 0.6616422557285478 + 0.0im
 # Function 0.661642255728541 - 0.0im
 
+println("Stieltjes integral test")
 
+ds1 = JacobiWeight(-.5,-.5,ApproxFun.ChebyshevDirichlet{1,1}())
+ds2 = JacobiWeight(-.5,-.5,Chebyshev())
+rs = Chebyshev([2.,4.])
+f1 = Fun(x->exp(x)/sqrt(1-x^2),ds1)
+f2 = Fun(x->exp(x)/sqrt(1-x^2),ds2)
+S = Stieltjes(ds1,rs,0)
+
+z = 3.
+@test_approx_eq (S*f1)[z] SIE.stieltjesintegral(f2,z)
+# Operator 3.6322473044237698 + 0.0im
+# Function 3.6322473044237515
+
+ds1 = JacobiWeight(.5,.5,Ultraspherical{1}())
+ds2 = JacobiWeight(.5,.5,Chebyshev())
+rs = Chebyshev([2.0,4.0])
+f1 = Fun(x->exp(x)*sqrt(1-x^2),ds1)
+f2 = Fun(x->exp(x)*sqrt(1-x^2),ds2)
+S = Stieltjes(ds1,rs,0)
+
+z = 3.0
+@test_approx_eq (S*f1)[z] SIE.stieltjesintegral(f2,z)
+# Operator 1.7772163062194861 + 0.0im
+# Function 1.7772163062194637
 
 println("Cauchy test")
 
