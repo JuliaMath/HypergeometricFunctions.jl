@@ -106,6 +106,24 @@ d1=Circle(c1,r1)
 d2=Circle(c2,r2)
 @test norm((Cauchy(d1,d2)*Fun(z->exp(1/z)-1,d1)+Fun(z->exp(1/z)-1,d2)).coefficients)<200eps()
 
+
+println("Arc test")
+
+a=Arc(0.,1.,0.,π/2)
+ζ=Fun(identity,a)
+f=Fun(exp,a)*sqrt(abs((ζ-1)*(ζ-im)))
+z=.1+.2im
+@test_approx_eq cauchy(f,z) sum(f/(ζ-z))/(2π*im)
+z=exp(.1im)
+@test_approx_eq hilbert(f,z) im*(cauchy(+1,f,z)+cauchy(-1,f,z))
+
+
+println("Functional test")
+z=.1+.2im
+x=Fun(identity)
+f=exp(x)*sqrt(1-x^2)
+@test_approx_eq Stieltjes(space(f),z)*f stieltjes(f,z)
+
 println("KernelFun test")
 
 include("KernelFunTest.jl")
