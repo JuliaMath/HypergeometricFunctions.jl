@@ -183,7 +183,16 @@ x=4.0+2im;
 @test_approx_eq linesum(f*log(abs(x-z))) logkernel(f,x)
 
 
+a=1.0;b=2.0
+d=Interval(a,b)
+z=Fun(d)
+f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
+x=1.5
+@test_approx_eq (Hilbert(space(f),0)*f)[x] logkernel(f,x)/π
 
+f=real(exp(z)*(sqrt(z-a)*sqrt(b-z)))
+x=1.5
+@test_approx_eq (Hilbert(space(f),0)*f)[x] logkernel(f,x)/π
 
 println("KernelFun test")
 
