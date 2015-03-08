@@ -155,6 +155,36 @@ H=Hilbert()
 z=exp(.1im)
 @test_approx_eq (H*f)[z] hilbert(f,z)
 
+
+println("Logkernel test")
+
+a=1.0;b=2.0
+d=Interval(a,b)
+z=Fun(d)
+f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
+S=space(f)
+x=4.0+2im;
+@test_approx_eq linesum(f*log(abs(x-z))) logkernel(f,x)
+
+a=1.0;b=2.0+im
+d=Interval(a,b)
+z=Fun(d)
+f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
+S=space(f)
+x=4.0+2im;
+@test_approx_eq linesum(f*log(abs(x-z))) logkernel(f,x)
+
+a=1.0;b=2.0+im
+d=Interval(a,b)
+z=Fun(d)
+f=real(exp(z)*(sqrt(z-a)*sqrt(b-z)))
+S=space(f)
+x=4.0+2im;
+@test_approx_eq linesum(f*log(abs(x-z))) logkernel(f,x)
+
+
+
+
 println("KernelFun test")
 
 include("KernelFunTest.jl")
