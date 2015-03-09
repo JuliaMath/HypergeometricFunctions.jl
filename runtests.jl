@@ -227,7 +227,12 @@ f=real(ζ+1/(ζ-0.1))
 z=0.1+0.1im;@test_approx_eq linesum(log(abs(ζ-z))*f) logkernel(f,z)
 z=5.0+0.1im;@test_approx_eq linesum(log(abs(ζ-z))*f) logkernel(f,z)
 
-
+d=Circle(0.2,3.0)
+S=Fourier(d)
+H=Hilbert(S,0)
+ζ=Fun(d)
+f=real(ζ+1/(ζ-0.1))
+z=0.2+3im;@test_approx_eq (H*f)[z] logkernel(f,z)/π
 
 
 println("KernelFun test")
