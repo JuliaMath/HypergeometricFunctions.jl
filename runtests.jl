@@ -218,6 +218,18 @@ H=OffHilbert(S,Chebyshev([3,4.0+im]),0)
 @test_approx_eq (H*f)[3.5+0.5im] logkernel(f,3.5+0.5im)/π
 
 
+## Circle
+
+d=Circle(3.0)
+S=Fourier(d)
+ζ=Fun(d)
+f=real(ζ+1/(ζ-0.1))
+z=0.1+0.1im;@test_approx_eq linesum(log(abs(ζ-z))*f) logkernel(f,z)
+z=5.0+0.1im;@test_approx_eq linesum(log(abs(ζ-z))*f) logkernel(f,z)
+
+
+
+
 println("KernelFun test")
 
 include("KernelFunTest.jl")
