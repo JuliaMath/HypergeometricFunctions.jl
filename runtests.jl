@@ -220,7 +220,7 @@ H=OffHilbert(S,Chebyshev([3,4.0+im]),0)
 
 ## Circle
 
-d=Circle(3.0)
+d=Circle(0.2,3.0)
 S=Fourier(d)
 ζ=Fun(d)
 f=real(ζ+1/(ζ-0.1))
