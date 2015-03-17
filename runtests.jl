@@ -188,33 +188,33 @@ d=Interval(a,b)
 z=Fun(d)
 f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
 x=1.5
-@test_approx_eq (Hilbert(space(f),0)*f)[x] logkernel(f,x)/π
+@test_approx_eq (SingularIntegral(space(f),0)*f)[x] logkernel(f,x)/π
 
 f=real(exp(z)*(sqrt(z-a)*sqrt(b-z)))
 x=1.5
-@test_approx_eq (Hilbert(space(f),0)*f)[x] logkernel(f,x)/π
+@test_approx_eq (SingularIntegral(space(f),0)*f)[x] logkernel(f,x)/π
 
 a=1.0;b=2.0+im
 d=Interval(a,b)
 z=Fun(d)
 f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
 x=1.5+0.5im
-H=Hilbert(space(f),0)
+H=SingularIntegral(space(f),0)
 @test_approx_eq (H*f)[x] logkernel(f,x)/π
 
 
 f=real(exp(z)*(sqrt(z-a)*sqrt(b-z)))
-@test_approx_eq (Hilbert(space(f),0)*f)[x] logkernel(f,x)/π
+@test_approx_eq (SingularIntegral(space(f),0)*f)[x] logkernel(f,x)/π
 
 a=1.0;b=2.0+im
 d=Interval(a,b)
 z=Fun(d)
 f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
 S=JacobiWeight(-0.5,-0.5,ChebyshevDirichlet{1,1}(d))
-H=OffHilbert(S,Chebyshev([3,4]),0)
+H=OffSingularIntegral(S,Chebyshev([3,4]),0)
 @test_approx_eq (H*f)[3.5] logkernel(f,3.5)/π
 
-H=OffHilbert(S,Chebyshev([3,4.0+im]),0)
+H=OffSingularIntegral(S,Chebyshev([3,4.0+im]),0)
 @test_approx_eq (H*f)[3.5+0.5im] logkernel(f,3.5+0.5im)/π
 
 
