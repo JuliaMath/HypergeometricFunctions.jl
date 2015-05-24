@@ -105,6 +105,19 @@ z = 3.0
 
 println("Cauchy test")
 
+f=Fun(exp,Legendre())
+@test_approx_eq cauchy(f,.1+0.000000000001im) cauchy(+1,f,.1)
+@test_approx_eq cauchy(f,.1-0.000000000001im) cauchy(-1,f,.1)
+@test_approx_eq (cauchy(+1,f,.1)-cauchy(-1,f,.1)) exp(.1)
+
+
+f2=Fun(sech,PeriodicLine())
+@test_approx_eq cauchy(f2,1.+im) (0.23294739894134472 + 0.10998776661109881im )
+@test_approx_eq cauchy(f2,1.-im) (-0.23294739894134472 + 0.10998776661109881im )
+f=Fun(sech,Line())
+@test_approx_eq cauchy(f,1.+im) cauchy(f2,1.+im)
+
+
 Γ=Circle()∪Circle(0.5)
 f=depiece([Fun(z->z^(-1),Γ[1]),Fun(z->z,Γ[2])])
 A=I-(f-1)*Cauchy(-1)
