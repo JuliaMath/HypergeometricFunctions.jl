@@ -144,6 +144,14 @@ d2=Circle(c2,r2)
 @test norm((Cauchy(d1,d2)*Fun(z->exp(1/z)-1,d1)+Fun(z->exp(1/z)-1,d2)).coefficients)<200eps()
 
 
+# complex contour
+
+ω=2.
+d=Interval(0.5im,30.im/ω)
+x=Fun(identity,Legendre(d))
+@test_approx_eq cauchy(exp(im*ω*x),1.+im) (-0.025430235512791915911 + 0.0016246822285867573678im)
+
+
 println("Arc test")
 
 a=Arc(0.,1.,0.,π/2)
