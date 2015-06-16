@@ -263,3 +263,7 @@ include("KernelFunTest.jl")
 println("Example test")
 
 include("ExamplesTest.jl")
+
+
+include("stieltjesmomenttest.jl")
+
