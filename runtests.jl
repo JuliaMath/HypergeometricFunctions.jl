@@ -1,4 +1,4 @@
-using ApproxFun, SIE, Base.Test
+using ApproxFun, SingularIntegralEquations, Base.Test
 
 println("Hilbert test")
 
@@ -87,7 +87,7 @@ f2 = Fun(x->exp(x)/sqrt(1-x^2),ds2)
 S = Stieltjes(ds1,rs,0)
 
 z = 3.
-@test_approx_eq (S*f1)[z] SIE.stieltjesintegral(f2,z)
+@test_approx_eq (S*f1)[z] SingularIntegralEquations.stieltjesintegral(f2,z)
 # Operator 3.6322473044237698 + 0.0im
 # Function 3.6322473044237515
 
@@ -99,7 +99,7 @@ f2 = Fun(x->exp(x)*sqrt(1-x^2),ds2)
 S = Stieltjes(ds1,rs,0)
 
 z = 3.0
-@test_approx_eq (S*f1)[z] SIE.stieltjesintegral(f2,z)
+@test_approx_eq (S*f1)[z] SingularIntegralEquations.stieltjesintegral(f2,z)
 # Operator 1.7772163062194861 + 0.0im
 # Function 1.7772163062194637
 
