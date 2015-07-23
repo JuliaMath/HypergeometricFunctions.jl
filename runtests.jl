@@ -1,7 +1,7 @@
 using ApproxFun, SingularIntegralEquations, Base.Test
 
 
-if !isdir(Pkg.dir("FastGaussQuadrature")) 
+if !isdir(Pkg.dir("FastGaussQuadrature"))
     warn("Install FastGaussQuadrature.jl for full support.  Some tests not performed")
 end
 
@@ -115,7 +115,7 @@ f2=Fun(sech,PeriodicLine())
 @test_approx_eq cauchy(f2,1.+im) (0.23294739894134472 + 0.10998776661109881im )
 @test_approx_eq cauchy(f2,1.-im) (-0.23294739894134472 + 0.10998776661109881im )
 
-if isdir(Pkg.dir("FastGaussQuadrature")) 
+if isdir(Pkg.dir("FastGaussQuadrature"))
     f=Fun(sech,Line())
     @test_approx_eq cauchy(f,1.+im) cauchy(f2,1.+im)
 end
@@ -149,21 +149,21 @@ d2=Circle(c2,r2)
 
 # complex contour
 
-if isdir(Pkg.dir("FastGaussQuadrature")) 
+if isdir(Pkg.dir("FastGaussQuadrature"))
     #Legendre uses FastGuassQuadrature
     f=Fun(exp,Legendre())
     @test_approx_eq cauchy(f,.1+0.000000000001im) cauchy(+1,f,.1)
     @test_approx_eq cauchy(f,.1-0.000000000001im) cauchy(-1,f,.1)
     @test_approx_eq (cauchy(+1,f,.1)-cauchy(-1,f,.1)) exp(.1)
-    
+
     ω=2.
     d=Interval(0.5im,30.im/ω)
     x=Fun(identity,Legendre(d))
     @test_approx_eq cauchy(exp(im*ω*x),1.+im) (-0.025430235512791915911 + 0.0016246822285867573678im)
-    
-    
+
+
     println("Arc test")
-    
+
     a=Arc(0.,1.,0.,π/2)
     ζ=Fun(identity,a)
     f=Fun(exp,a)*sqrt(abs((ζ-1)*(ζ-im)))
@@ -267,10 +267,14 @@ H=Hilbert(S,0)
 f=real(ζ+1/(ζ-0.1))
 z=0.2+3im;@test_approx_eq (H*f)[z] logkernel(f,z)
 
-if isdir(Pkg.dir("FastGaussQuadrature")) 
+if isdir(Pkg.dir("FastGaussQuadrature"))
     println("Stieltjes moment test")
-    include("stieltjesmomenttest.jl")
+    include("stieltjesmomentTest.jl")
 end
+
+println("Woodbury solve test")
+
+include("woodburysolveTest.jl")
 
 println("Convolution ProductFun test")
 
