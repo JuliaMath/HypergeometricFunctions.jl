@@ -272,6 +272,9 @@ if isdir(Pkg.dir("FastGaussQuadrature"))
     include("stieltjesmomentTest.jl")
 end
 
+println("Curve Test")
+include("CurveTest.jl")
+
 println("Woodbury solve test")
 
 include("woodburysolveTest.jl")
