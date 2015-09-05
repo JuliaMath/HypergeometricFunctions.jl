@@ -273,11 +273,12 @@ if isdir(Pkg.dir("FastGaussQuadrature"))
 end
 
 println("Curve Test")
+
 include("CurveTest.jl")
 
-println("Woodbury solve test")
+println("Hierarchical solve test")
 
-include("woodburysolveTest.jl")
+include("hierarchicalsolveTest.jl")
 
 println("Convolution ProductFun test")
 
