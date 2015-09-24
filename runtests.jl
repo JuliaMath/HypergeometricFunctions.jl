@@ -9,25 +9,25 @@ println("Hilbert test")
 
 x=Fun(identity)
 f=(exp(x)/(sqrt(1-x)*sqrt(x+1)))
-@test_approx_eq (Hilbert(f|>space,0)*f)[.1] (-0.8545003781055088)
-@test_approx_eq (Hilbert(0)*f)[.1] (-0.8545003781055088)
-@test_approx_eq (Hilbert()*f)[.1] 1.1404096104609646386
+@test_approx_eq (Hilbert(f|>space,0)*f)(.1) (-0.8545003781055088)
+@test_approx_eq (Hilbert(0)*f)(.1) (-0.8545003781055088)
+@test_approx_eq (Hilbert()*f)(.1) 1.1404096104609646386
 
 x=Fun(identity,[-1,2])
 f=(exp(x)/(sqrt(2-x)*sqrt(x+1)))
-@test_approx_eq (Hilbert(f|>space,0)*f)[.1] 0.49127801561694168644
-@test_approx_eq (Hilbert(0)*f)[.1] 0.49127801561694168644
-@test_approx_eq (Hilbert()*f)[.1] 1.6649936695644078289
+@test_approx_eq (Hilbert(f|>space,0)*f)(.1) 0.49127801561694168644
+@test_approx_eq (Hilbert(0)*f)(.1) 0.49127801561694168644
+@test_approx_eq (Hilbert()*f)(.1) 1.6649936695644078289
 
 
 
 x=Fun(identity)
 f=(exp(x)*(sqrt(1-x)*sqrt(x+1)))
-@test_approx_eq (Hilbert()*f)[.1] 0.43723982258866913063
+@test_approx_eq (Hilbert()*f)(.1) 0.43723982258866913063
 
 x=Fun(identity,[-1,2])
 f=(exp(x)*(sqrt(2-x)*sqrt(x+1)))
-@test_approx_eq (Hilbert()*f)[.1] 2.1380903070701673244
+@test_approx_eq (Hilbert()*f)(.1) 2.1380903070701673244
 
 x=Fun(identity)
 d=domain(x)
@@ -46,13 +46,13 @@ end
 x = Fun(identity)
 w = 1/sqrt(1-x^2)
 H = Hilbert(space(w))
-@test_approx_eq  (H[w]*exp(x))[.1] hilbert(w*exp(x))[.1]
+@test_approx_eq  (H[w]*exp(x))(.1) hilbert(w*exp(x))(.1)
 
 
 x = Fun(identity)
 w = sqrt(1-x^2)
 H = Hilbert(space(w))
-@test_approx_eq (H[w]*exp(x))[.1] hilbert(w*exp(x))[.1]
+@test_approx_eq (H[w]*exp(x))(.1) hilbert(w*exp(x))(.1)
 
 
 println("Stieltjes test")
@@ -65,7 +65,7 @@ f2 = Fun(x->exp(x)/sqrt(1-x^2),ds2)
 S = Stieltjes(ds1,rs)
 
 z = 3.+1.5im
-@test_approx_eq (S*f1)[z] stieltjes(f2,z) #val,err = quadgk(x->f1[x]./(z-x),-1.,1.)
+@test_approx_eq (S*f1)(z) stieltjes(f2,z) #val,err = quadgk(x->f1(x)./(z-x),-1.,1.)
 # Operator 1.1589646343327578 - 0.7273679005911196im
 # Function 1.1589646343327455 - 0.7273679005911283im
 
@@ -78,7 +78,7 @@ f2 = Fun(x->exp(x)*sqrt(1-x^2),ds2)
 S = Stieltjes(ds1,rs)
 
 z = 3.
-@test_approx_eq (S*f1)[z] stieltjes(f2,z) #val,err = quadgk(x->f1[x]./(z-x),-1.,1.;reltol=eps())
+@test_approx_eq (S*f1)(z) stieltjes(f2,z) #val,err = quadgk(x->f1(x)./(z-x),-1.,1.;reltol=eps())
 # Operator 0.6616422557285478 + 0.0im
 # Function 0.661642255728541 - 0.0im
 
@@ -92,7 +92,7 @@ f2 = Fun(x->exp(x)/sqrt(1-x^2),ds2)
 S = Stieltjes(ds1,rs,0)
 
 z = 3.
-@test_approx_eq (S*f1)[z] SingularIntegralEquations.stieltjesintegral(f2,z)
+@test_approx_eq (S*f1)(z) SingularIntegralEquations.stieltjesintegral(f2,z)
 # Operator 3.6322473044237698 + 0.0im
 # Function 3.6322473044237515
 
@@ -104,7 +104,7 @@ f2 = Fun(x->exp(x)*sqrt(1-x^2),ds2)
 S = Stieltjes(ds1,rs,0)
 
 z = 3.0
-@test_approx_eq (S*f1)[z] SingularIntegralEquations.stieltjesintegral(f2,z)
+@test_approx_eq (S*f1)(z) SingularIntegralEquations.stieltjesintegral(f2,z)
 # Operator 1.7772163062194861 + 0.0im
 # Function 1.7772163062194637
 
@@ -115,10 +115,9 @@ f2=Fun(sech,PeriodicLine())
 @test_approx_eq cauchy(f2,1.+im) (0.23294739894134472 + 0.10998776661109881im )
 @test_approx_eq cauchy(f2,1.-im) (-0.23294739894134472 + 0.10998776661109881im )
 
-if isdir(Pkg.dir("FastGaussQuadrature"))
-    f=Fun(sech,Line())
-    @test_approx_eq cauchy(f,1.+im) cauchy(f2,1.+im)
-end
+
+f=Fun(sech,Line())
+@test_approx_eq cauchy(f,1.+im) cauchy(f2,1.+im)
 
 
 Γ=Circle()∪Circle(0.5)
@@ -186,7 +185,7 @@ a=Arc(0.,1.,0.,π/2)
 f=Fun(exp,a)*sqrt(abs((ζ-1)*(ζ-im)))
 H=Hilbert()
 z=exp(.1im)
-@test_approx_eq (H*f)[z] hilbert(f,z)
+@test_approx_eq (H*f)(z) hilbert(f,z)
 
 
 println("Logkernel test")
@@ -221,11 +220,11 @@ d=Interval(a,b)
 z=Fun(d)
 f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
 x=1.5
-@test_approx_eq (SingularIntegral(space(f),0)*f)[x] logkernel(f,x)
+@test_approx_eq (SingularIntegral(space(f),0)*f)(x) logkernel(f,x)
 
 f=real(exp(z)*(sqrt(z-a)*sqrt(b-z)))
 x=1.5
-@test_approx_eq (SingularIntegral(space(f),0)*f)[x] logkernel(f,x)
+@test_approx_eq (SingularIntegral(space(f),0)*f)(x) logkernel(f,x)
 
 a=1.0;b=2.0+im
 d=Interval(a,b)
@@ -233,11 +232,11 @@ z=Fun(d)
 f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
 x=1.5+0.5im
 H=SingularIntegral(space(f),0)
-@test_approx_eq (H*f)[x] logkernel(f,x)
+@test_approx_eq (H*f)(x) logkernel(f,x)
 
 
 f=real(exp(z)*(sqrt(z-a)*sqrt(b-z)))
-@test_approx_eq (SingularIntegral(space(f),0)*f)[x] logkernel(f,x)
+@test_approx_eq (SingularIntegral(space(f),0)*f)(x) logkernel(f,x)
 
 a=1.0;b=2.0+im
 d=Interval(a,b)
@@ -245,7 +244,7 @@ z=Fun(d)
 f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
 S=JacobiWeight(-0.5,-0.5,ChebyshevDirichlet{1,1}(d))
 H=OffSingularIntegral(S,Chebyshev([3,4]),0)
-@test_approx_eq (H*f)[3.5] logkernel(f,3.5)
+@test_approx_eq (H*f)(3.5) logkernel(f,3.5)
 
 H=OffSingularIntegral(S,Chebyshev([3,4.0+im]),0)
 @test_approx_eq (H*f)[3.5+0.5im] logkernel(f,3.5+0.5im)
@@ -265,7 +264,7 @@ S=Fourier(d)
 H=Hilbert(S,0)
 ζ=Fun(d)
 f=real(ζ+1/(ζ-0.1))
-z=0.2+3im;@test_approx_eq (H*f)[z] logkernel(f,z)
+z=0.2+3im;@test_approx_eq (H*f)(z) logkernel(f,z)
 
 if isdir(Pkg.dir("FastGaussQuadrature"))
     println("Stieltjes moment test")
