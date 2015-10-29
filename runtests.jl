@@ -283,6 +283,10 @@ println("Convolution ProductFun test")
 
 include("convolutionProductFunTest.jl")
 
+println("LowRankMatrix test")
+
+include("LowRankMatrixTest.jl")
+
 println("Hierarchical solve test")
 
 include("hierarchicalsolveTest.jl")
