@@ -287,6 +287,10 @@ println("LowRankMatrix test")
 
 include("LowRankMatrixTest.jl")
 
+println("HierarchicalVector test")
+
+include("HierarchicalVectorTest.jl")
+
 println("Hierarchical solve test")
 
 include("hierarchicalsolveTest.jl")
