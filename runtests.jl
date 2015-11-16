@@ -148,29 +148,29 @@ d2=Circle(c2,r2)
 
 # complex contour
 
-if isdir(Pkg.dir("FastGaussQuadrature"))
-    #Legendre uses FastGuassQuadrature
-    f=Fun(exp,Legendre())
-    @test_approx_eq cauchy(f,.1+0.000000000001im) cauchy(+1,f,.1)
-    @test_approx_eq cauchy(f,.1-0.000000000001im) cauchy(-1,f,.1)
-    @test_approx_eq (cauchy(+1,f,.1)-cauchy(-1,f,.1)) exp(.1)
 
-    ω=2.
-    d=Interval(0.5im,30.im/ω)
-    x=Fun(identity,Legendre(d))
-    @test_approx_eq cauchy(exp(im*ω*x),1.+im) (-0.025430235512791915911 + 0.0016246822285867573678im)
+#Legendre uses FastGuassQuadrature
+f=Fun(exp,Legendre())
+@test_approx_eq cauchy(f,.1+0.000000000001im) cauchy(f,.1,+)
+@test_approx_eq cauchy(f,.1-0.000000000001im) cauchy(f,.1,-)
+@test_approx_eq (cauchy(f,.1,+)-cauchy(f,.1,-)) exp(.1)
+
+ω=2.
+d=Interval(0.5im,30.im/ω)
+x=Fun(identity,Legendre(d))
+@test_approx_eq cauchy(exp(im*ω*x),1.+im) (-0.025430235512791915911 + 0.0016246822285867573678im)
 
 
-    println("Arc test")
+println("Arc test")
 
-    a=Arc(0.,1.,0.,π/2)
-    ζ=Fun(identity,a)
-    f=Fun(exp,a)*sqrt(abs((ζ-1)*(ζ-im)))
-    z=.1+.2im
-    #@test_approx_eq cauchy(f,z) sum(f/(ζ-z))/(2π*im)
-    z=exp(.1im)
-    @test_approx_eq hilbert(f,z) im*(cauchy(+1,f,z)+cauchy(-1,f,z))
-end
+a=Arc(0.,1.,0.,π/2)
+ζ=Fun(identity,a)
+f=Fun(exp,a)*sqrt(abs((ζ-1)*(ζ-im)))
+z=.1+.2im
+#@test_approx_eq cauchy(f,z) sum(f/(ζ-z))/(2π*im)
+z=exp(.1im)
+@test_approx_eq hilbert(f,z) im*(cauchy(f,z,+)+cauchy(f,z,-))
+
 
 
 
