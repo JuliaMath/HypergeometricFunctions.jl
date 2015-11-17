@@ -137,13 +137,13 @@ C=Cauchy(Space(d1),Space(d2))
 @test norm((C*Fun(exp,d1)-Fun(exp,d2)).coefficients)<100eps()
 
 C2=Cauchy(Space(d2),Space(d1))
-@test norm((C2*Fun(z->exp(1/z)-1,d2)+Fun(z->exp(1/z)-1,d1)).coefficients)<10000eps()
+@test norm((C2*Fun(z->exp(1/z)-1,d2)+Fun(z->exp(1/z)-1,d1)).coefficients)<100000eps()
 
 c1=0.1+.1im;r1=.4;
 c2=-2.+.2im;r2=0.3;
 d1=Circle(c1,r1)
 d2=Circle(c2,r2)
-@test norm((Cauchy(d1,d2)*Fun(z->exp(1/z)-1,d1)+Fun(z->exp(1/z)-1,d2)).coefficients)<200eps()
+@test norm((Cauchy(d1,d2)*Fun(z->exp(1/z)-1,d1)+Fun(z->exp(1/z)-1,d2)).coefficients)<2000eps()
 
 
 # complex contour
