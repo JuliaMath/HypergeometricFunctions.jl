@@ -120,6 +120,23 @@ f=Fun(sech,Line())
 @test_approx_eq cauchy(f,1.+im) cauchy(f2,1.+im)
 
 
+f=Fun(z->exp(exp(0.1im)*z+1/z),Laurent(Circle()))
+
+@test_approx_eq hilbert(f,exp(0.2im)) hilbert(Fun(f,Fourier),exp(0.2im))
+@test_approx_eq hilbert(f,exp(0.2im)) -hilbert(reverseorientation(f),exp(0.2im))
+@test_approx_eq hilbert(f,exp(0.2im)) hilbert(reverseorientation(Fun(f,Fourier)),exp(0.2im))
+
+@test_approx_eq cauchy(f,0.5exp(0.2im)) cauchy(Fun(f,Fourier),0.5exp(0.2im))
+@test_approx_eq cauchy(f,0.5exp(0.2im)) -cauchy(reverseorientation(f),0.5exp(0.2im))
+@test_approx_eq cauchy(f,0.5exp(0.2im)) cauchy(reverseorientation(Fun(f,Fourier)),0.5exp(0.2im))
+@test_approx_eq cauchy(f,0.5exp(0.2im)) (OffHilbert(domainspace(f),Laurent(Circle(0.5)))*f)(0.5exp(0.2im))/(2im)
+
+f=Fun(z->exp(exp(0.1im)*z+1/z),Laurent(Circle(1.,0.5)))
+@test_approx_eq cauchy(f,0.5exp(0.2im)) cauchy(Fun(f,Fourier),0.5exp(0.2im))
+@test_approx_eq cauchy(f,0.5exp(0.2im)) -cauchy(reverseorientation(f),0.5exp(0.2im))
+@test_approx_eq cauchy(f,0.5exp(0.2im)) cauchy(reverseorientation(Fun(f,Fourier)),0.5exp(0.2im))
+
+
 Γ=Circle()∪Circle(0.5)
 f=depiece([Fun(z->z^(-1),Γ[1]),Fun(z->z,Γ[2])])
 A=I-(f-Fun(one,space(f)))*Cauchy(-1)
