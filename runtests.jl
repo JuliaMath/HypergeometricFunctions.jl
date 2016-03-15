@@ -39,7 +39,7 @@ for a in [sqrt(sqrt(5)-2)/2,1.,10.]
     L=H[w]+1/a/sqrt(1+a^2)*x
     u=[B,L]\[1.]
     usol = (1+a^2)/(x^2+a^2)
-    @test norm(u-usol) <= eps(100/a)
+    @test norm(u-usol) <= eps(1000/a)
 end
 
 
