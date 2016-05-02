@@ -218,8 +218,13 @@ z=Fun(d)
 f=real(exp(z)/(sqrt(z-a)*sqrt(b-z)))
 S=space(f)
 x=4.0+2im;
+@test_approx_eq linesum(f*log(abs(x-z))) 13.740676344264614
 @test_approx_eq linesum(f*log(abs(x-z))) logkernel(f,x)*π
 
+
+
+linesum(f)
+sum(f)
 a=1.0;b=2.0+im
 d=Interval(a,b)
 z=Fun(d)
