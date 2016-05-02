@@ -1,10 +1,5 @@
 using ApproxFun, SingularIntegralEquations, Base.Test
 
-
-if !isdir(Pkg.dir("FastGaussQuadrature"))
-    warn("Install FastGaussQuadrature.jl for full support.  Some tests not performed")
-end
-
 println("Hilbert test")
 
 x=Fun(identity)
@@ -125,6 +120,7 @@ f=Fun(z->exp(exp(0.1im)*z+1/z),Laurent(Circle()))
 @test_approx_eq hilbert(f,exp(0.2im)) hilbert(Fun(f,Fourier),exp(0.2im))
 @test_approx_eq hilbert(f,exp(0.2im)) -hilbert(reverseorientation(f),exp(0.2im))
 @test_approx_eq hilbert(f,exp(0.2im)) -hilbert(reverseorientation(Fun(f,Fourier)),exp(0.2im))
+
 
 @test_approx_eq cauchy(f,0.5exp(0.2im)) cauchy(Fun(f,Fourier),0.5exp(0.2im))
 @test_approx_eq cauchy(f,0.5exp(0.2im)) -cauchy(reverseorientation(f),0.5exp(0.2im))
