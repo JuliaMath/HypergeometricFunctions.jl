@@ -1,9 +1,9 @@
 using ApproxFun, SingularIntegralEquations, Base.Test
 
-import SingularIntegralEquations: _₂F₁general
+import SingularIntegralEquations.HypergeometricFunctions: _₂F₁general
 
 println()
-println("Testing Hypergeometric series ₂F₁(a,b;c;z) against known transcendental cases")
+println("Testing Hypergeometric function ₂F₁(a,b;c;z) against known transcendental cases")
 println()
 
 for z in (.9rand(Float64,10),10rand(Complex128,10))
@@ -16,7 +16,7 @@ for z in (.9rand(Float64,10),10rand(Complex128,10))
         normj = 0.0
         for zi in z
             twoFone = _₂F₁(a,b,c,zi)
-            aa,bb,cc = big(a)+400eps(Float64),big(b)+700eps(Float64),big(c)+900eps(Float64)
+            aa,bb,cc = big(a),big(b),big(c)
             twoFonegeneral = convert(Complex{Float64},_₂F₁general(aa,bb,cc,big(zi)))
             norm(twoFone/twoFonegeneral-1) > sqrt(eps()) && println("This is ₂F₁($a,$b;$c;zi) - ₂F₁general($a,$b;$c;zi): ",norm(twoFone/twoFonegeneral-1),"   ",twoFone,"   ",twoFonegeneral,"   ",isfinite(twoFone),"   ",isfinite(twoFonegeneral)," this is zi: ",zi)
             normj += Float64(norm(twoFone/twoFonegeneral-1))
