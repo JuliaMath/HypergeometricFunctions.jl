@@ -6,21 +6,21 @@ immutable ℕ end
 Base.in(n::Integer,::Type{ℕ}) = n > 0
 Base.in(n::Real,::Type{ℕ}) = (ν = round(Int,n); n == ν && ν ∈ ℕ)
 Base.in(n::Complex,::Type{ℕ}) = imag(n) == 0 && real(n) ∈ ℕ
-Base.in(n::Dual,::Type{ℕ}) = realpart(n) ∈ ℕ
+Base.in(n::Dual,::Type{ℕ}) = dualpart(n) == 0 && realpart(n) ∈ ℕ
 
 immutable ℕ₀ end
 
 Base.in(n::Integer,::Type{ℕ₀}) = n ≥ 0
 Base.in(n::Real,::Type{ℕ₀}) = (ν = round(Int,n); n == ν && ν ∈ ℕ₀)
 Base.in(n::Complex,::Type{ℕ₀}) = imag(n) == 0 && real(n) ∈ ℕ₀
-Base.in(n::Dual,::Type{ℕ₀}) = realpart(n) ∈ ℕ₀
+Base.in(n::Dual,::Type{ℕ₀}) = dualpart(n) == 0 && realpart(n) ∈ ℕ₀
 
 immutable ℤ end
 
 Base.in(n::Integer,::Type{ℤ}) = true
 Base.in(n::Real,::Type{ℤ}) = n == round(Int,n)
 Base.in(n::Complex,::Type{ℤ}) = imag(n) == 0 && real(n) ∈ ℤ
-Base.in(n::Dual,::Type{ℤ}) = realpart(n) ∈ ℤ
+Base.in(n::Dual,::Type{ℤ}) = dualpart(n) == 0 && realpart(n) ∈ ℤ
 
 abeqcd(a,b,cd) = isequal(a,b) && isequal(b,cd)
 abeqcd(a,b,c,d) = isequal(a,c) && isequal(b,d)
@@ -81,6 +81,7 @@ function unsafe_gamma(x::BigFloat)
     return z
 end
 unsafe_gamma(z::Complex) = gamma(z)
+unsafe_gamma(z::Dual) = (r = realpart(z);w = unsafe_gamma(r); dual(w, w*digamma(r)*dualpart(z)))
 @vectorize_1arg Number unsafe_gamma
 
 # Compute ∑_{i=1}^N cᵢ/(z-1+i)/(z-1+i+ϵ) / ( c₀ + ∑_{i=1}^N cᵢ/(z-1+i) )
@@ -97,9 +98,9 @@ macro lanczosratio(z, ϵ, c₀, c...)
     Expr(:block, :(zm1 = $(esc(z))), :(zm1pϵ = $(esc(z))+$(esc(ϵ))), ex)
 end
 
-Hsum(z::Union{Float64,Complex128},ϵ::Union{Float64,Complex128}) = @lanczosratio(z,ϵ,0.99999999999999709182,57.156235665862923517,-59.597960355475491248,14.136097974741747174,-0.49191381609762019978,0.33994649984811888699E-4,0.46523628927048575665E-4,-0.98374475304879564677E-4,0.15808870322491248884E-3,-0.21026444172410488319E-3,0.21743961811521264320E-3,-0.16431810653676389022E-3,0.84418223983852743293E-4,-0.26190838401581408670E-4,0.36899182659531622704E-5)
+Hsum(z::Union{Float64,Complex128,Dual128,DualComplex256},ϵ::Union{Float64,Complex128,Dual128,DualComplex256}) = @lanczosratio(z,ϵ,0.99999999999999709182,57.156235665862923517,-59.597960355475491248,14.136097974741747174,-0.49191381609762019978,0.33994649984811888699E-4,0.46523628927048575665E-4,-0.98374475304879564677E-4,0.15808870322491248884E-3,-0.21026444172410488319E-3,0.21743961811521264320E-3,-0.16431810653676389022E-3,0.84418223983852743293E-4,-0.26190838401581408670E-4,0.36899182659531622704E-5)
 
-function H(z::Union{Float64,Complex128},ϵ::Union{Float64,Complex128})
+function H(z::Union{Float64,Complex128,Dual128,DualComplex256},ϵ::Union{Float64,Complex128,Dual128,DualComplex256})
     zm0p5 = z-0.5
     zpgm0p5 = zm0p5+4.7421875
     if real(z) ≥ 1/2
@@ -122,7 +123,7 @@ end
 """
 Compute the function (1/Γ(z)-1/Γ(z+ϵ))/ϵ
 """
-function G(z::Union{Float64,Complex128},ϵ::Union{Float64,Complex128})
+function G(z::Union{Float64,Complex128,Dual128,DualComplex256},ϵ::Union{Float64,Complex128,Dual128,DualComplex256})
     n,zpϵ = round(Int,real(z)),z+ϵ
     if abs(ϵ) > 0.1
         (inv(unsafe_gamma(z))-inv(unsafe_gamma(zpϵ)))/ϵ
@@ -220,7 +221,7 @@ function Bone(a,b,c,w,m::Int,ϵ)
     while err > 10eps()
         βₙ = (a+m+n+ϵ)*(b+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(b+m+n)/(m+n+1) - (a+m+n) - (b+m+n) - ϵ + (a+m+n+ϵ)*(b+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))
         ret += βₙ
-        err = abs(βₙ/ret)
+        err = errcheck(βₙ,ret)
         γₙ *= (a+m+n)*(b+m+n)/((m+n+1)*(n+1-ϵ))*w
         n+=1
     end
@@ -256,7 +257,7 @@ function BInf(a,b,c,w,m::Int,ϵ)
     while err > 10eps()
         βₙ = (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(1-c+a+m+n)/(m+n+1) - (a+m+n) - (1-c+a+m+n) - ϵ + (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))
         ret += βₙ
-        err = abs(βₙ/ret)
+        err = errcheck(βₙ,ret)
         γₙ *= (a+m+n)*(1-c+a+m+n)/((m+n+1)*(n+1-ϵ))*w
         n+=1
     end
@@ -276,7 +277,7 @@ function _₂F₁maclaurin(a::Number,b::Number,c::Number,z::Number)
     while err > 10eps2(T)
         rⱼ = (a+j)/(j+1)*(b+j)/(c+j)
         S₀,S₁ = S₁,S₁+(S₁-S₀)*rⱼ*z
-        err = abs((S₁-S₀)/S₀)
+        err = errcheck(S₁-S₀,S₀)
         j+=1
     end
     return S₁
@@ -288,7 +289,7 @@ function _₂F₁maclaurinalt(a::Number,b::Number,c::Number,z::Number)
     while err > 10eps2(T)
         C *= (a+j)/(j+1)*(b+j)/(c+j)*z
         S += C
-        err = abs(C/S)
+        err = errcheck(C,S)
         j+=1
     end
     return S
@@ -301,7 +302,7 @@ function _₂F₁continuation(s::Number,t::Number,c::Number,z₀::Number,z::Numb
     while err > 10eps2(T)
         d0,d1,izz₀j = d1,(j+s-one(T))/j/(j+2s-t)*(((j+s)*(1-2z₀)+(t+1)*z₀-c)*d1 + z₀*(1-z₀)*(j+s-2)*d0),izz₀j*izz₀
         S₀,S₁ = S₁,S₁+d1*izz₀j
-        err = abs((S₁-S₀)/S₀)
+        err = errcheck(S₁-S₀,S₀)
         j+=1
     end
     return S₁
@@ -323,7 +324,7 @@ function _₂F₁continuationalt(a::Number,c::Number,z₀::Number,z::Number)
         C *= (a+j-1)*izz₀/j
         cⱼ += 2/T(j)-one(T)/(a+j-one(T))
         S₀,S₁ = S₁,S₁+(e1*cⱼ-f1)*C
-        err = abs((S₁-S₀)/S₀)
+        err = errcheck(S₁-S₀,S₀)
         j+=1
     end
     return S₁
@@ -337,7 +338,7 @@ function _₂F₁logsum(a::Number,b::Number,z::Number,w::Number,s::Int)
         C *= (a+j)/(j+1)^2*(b+j)*w
         cⱼ += 2/(j+one(T))-one(T)/(a+j)-one(T)/(b+j)
         S += C*cⱼ
-        err = abs(C/S)
+        err = errcheck(C,S)
         j+=1
     end
     return S
@@ -351,7 +352,7 @@ function _₂F₁logsumalt(a::Number,b::Number,z::Number,w::Number)
         C *= (a+j)/(j+1)^2*(d+j)*w
         cⱼ += 2/(j+one(T))-one(T)/(a+j)+one(T)/(b-(j+one(T)))
         S += C*cⱼ
-        err = abs(C/S)
+        err = errcheck(C,S)
         j+=1
     end
     return S
@@ -367,7 +368,7 @@ function _₂F₁taylor(a::Number,b::Number,c::Number,z::Number)
         q₀,q₁ = q₁,((j*(2z₀-one(T))-c+(a+b+one(T))*z₀)*q₁ + (a+j)*(b+j)/(j+one(T))*q₀)/(z₀*(one(T)-z₀)*(j+2))
         zz₀j *= zz₀
         S₀,S₁ = S₁,S₁+q₁*zz₀j
-        err = abs((S₀-S₁)/S₀)
+        err = errcheck(S₀-S₁,S₀)
         j+=1
     end
     return S₁
@@ -379,8 +380,27 @@ function _₃F₂maclaurin(a₁::Number,a₂::Number,a₃::Number,b₁::Number,b
     while err > 100eps2(T)
         rⱼ = ((a₁+j)*(a₂+j)*(a₃+j))/((b₁+j)*(b₂+j)*(j+1))
         S₀,S₁ = S₁,S₁+(S₁-S₀)*rⱼ*z
-        err = abs((S₁-S₀)/S₀)
+        err = errcheck(S₁-S₀,S₀)
         j+=1
     end
     return S₁
 end
+
+errcheck(x,y) = abs(x/y)
+errcheck(x::Dual,y::Dual) = hypot2(realpart(x),dualpart(x))/hypot2(realpart(y),dualpart(y))
+
+# This is from Base because real(::Type{Dual{BigFloat}}) doesn't exist in the scop of rtoldefault, required by isapprox.
+
+# isapprox: approximate equality of numbers
+function isapprox(x::Number, y::Number; rtol::Real=rtoldefault(x,y), atol::Real=0)
+    x == y || (isfinite(x) && isfinite(y) && abs(x-y) <= atol + rtol*max(abs(x), abs(y)))
+end
+
+const ≈ = isapprox
+≉(x,y) = !(x ≈ y)
+
+# default tolerance arguments
+rtoldefault{T<:AbstractFloat}(::Type{T}) = sqrt(eps2(T))
+rtoldefault{T<:Real}(::Type{T}) = 0
+rtoldefault{T<:Real}(::Type{Dual{T}}) = rtoldefault(T)
+rtoldefault{T<:Number,S<:Number}(x::Union{T,Type{T}}, y::Union{S,Type{S}}) = rtoldefault(promote_type(real(T),real(S)))
