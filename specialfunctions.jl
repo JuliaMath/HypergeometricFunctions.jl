@@ -84,8 +84,11 @@ unsafe_gamma(z::Complex) = gamma(z)
 unsafe_gamma(z::Dual) = (r = realpart(z);w = unsafe_gamma(r); dual(w, w*digamma(r)*dualpart(z)))
 @vectorize_1arg Number unsafe_gamma
 
-# Compute ∑_{i=1}^N cᵢ/(z-1+i)/(z-1+i+ϵ) / ( c₀ + ∑_{i=1}^N cᵢ/(z-1+i) )
+"""
+`@lanczosratio(z,ϵ,c₀,c...)`
 
+Compute `∑_{i=1}^N cᵢ/(z-1+i)/(z-1+i+ϵ) / ( c₀ + ∑_{i=1}^N cᵢ/(z-1+i) )`
+"""
 macro lanczosratio(z, ϵ, c₀, c...)
     ex_num = :(zero(zm1))
     ex_den = esc(c₀)

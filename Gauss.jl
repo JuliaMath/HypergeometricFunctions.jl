@@ -4,18 +4,18 @@
 Compute the Gauss hypergeometric function `₂F₁(a,b;c;z)`.
 """
 function _₂F₁(a::Number,b::Number,c::Number,z::Number)
-    if a > b
+    if real(a) > real(b)
         return _₂F₁(b,a,c,z) # ensure a ≤ b
     elseif isequal(a,c) # 1. 15.4.6
         return exp(-b*log1p(-z))
     elseif isequal(b,c) # 1. 15.4.6
         return exp(-a*log1p(-z))
     elseif isequal(c,0.5)
-        if a+b == 0 # 31. 15.4.11 & 15.4.12
+        if isequal(a+b,0) # 31. 15.4.11 & 15.4.12
             return cosnasinsqrt(2b,z)
-        elseif a+b == 1 # 32. 15.4.13 & 15.4.14
+        elseif isequal(a+b,1) # 32. 15.4.13 & 15.4.14
             return cosnasinsqrt(1-2b,z)*exp(-0.5log1p(-z))
-        elseif b-a == 0.5 # 15.4.7 & 15.4.8
+        elseif isequal(b-a,0.5) # 15.4.7 & 15.4.8
             return expnlog1pcoshatanhsqrt(-2a,z)
         end
     elseif isequal(c,1.5)
