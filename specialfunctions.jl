@@ -389,6 +389,20 @@ function _₃F₂maclaurin(a₁::Number,a₂::Number,a₃::Number,b₁::Number,b
     return S₁
 end
 
+function mFnmaclaurin{S<:Number,V<:Number}(a::AbstractVector{S},b::AbstractVector{V},z::Number)
+    T = promote_type(S,V,typeof(z))
+    S₀,S₁,err,j = one(T),one(T)+prod(a)*z/prod(b),one(real(T)),1
+    while err > 100eps2(T)
+        rⱼ = inv(j+one(T))
+        for i=1:length(a) rⱼ *= a[i]+j end
+        for i=1:length(b) rⱼ /= b[i]+j end
+        S₀,S₁ = S₁,S₁+(S₁-S₀)*rⱼ*z
+        err = errcheck(S₁-S₀,S₀)
+        j+=1
+    end
+    return S₁
+end
+
 errcheck(x,y) = abs(x/y)
 errcheck(x::Dual,y::Dual) = hypot2(realpart(x),dualpart(x))/hypot2(realpart(y),dualpart(y))
 

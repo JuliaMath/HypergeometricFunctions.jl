@@ -9,7 +9,7 @@ using DualNumbers
 import ApproxFun: @clenshaw, real, eps2, hypot2
 import FastTransforms: pochhammer
 
-export _₂F₁, _₃F₂
+export _₂F₁, _₃F₂, mFn
 
 include("Gauss.jl")
 include("specialfunctions.jl")
@@ -18,4 +18,4 @@ end #module
 
 using .HypergeometricFunctions
 
-export _₂F₁, _₃F₂
+export _₂F₁, _₃F₂, mFn
