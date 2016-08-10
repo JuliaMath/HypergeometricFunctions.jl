@@ -403,6 +403,11 @@ function mFnmaclaurin{S<:Number,V<:Number}(a::AbstractVector{S},b::AbstractVecto
     return S₁
 end
 
+hypot2(a,b) = hypot(a,b)
+hypot2{T<:AbstractFloat}(a::Complex{T},b::Complex{T}) = hypot(hypot(a.re,b.re),hypot(a.im,b.im))
+hypot2{T<:AbstractFloat}(a::T,b::Complex{T}) = hypot(hypot(a,b.re),b.im)
+hypot2{T<:AbstractFloat}(a::Complex{T},b::T) = hypot(hypot(a.re,b),a.im)
+
 errcheck(x,y) = abs(x/y)
 errcheck(x::Dual,y::Dual) = hypot2(realpart(x),dualpart(x))/hypot2(realpart(y),dualpart(y))
 
