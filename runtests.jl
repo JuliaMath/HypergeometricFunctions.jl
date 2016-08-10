@@ -170,7 +170,7 @@ f=Fun(exp,Legendre())
 #@test_approx_eq (cauchy(f,.1,+)-cauchy(f,.1,-)) exp(.1)
 
 ω=2.
-d=Interval(0.5im,30.im/ω)
+d=Interval(0.5im,30.0im/ω)
 x=Fun(identity,Legendre(d))
 @test_approx_eq cauchy(exp(im*ω*x),1.+im) (-0.025430235512791915911 + 0.0016246822285867573678im)
 
