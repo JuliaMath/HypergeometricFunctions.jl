@@ -6,7 +6,7 @@ This module calculates (generalized) hypergeometric functions:
 module HypergeometricFunctions
 
 using DualNumbers
-import ApproxFun: @clenshaw, real, eps2, hypot2
+import ApproxFun: @clenshaw, real, eps
 import FastTransforms: pochhammer
 
 export _₂F₁, _₃F₂, mFn
