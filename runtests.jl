@@ -65,7 +65,7 @@ z = 3.+1.5im
 # Function 1.1589646343327455 - 0.7273679005911283im
 
 
-ds1 = JacobiWeight(.5,.5,Ultraspherical{1}())
+ds1 = JacobiWeight(.5,.5,Ultraspherical(1))
 ds2 = JacobiWeight(.5,.5,Chebyshev())
 rs = Chebyshev([2.,4.])
 f1 = Fun(x->exp(x)*sqrt(1-x^2),ds1)
@@ -91,7 +91,7 @@ z = 3.
 # Operator 3.6322473044237698 + 0.0im
 # Function 3.6322473044237515
 
-ds1 = JacobiWeight(.5,.5,Ultraspherical{1}())
+ds1 = JacobiWeight(.5,.5,Ultraspherical(1))
 ds2 = JacobiWeight(.5,.5,Chebyshev())
 rs = Chebyshev([2.0,4.0])
 f1 = Fun(x->exp(x)*sqrt(1-x^2),ds1)
