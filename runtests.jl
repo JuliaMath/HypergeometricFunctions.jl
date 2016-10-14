@@ -285,10 +285,13 @@ H=Hilbert(S,0)
 f=real(ζ+1/(ζ-0.1))
 z=0.2+3im;@test_approx_eq (H*f)(z) logkernel(f,z)
 
-if isdir(Pkg.dir("FastGaussQuadrature"))
-    println("Stieltjes moment test")
-    include("stieltjesmomentTest.jl")
-end
+
+println("Stieltjes moment test")
+include("stieltjesmomentTest.jl")
+
+
+println("Stieltjes integral test")
+include("stieltjesintegraltest.jl")
 
 println("Curve Test")
 
