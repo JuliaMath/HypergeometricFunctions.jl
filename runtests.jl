@@ -10,6 +10,9 @@ include("stieltjesmomentTest.jl")
 println("Stieltjes integral test")
 include("stieltjesintegraltest.jl")
 
+println("Log kernel test")
+include("logkerneltest.jl")
+
 println("Curve Test")
 
 include("CurveTest.jl")
