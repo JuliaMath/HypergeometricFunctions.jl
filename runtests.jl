@@ -14,27 +14,21 @@ println("Log kernel test")
 include("logkerneltest.jl")
 
 println("Curve Test")
-
 include("CurveTest.jl")
 
 println("FundamentalSolutions test")
-
 include("FundamentalSolutionsTest.jl")
 
 println("Convolution ProductFun test")
-
 include("convolutionProductFunTest.jl")
 
 println("LowRankMatrix test")
-
 include("LowRankMatrixTest.jl")
 
 println("HierarchicalVector test")
-
 include("HierarchicalVectorTest.jl")
 
 println("Hierarchical solve test")
-
 include("hierarchicalsolveTest.jl")
 
 # Testing Travis CI abilities. Currently, Examples tests are slow.
