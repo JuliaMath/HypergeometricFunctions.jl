@@ -265,8 +265,8 @@ function AInf(a,b,c,w,m::Int,ϵ)
     ret
 end
 
-function BInf(a,b,c,w,m::Int,ϵ,s...)
-    βₙ,γₙ = recInfβ₀(a,b,c,w,m,ϵ,s...)*one(w),recInfγ₀(a,b,c,w,m,ϵ)*w
+function BInf(a,b,c,w,m::Int,ϵ)
+    βₙ,γₙ = recInfβ₀(a,b,c,w,m,ϵ)*one(w),recInfγ₀(a,b,c,w,m,ϵ)*w
     ret,err,n = βₙ,1.0,0
     while err > 10eps()
         βₙ = (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(1-c+a+m+n)/(m+n+1) - (a+m+n) - (1-c+a+m+n) - ϵ + (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))

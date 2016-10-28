@@ -95,7 +95,7 @@ function _₂F₁(a::Number,b::Number,c::Number,z::Number,s::Bool)
     _₂F₁general(a,b,c,z,s) # catch-all
 end
 
-_₂F₁(a::Number,b::Number,c::Number,z::AbstractArray,s...) = reshape(promote_type(typeof(a),typeof(b),typeof(c),eltype(z))[ _₂F₁(a,b,c,z[i],s...) for i in eachindex(z) ], size(z))
+_₂F₁(a::Number,b::Number,c::Number,z::AbstractArray) = reshape(promote_type(typeof(a),typeof(b),typeof(c),eltype(z))[ _₂F₁(a,b,c,z[i]) for i in eachindex(z) ], size(z))
 
 """
 Compute the Gauss hypergeometric function `₂F₁(a,b;c;z)` with general parameters a,b, and c.
