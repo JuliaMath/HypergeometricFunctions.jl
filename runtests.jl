@@ -1,6 +1,6 @@
 using ApproxFun, SingularIntegralEquations, Base.Test
     import SingularIntegralEquations: x̄sqrtx2real, sqrtx2, joukowskyinverse,
-            joukowskyinversereal, joukowskyinverseabs
+            joukowskyinversereal, joukowskyinverseabs, ⁺, ⁻
 
 ## Special functions
 
@@ -8,9 +8,15 @@ println("Special function tests")
 
 @test_approx_eq x̄sqrtx2real(2.0+3.0im) real(sqrtx2(2.0+3.0im)*(2.0-3.0im))
 
-for s in (true,false), z in (2.0+3.0im,2.0,0.1)
-    @test_approx_eq real(joukowskyinverse(Val{s},z+0im)) joukowskyinversereal(Val{s},z)
-    @test_approx_eq abs(joukowskyinverse(Val{s},z+0im)) joukowskyinverseabs(Val{s},z)
+for s in (true,false)
+    for z in (2.0+3.0im,2.0,0.1)
+        @test_approx_eq real(joukowskyinverse(Val{s},z+0im)) joukowskyinversereal(Val{s},z)
+        @test_approx_eq abs(joukowskyinverse(Val{s},z+0im)) joukowskyinverseabs(Val{s},z)
+    end
+
+    p=0.1
+    @test_approx_eq joukowskyinverse(Val{s},p*⁺) joukowskyinverse(Val{s},p+0im)
+    @test_approx_eq joukowskyinverse(Val{s},p*⁻) joukowskyinverse(Val{s},p-0im)
 end
 
 
