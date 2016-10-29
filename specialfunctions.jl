@@ -247,12 +247,6 @@ recInfβ₀(a,b,c,w,m::Int,ϵ) = abs(ϵ) > 0.1 ?
                         ( (pochhammer(float(1-c+a)+ϵ,m)*G(1.0,-ϵ)-P(1-c+a,ϵ,m)/gamma(1-ϵ))/(gamma(c-a)*gamma(a+m+ϵ)*gamma(m+1)) +
                                 pochhammer(float(1-c+a)+ϵ,m)*( (G(m+1.0,ϵ)/gamma(a+m+ϵ) - G(float(a)+m,ϵ)/gamma(m+1+ϵ))/gamma(c-a) -
                                     (G(float(c-a),-ϵ) - E(-log(-w),-ϵ)/gamma(c-a-ϵ))/(gamma(m+1+ϵ)*gamma(a+m)) ) )*gamma(c)*pochhammer(float(a),m)*w^m
-recInfβ₀(a,b,c,w,m::Int,ϵ,s::Bool) = abs(ϵ) > 0.1 ?
-                        ( pochhammer(float(a),m)*pochhammer(float(1-c+a),m)/(gamma(1-ϵ)*gamma(a+m+ϵ)*gamma(c-a)*gamma(m+1)) -
-                                exp((s?-1:1)*π*im*ϵ)*w^ϵ*pochhammer(float(1-c+a)+ϵ,m)/(gamma(a)*gamma(c-a-ϵ)*gamma(m+1+ϵ)) )*gamma(c)*w^m/ϵ :
-                        ( (pochhammer(float(1-c+a)+ϵ,m)*G(1.0,-ϵ)-P(1-c+a,ϵ,m)/gamma(1-ϵ))/(gamma(c-a)*gamma(a+m+ϵ)*gamma(m+1)) +
-                                pochhammer(float(1-c+a)+ϵ,m)*( (G(m+1.0,ϵ)/gamma(a+m+ϵ) - G(float(a)+m,ϵ)/gamma(m+1+ϵ))/gamma(c-a) -
-                                    (G(float(c-a),-ϵ) - E(-(log(w)+(s?-1:1)*π*im),-ϵ)/gamma(c-a-ϵ))/(gamma(m+1+ϵ)*gamma(a+m)) ) )*gamma(c)*pochhammer(float(a),m)*w^m
 recInfγ₀(a,b,c,w,m::Int,ϵ) = gamma(c)*pochhammer(float(a),m)*pochhammer(float(1-c+a),m)*w^m/(gamma(a+m+ϵ)*gamma(c-a)*gamma(m+1)*gamma(1-ϵ))
 
 function AInf(a,b,c,w,m::Int,ϵ)
@@ -285,12 +279,6 @@ function _₂F₁Inf(a,b,c,z)
     (-1)^m*(-w)^a/sinc(ϵ)*(AInf(a,b,c,w,m,ϵ) + BInf(a,b,c,w,m,ϵ))
 end
 
-function _₂F₁Inf(a,b,c,z,s::Bool)
-    m = round(Int,real(b-a))
-    ϵ = b-a-m
-    w = inv(z)
-    (-1)^m*exp((s?-1:1)*a*π*im)*w^a/sinc(ϵ)*(AInf(a,b,c,w,m,ϵ) + BInf(a,b,c,w,m,ϵ,s))
-end
 
 function _₂F₁maclaurin(a::Number,b::Number,c::Number,z::Number)
     T = promote_type(typeof(a),typeof(b),typeof(c),typeof(z))

@@ -1,7 +1,5 @@
 # The references to special cases are to Table of Integrals, Series, and Products, § 9.121, followed by NIST's DLMF.
 
-log1p(x) = Base.log1p(x)
-log1p(x,s::Bool) = log(-1-x)+(s?1:-1)*π*im
 
 """
 Compute the Gauss hypergeometric function `₂F₁(a,b;c;z)`.
@@ -50,51 +48,6 @@ function _₂F₁(a::Number,b::Number,c::Number,z::Number)
 end
 
 
-# s indicates limit from above/below for z on the branch cut
-# along (1,∞)
-function _₂F₁(a::Number,b::Number,c::Number,z::Number,s::Bool)
-    if real(a) > real(b)
-        return _₂F₁(b,a,c,z,s) # ensure a ≤ b
-    elseif isequal(a,c) # 1. 15.4.6
-        return exp(-b*log1p(-z,!s))
-    elseif isequal(b,c) # 1. 15.4.6
-        return exp(-a*log1p(-z,!s))
-    elseif isequal(c,0.5)
-        if isequal(a+b,0) # 31. 15.4.11 & 15.4.12
-            return cosnasinsqrt(2b,z,s)
-        elseif isequal(a+b,1) # 32. 15.4.13 & 15.4.14
-            return cosnasinsqrt(1-2b,z,s)*exp(-0.5log1p(-z,!s))
-        elseif isequal(b-a,0.5) # 15.4.7 & 15.4.8
-            return expnlog1pcoshatanhsqrt(-2a,z,s)
-        end
-    elseif isequal(c,1.5)
-        if abeqcd(a,b,0.5) # 13. 15.4.4 & 15.4.5
-            return sqrtasinsqrt(z,s)
-        elseif abeqcd(a,b,1) # 14.
-            return sqrtasinsqrt(z,s)*exp(-0.5log1p(-z,!s))
-        elseif abeqcd(a,b,0.5,1) # 15. 15.4.2 & 15.4.3
-            return sqrtatanhsqrt(z,s)
-        elseif isequal(a+b,1) # 29. 15.4.15 & 15.4.16
-            return sinnasinsqrt(1-2b,z,s)
-        elseif isequal(a+b,2) # 30.
-            return sinnasinsqrt(2-2b,z,s)*exp(-0.5log1p(-z,!s))
-        elseif isequal(b-a,0.5) # 4. 15.4.9 & 15.4.10
-            return expnlog1psinhatanhsqrt(1-2a,z,s)
-        end
-    elseif isequal(c,2)
-        if abeqcd(a,b,1) # 6. 15.4.1
-            return (ζ = -z; log1p(ζ,!s)/ζ)
-        elseif a ∈ ℤ && b == 1 # 5.
-            return expm1nlog1p(1-a,-z,!s)
-        elseif a == 1 && b ∈ ℤ # 5.
-            return expm1nlog1p(1-b,-z,!s)
-        end
-    elseif isequal(c,2.5) && abeqcd(a,b,1,1.5)
-         return speciallog(z,s)
-    end
-    _₂F₁general(a,b,c,z,s) # catch-all
-end
-
 _₂F₁(a::Number,b::Number,c::Number,z::AbstractArray) = reshape(promote_type(typeof(a),typeof(b),typeof(c),eltype(z))[ _₂F₁(a,b,c,z[i]) for i in eachindex(z) ], size(z))
 
 """
@@ -123,31 +76,6 @@ function _₂F₁general(a::Number,b::Number,c::Number,z::Number)
         exp(-a*log1p(-z))*_₂F₁one(a,c-b,c,z/(z-1))
     elseif absarg(1-z) < convert(real(T),π)
         _₂F₁taylor(a,b,c,z)
-    else
-        zero(T)#throw(DomainError())
-    end
-end
-
-function _₂F₁general(a::Number,b::Number,c::Number,z::Number,s::Bool)
-    T = promote_type(typeof(a),typeof(b),typeof(c),typeof(z))
-
-    real(b) < real(a) && (return _₂F₁general(b,a,c,z,s))
-    real(c) < real(a)+real(b) && (return exp((c-a-b)*log1p(-z,!s))*_₂F₁general(c-a,c-b,c,z,s))
-
-    if abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
-        _₂F₁maclaurin(a,b,c,z)
-    elseif abs(z/(z-1)) ≤ ρ && absarg(1-z) < convert(real(T),π)
-        exp(-a*log1p(-z,!s))_₂F₁maclaurin(a,c-b,c,z/(z-1),!s)
-    elseif abs(inv(z)) ≤ ρ && absarg(-z) < convert(real(T),π)
-        _₂F₁Inf(a,b,c,z,s)
-    elseif abs(1-inv(z)) ≤ ρ && absarg(z) < convert(real(T),π) && absarg(1-z) < convert(real(T),π)
-        exp(-a*log1p(-z,!s))*_₂F₁Inf(a,c-b,c,z/(z-1),!s)
-    elseif abs(1-z) ≤ ρ && absarg(z) < convert(real(T),π) && absarg(1-z) < convert(real(T),π)
-        _₂F₁one(a,b,c,z,s)
-    elseif abs(inv(1-z)) ≤ ρ && absarg(-z) < convert(real(T),π)
-        exp(-a*log1p(-z,!s))*_₂F₁one(a,c-b,c,z/(z-1),!s)
-    elseif absarg(1-z) < convert(real(T),π)
-        _₂F₁taylor(a,b,c,z,s)
     else
         zero(T)#throw(DomainError())
     end
