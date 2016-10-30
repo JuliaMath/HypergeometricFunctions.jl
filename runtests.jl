@@ -1,6 +1,7 @@
 using ApproxFun, SingularIntegralEquations, Base.Test
     import SingularIntegralEquations: x̄sqrtx2real, sqrtx2, joukowskyinverse,
-            joukowskyinversereal, joukowskyinverseabs, ⁺, ⁻
+            joukowskyinversereal, joukowskyinverseabs, ⁺, ⁻, logabslegendremoment,
+            stieltjeslegendremoment, stieltjesjacobimoment, stieltjesmoment, Directed
 
 ## Special functions
 
@@ -19,6 +20,18 @@ for s in (true,false)
     @test_approx_eq joukowskyinverse(Val{s},p*⁻) joukowskyinverse(Val{s},p-0im)
 end
 
+
+x=Fun()
+@test_approx_eq sum(log(abs(x-2.0))) logabslegendremoment(2.0)
+@test_approx_eq sum(log(abs(x-(2.0+im)))) logabslegendremoment(2.0+im)
+
+@test_approx_eq stieltjesmoment(Legendre(),0,0.1+0im) stieltjesmoment(Legendre(),0,Directed{true}(0.1))
+@test_approx_eq stieltjesmoment(Legendre(),0,0.1-0im) stieltjesmoment(Legendre(),0,Directed{false}(0.1))
+@test_approx_eq stieltjesjacobimoment(0.,0.,1,0.1+0im) stieltjesjacobimoment(0.,0.,1,0.1*⁺)
+@test_approx_eq stieltjesjacobimoment(0.,0.,1,0.1-0im) stieltjesjacobimoment(0.,0.,1,0.1*⁻)
+
+@test_approx_eq (stieltjesjacobimoment(0,0,0,0.1+0im)-stieltjesjacobimoment(0,0,0,0.1-0im))/(-2π*im) 1.0
+@test_approx_eq (stieltjesjacobimoment(0,0,1,0.1+0im)-stieltjesjacobimoment(0,0,1,0.1-0im))/(-2π*im) 0.1
 
 println("Hilbert test")
 include("HilbertTest.jl")
