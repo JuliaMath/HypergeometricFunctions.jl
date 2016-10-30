@@ -69,11 +69,11 @@ function _₂F₁general(a::Number,b::Number,c::Number,z::Number)
     elseif abs(inv(z)) ≤ ρ
         _₂F₁Inf(a,b,c,z)
     elseif abs(1-inv(z)) ≤ ρ
-        exp(-a*log1p(-z))*_₂F₁Inf(a,c-b,c,z/(z-1))
+        exp(-a*log1p(-z))*_₂F₁Inf(a,c-b,c,reverseorientation(z/(z-1)))
     elseif abs(1-z) ≤ ρ
         _₂F₁one(a,b,c,z)
     elseif abs(inv(1-z)) ≤ ρ
-        exp(-a*log1p(-z))*_₂F₁one(a,c-b,c,z/(z-1))
+        exp(-a*log1p(-z))*_₂F₁one(a,c-b,c,reverseorientation(z/(z-1)))
     else
         _₂F₁taylor(a,b,c,value(z))
     end
