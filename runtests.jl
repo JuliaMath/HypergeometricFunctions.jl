@@ -1,11 +1,21 @@
 using ApproxFun, SingularIntegralEquations, Base.Test
     import SingularIntegralEquations: x̄sqrtx2real, sqrtx2, joukowskyinverse,
             joukowskyinversereal, joukowskyinverseabs, ⁺, ⁻, logabslegendremoment,
-            stieltjeslegendremoment, stieltjesjacobimoment, stieltjesmoment, Directed
+            stieltjeslegendremoment, stieltjesjacobimoment, stieltjesmoment, Directed,
+            HypergeometricFunctions
+    import HypergeometricFunctions: _₂F₁general,_₂F₁Inf
+
 
 ## Special functions
 
 println("Special function tests")
+
+
+for (a,b,c) in ((1,1,2),(2,2,4)), x in (1.1,10.1,1.5)
+    @test_approx_eq _₂F₁(a,b,c,x+eps()im) _₂F₁(a,b,c,x*⁺)
+    @test_approx_eq _₂F₁(a,b,c,x-eps()im) _₂F₁(a,b,c,x*⁻)
+end
+
 
 @test_approx_eq x̄sqrtx2real(2.0+3.0im) real(sqrtx2(2.0+3.0im)*(2.0-3.0im))
 
