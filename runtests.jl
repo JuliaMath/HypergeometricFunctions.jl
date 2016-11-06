@@ -65,8 +65,12 @@ include("FundamentalSolutionsTest.jl")
 println("Convolution ProductFun test")
 include("convolutionProductFunTest.jl")
 
+## TODO: Move these into ApproxFun tests (since the code is there now).
 println("LowRankMatrix test")
 include("LowRankMatrixTest.jl")
+
+println("Fractal test")
+include("FractalTest.jl")
 
 println("HierarchicalVector test")
 include("HierarchicalVectorTest.jl")
