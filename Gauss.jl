@@ -35,7 +35,7 @@ function _₂F₁(a::Number,b::Number,c::Number,z::Number)
         end
     elseif isequal(c,2)
         if abeqcd(a,b,1) # 6. 15.4.1
-            return (s = -z; log1p(s)/value(s))
+            return (s = -z; log1p(s)/undirected(s))
         elseif a ∈ ℤ && b == 1 # 5.
             return expm1nlog1p(1-a,-z)
         elseif a == 1 && b ∈ ℤ # 5.
@@ -57,15 +57,15 @@ This polyalgorithm is designed based on the paper
     N. Michel and M. V. Stoitsov, Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions, Comp. Phys. Commun., 178:535–551, 2008.
 """
 function _₂F₁general(a::Number,b::Number,c::Number,z::Number)
-    T = promote_type(typeof(a),typeof(b),typeof(c),typeof(value(z)))
+    T = promote_type(typeof(a),typeof(b),typeof(c),typeof(undirected(z)))
 
     real(b) < real(a) && (return _₂F₁general(b,a,c,z))
     real(c) < real(a)+real(b) && (return exp((c-a-b)*log1p(-z))*_₂F₁general(c-a,c-b,c,z))
 
     if abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
-        _₂F₁maclaurin(a,b,c,value(z))
+        _₂F₁maclaurin(a,b,c,undirected(z))
     elseif abs(z/(z-1)) ≤ ρ
-        exp(-a*log1p(-z))_₂F₁maclaurin(a,c-b,c,value(z/(z-1)))
+        exp(-a*log1p(-z))_₂F₁maclaurin(a,c-b,c,undirected(z/(z-1)))
     elseif abs(inv(z)) ≤ ρ
         _₂F₁Inf(a,b,c,z)
     elseif abs(1-inv(z)) ≤ ρ
@@ -75,7 +75,7 @@ function _₂F₁general(a::Number,b::Number,c::Number,z::Number)
     elseif abs(inv(1-z)) ≤ ρ
         exp(-a*log1p(-z))*_₂F₁one(a,c-b,c,reverseorientation(z/(z-1)))
     else
-        _₂F₁taylor(a,b,c,value(z))
+        _₂F₁taylor(a,b,c,undirected(z))
     end
 end
 

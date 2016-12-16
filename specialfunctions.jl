@@ -235,7 +235,7 @@ function _₂F₁one(a,b,c,z)
     m = round(Int,real(c-(a+b)))
     ϵ = c-(a+b)-m
     w = 1-z
-    (-1)^m/sinc(ϵ)*(Aone(a,b,c,value(w),m,ϵ) + Bone(a,b,c,w,m,ϵ))
+    (-1)^m/sinc(ϵ)*(Aone(a,b,c,undirected(w),m,ϵ) + Bone(a,b,c,w,m,ϵ))
 end
 
 # Transformation formula w = 1/z
@@ -260,7 +260,7 @@ function AInf(a,b,c,w,m::Int,ϵ)
 end
 
 function BInf(a,b,c,win,m::Int,ϵ)
-    w=value(win)
+    w=undirected(win)
     βₙ,γₙ = recInfβ₀(a,b,c,win,m,ϵ)*one(w),recInfγ₀(a,b,c,win,m,ϵ)*w
     ret,err,n = βₙ,1.0,0
     while err > 10eps()
@@ -277,7 +277,7 @@ function _₂F₁Inf(a,b,c,z)
     m = round(Int,real(b-a))
     ϵ = b-a-m
     w = reverseorientation(inv(z))  # we've swapped the branch cut
-    (-1)^m*(-w)^a/sinc(ϵ)*(AInf(a,b,c,value(w),m,ϵ) + BInf(a,b,c,w,m,ϵ))
+    (-1)^m*(-w)^a/sinc(ϵ)*(AInf(a,b,c,undirected(w),m,ϵ) + BInf(a,b,c,w,m,ϵ))
 end
 
 
