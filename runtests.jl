@@ -85,7 +85,3 @@ include("hierarchicalsolveTest.jl")
 
 println("WienerHopfTest")
 include("WienerHopfTest.jl")
-
-
-println("Ideal Fluid Flow tests")
-include("IdealFluidFlowTest.jl")
