@@ -68,7 +68,6 @@ speciallogseries(x::Union{Float64,Dual128}) = @clenshaw(5.0x,1.00873917885443939
 speciallogseries(x::Union{Complex128,DualComplex256}) = @evalpoly(x,1.0000000000000000000000,5.9999999999999999999966e-01,4.2857142857142857142869e-01,3.3333333333333333333347e-01,2.7272727272727272727292e-01,2.3076923076923076923072e-01,1.9999999999999999999996e-01,1.7647058823529411764702e-01,1.5789473684210526315786e-01,1.4285714285714285714283e-01,1.3043478260869565217384e-01,1.2000000000000000000000e-01,1.1111111111111111111109e-01,1.0344827586206896551722e-01,9.6774193548387096774217e-02,9.0909090909090909090938e-02,8.5714285714285714285696e-02,8.1081081081081081081064e-02,7.6923076923076923076907e-02,7.3170731707317073170688e-02)
 
 tanpi(z) = sinpi(z)/cospi(z)
-@vectorize_1arg Number tanpi
 
 const libm = Base.libm_name
 
@@ -82,7 +81,6 @@ function unsafe_gamma(x::BigFloat)
 end
 unsafe_gamma(z::Complex) = gamma(z)
 unsafe_gamma(z::Dual) = (r = realpart(z);w = unsafe_gamma(r); dual(w, w*digamma(r)*dualpart(z)))
-@vectorize_1arg Number unsafe_gamma
 
 """
 `@lanczosratio(z,ϵ,c₀,c...)`
@@ -150,7 +148,7 @@ function G(z::Union{Float64,Complex128,Dual128,DualComplex256},ϵ::Union{Float64
     end
 end
 
-G(z,ϵ) = ϵ == 0 ? digamma(z)/unsafe_gamma(z) : (inv(unsafe_gamma(z))-inv(unsafe_gamma(z+ϵ)))/ϵ
+G(z::Number,ϵ::Number) = ϵ == 0 ? digamma(z)/unsafe_gamma(z) : (inv(unsafe_gamma(z))-inv(unsafe_gamma(z+ϵ)))/ϵ
 
 
 """
@@ -195,11 +193,8 @@ function P(z::Number,ϵ::Number,m::Int)
     end
 end
 
-E(z,ϵ) = ϵ == 0 ? z : expm1(ϵ*z)/ϵ
+E(z::Number,ϵ::Number) = ϵ == 0 ? z : expm1(ϵ*z)/ϵ
 
-@vectorize_2arg Number E
-@vectorize_2arg Number G
-@vectorize_2arg Number H
 G(z::AbstractVector{BigFloat},ϵ::BigFloat) = BigFloat[G(zi,ϵ) for zi in z]
 
 # Transformation formula w = 1-z
