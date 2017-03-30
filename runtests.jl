@@ -81,10 +81,3 @@ include("hierarchicalsolveTest.jl")
 #println("\nExamples test\n")
 #
 #include("ExamplesTest.jl")
-
-println("WienerHopfTest")
-include("WienerHopfTest.jl")
-
-
-println("Ideal Fluid Flow tests")
-include("IdealFluidFlowTest.jl")
