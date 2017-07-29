@@ -68,6 +68,9 @@ include("convolutionProductFunTest.jl")
 println("LowRankMatrix test")
 include("LowRankMatrixTest.jl")
 
+println("GreensFun test")
+include("GreensFunTest.jl")
+
 println("Fractal test")
 include("FractalTest.jl")
 
