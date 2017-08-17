@@ -1,21 +1,21 @@
 const ρ = 0.72
 const ρϵ = 0.71
 
-immutable ℕ end
+struct ℕ end
 
 Base.in(n::Integer,::Type{ℕ}) = n > 0
 Base.in(n::Real,::Type{ℕ}) = (ν = round(Int,n); n == ν && ν ∈ ℕ)
 Base.in(n::Complex,::Type{ℕ}) = imag(n) == 0 && real(n) ∈ ℕ
 Base.in(n::Dual,::Type{ℕ}) = dualpart(n) == 0 && realpart(n) ∈ ℕ
 
-immutable ℕ₀ end
+struct ℕ₀ end
 
 Base.in(n::Integer,::Type{ℕ₀}) = n ≥ 0
 Base.in(n::Real,::Type{ℕ₀}) = (ν = round(Int,n); n == ν && ν ∈ ℕ₀)
 Base.in(n::Complex,::Type{ℕ₀}) = imag(n) == 0 && real(n) ∈ ℕ₀
 Base.in(n::Dual,::Type{ℕ₀}) = dualpart(n) == 0 && realpart(n) ∈ ℕ₀
 
-immutable ℤ end
+struct ℤ end
 
 Base.in(n::Integer,::Type{ℤ}) = true
 Base.in(n::Real,::Type{ℤ}) = n == round(Int,n)
@@ -34,12 +34,12 @@ cosnasinsqrt(n,x) = cos(n*asin(sqrt(x)))
 expnlog1pcoshatanhsqrt(n,x) = x == 0 ? one(x) : (s = sqrt(x); (exp(n*log1p(s))+exp(n*log1p(-s)))/2)
 expnlog1psinhatanhsqrt(n,x) = x == 0 ? one(x) : (s = sqrt(x); (exp(n*log1p(s))-exp(n*log1p(-s)))/(2n*s))
 
-sqrtatanhsqrt{T<:Real}(x::Union{T,Dual{T}}) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); atanh(s)/s) : (s = sqrt(-x); atan(s)/s)
-sqrtasinsqrt{T<:Real}(x::Union{T,Dual{T}}) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); asin(s)/s) : (s = sqrt(-x); asinh(s)/s)
-sinnasinsqrt{T<:Real}(n,x::Union{T,Dual{T}}) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); sin(n*asin(s))/(n*s)) : (s = sqrt(-x); sinh(n*asinh(s))/(n*s))
-cosnasinsqrt{T<:Real}(n,x::Union{T,Dual{T}}) = x > 0 ? cos(n*asin(sqrt(x))) : cosh(n*asinh(sqrt(-x)))
-expnlog1pcoshatanhsqrt{T<:Real}(n,x::Union{T,Dual{T}}) = x == 0 ? one(x) : x > 0 ? exp(n/2*log1p(-x))*cosh(n*atanh(sqrt(x))) : exp(n/2*log1p(-x))*cos(n*atan(sqrt(-x)))
-expnlog1psinhatanhsqrt{T<:Real}(n,x::Union{T,Dual{T}}) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); exp(n/2*log1p(-x))*sinh(n*atanh(s))/(n*s)) : (s = sqrt(-x); exp(n/2*log1p(-x))*sin(n*atan(s))/(n*s))
+sqrtatanhsqrt(x::Union{T,Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); atanh(s)/s) : (s = sqrt(-x); atan(s)/s)
+sqrtasinsqrt(x::Union{T,Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); asin(s)/s) : (s = sqrt(-x); asinh(s)/s)
+sinnasinsqrt(n,x::Union{T,Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); sin(n*asin(s))/(n*s)) : (s = sqrt(-x); sinh(n*asinh(s))/(n*s))
+cosnasinsqrt(n,x::Union{T,Dual{T}}) where {T<:Real} = x > 0 ? cos(n*asin(sqrt(x))) : cosh(n*asinh(sqrt(-x)))
+expnlog1pcoshatanhsqrt(n,x::Union{T,Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? exp(n/2*log1p(-x))*cosh(n*atanh(sqrt(x))) : exp(n/2*log1p(-x))*cos(n*atan(sqrt(-x)))
+expnlog1psinhatanhsqrt(n,x::Union{T,Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); exp(n/2*log1p(-x))*sinh(n*atanh(s))/(n*s)) : (s = sqrt(-x); exp(n/2*log1p(-x))*sin(n*atan(s))/(n*s))
 
 expm1nlog1p(n,x) = x == 0 ? one(x) : expm1(n*log1p(x))/(n*x)
 
@@ -391,7 +391,7 @@ function _₃F₂maclaurin(a₁::Number,a₂::Number,a₃::Number,b₁::Number,b
     return S₁
 end
 
-function mFnmaclaurin{S<:Number,V<:Number}(a::AbstractVector{S},b::AbstractVector{V},z::Number)
+function mFnmaclaurin(a::AbstractVector{S},b::AbstractVector{V},z::Number) where {S<:Number,V<:Number}
     T = promote_type(S,V,typeof(z))
     S₀,S₁,err,j = one(T),one(T)+prod(a)*z/prod(b),one(real(T)),1
     while err > 100eps(T)
@@ -406,9 +406,9 @@ function mFnmaclaurin{S<:Number,V<:Number}(a::AbstractVector{S},b::AbstractVecto
 end
 
 hypot2(a,b) = hypot(a,b)
-hypot2{T<:AbstractFloat}(a::Complex{T},b::Complex{T}) = hypot(hypot(a.re,b.re),hypot(a.im,b.im))
-hypot2{T<:AbstractFloat}(a::T,b::Complex{T}) = hypot(hypot(a,b.re),b.im)
-hypot2{T<:AbstractFloat}(a::Complex{T},b::T) = hypot(hypot(a.re,b),a.im)
+hypot2(a::Complex{T},b::Complex{T}) where {T<:AbstractFloat} = hypot(hypot(a.re,b.re),hypot(a.im,b.im))
+hypot2(a::T,b::Complex{T}) where {T<:AbstractFloat} = hypot(hypot(a,b.re),b.im)
+hypot2(a::Complex{T},b::T) where {T<:AbstractFloat} = hypot(hypot(a.re,b),a.im)
 
 errcheck(x,y) = abs(x/y)
 errcheck(x::Dual,y::Dual) = hypot2(realpart(x),dualpart(x))/hypot2(realpart(y),dualpart(y))
@@ -424,7 +424,7 @@ const ≈ = isapprox
 ≉(x,y) = !(x ≈ y)
 
 # default tolerance arguments
-rtoldefault{T<:AbstractFloat}(::Type{T}) = sqrt(eps(T))
-rtoldefault{T<:Real}(::Type{T}) = 0
-rtoldefault{T<:Real}(::Type{Dual{T}}) = rtoldefault(T)
-rtoldefault{T<:Number,S<:Number}(x::Union{T,Type{T}}, y::Union{S,Type{S}}) = rtoldefault(promote_type(real(T),real(S)))
+rtoldefault(::Type{T}) where {T<:AbstractFloat} = sqrt(eps(T))
+rtoldefault(::Type{T}) where {T<:Real} = 0
+rtoldefault(::Type{Dual{T}}) where {T<:Real} = rtoldefault(T)
+rtoldefault(x::Union{T,Type{T}}, y::Union{S,Type{S}}) where {T<:Number,S<:Number} = rtoldefault(promote_type(real(T),real(S)))

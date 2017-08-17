@@ -157,11 +157,11 @@ _₃F₂(a₁::Number,b₁::Number,z) = _₃F₂(1,1,a₁,2,b₁,z)
 """
 Compute the generalized hypergeometric function `mFn(a;b;z)` with the Maclaurin series.
 """
-function mFn{S<:Number,V<:Number}(a::AbstractVector{S},b::AbstractVector{V},z::Number)
+function mFn(a::AbstractVector{S},b::AbstractVector{V},z::Number) where {S<:Number,V<:Number}
     if abs(z) ≤ ρ || length(a) ≤ length(b)
         mFnmaclaurin(a,b,z)
     else
         zero(promote_type(S,V,typeof(z)))
     end
 end
-mFn{S<:Number,V<:Number}(a::AbstractVector{S},b::AbstractVector{V},z::AbstractArray) = reshape(promote_type(S,V,eltype(z))[ mFn(a,b,z[i]) for i in eachindex(z) ], size(z))
+mFn(a::AbstractVector{S},b::AbstractVector{V},z::AbstractArray) where {S<:Number,V<:Number} = reshape(promote_type(S,V,eltype(z))[ mFn(a,b,z[i]) for i in eachindex(z) ], size(z))
