@@ -35,6 +35,9 @@ x=Fun()
 @test sum(logabs(x-2.0)) ≈ logabslegendremoment(2.0)
 @test sum(logabs(x-(2.0+im))) ≈ logabslegendremoment(2.0+im)
 
+@test sqrt(Directed{true}(-0.1)) ≈ sqrt(-0.1-0.0im)
+@test sqrt(Directed{false}(-0.1)) ≈ sqrt(-0.1+0.0im)
+
 @test stieltjesmoment(Legendre(),0,0.1+0im) ≈ stieltjesmoment(Legendre(),0,Directed{true}(0.1))
 @test stieltjesmoment(Legendre(),0,0.1-0im) ≈ stieltjesmoment(Legendre(),0,Directed{false}(0.1))
 @test stieltjesjacobimoment(0.,0.,1,0.1+0im) ≈ stieltjesjacobimoment(0.,0.,1,0.1*⁺)
@@ -42,6 +45,12 @@ x=Fun()
 
 @test (stieltjesjacobimoment(0,0,0,0.1+0im)-stieltjesjacobimoment(0,0,0,0.1-0im))/(-2π*im) ≈ 1.0
 @test (stieltjesjacobimoment(0,0,1,0.1+0im)-stieltjesjacobimoment(0,0,1,0.1-0im))/(-2π*im) ≈ 0.1
+
+@test stieltjesjacobimoment(0.5,0,0,Directed{true}(0.1)) ≈ stieltjesjacobimoment(0.5,0,0,0.1+0im)
+@test stieltjesjacobimoment(0.5,0,0,Directed{false}(0.1)) ≈ stieltjesjacobimoment(0.5,0,0,0.1-0.0im)
+
+
+
 
 println("Hilbert test")
 include("HilbertTest.jl")
