@@ -44,6 +44,7 @@ expnlog1psinhatanhsqrt(n,x::Union{T,Dual{T}}) where {T<:Real} = x == 0 ? one(x) 
 expm1nlog1p(n,x) = x == 0 ? one(x) : expm1(n*log1p(x))/(n*x)
 
 speciallog(x) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); 3(atanh(s)-s)/s^3) : (s = sqrt(-x); 3(s-atan(s))/s^3)
+speciallog(x::Directed) = (s = sqrt(-x); 3(s-atan(s))/s^3)
 function speciallog(x::Float64)
     if x > 0.2
         s = sqrt(x)

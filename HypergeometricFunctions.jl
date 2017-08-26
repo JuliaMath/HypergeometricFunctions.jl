@@ -5,10 +5,10 @@ This module calculates (generalized) hypergeometric functions:
 """
 module HypergeometricFunctions
     using DualNumbers
-    import ApproxFun: @clenshaw, real, eps, reverseorientation
-    import FastTransforms: pochhammer
-    import SingularIntegralEquations: undirected
-    
+import ApproxFun: @clenshaw, real, eps, reverseorientation
+import FastTransforms: pochhammer
+import SingularIntegralEquations: undirected, Directed
+
 export _₂F₁, _₃F₂, mFn
 
 include("Gauss.jl")
