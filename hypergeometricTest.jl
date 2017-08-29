@@ -25,3 +25,12 @@ for z in (.9rand(Float64,10),10rand(Complex128,10))
         j+=1
     end
 end
+
+
+
+# Check new special case
+
+for z in (0.8,2.0+2.0im,2.0-2.0im)
+    @test SingularIntegralEquations.HypergeometricFunctions._₂F₁general(2,2,4,z) ≈
+    SingularIntegralEquations.HypergeometricFunctions._₂F₁(2,2,4,z)
+end
