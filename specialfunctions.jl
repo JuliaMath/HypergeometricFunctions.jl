@@ -43,6 +43,17 @@ expnlog1psinhatanhsqrt(n,x::Union{T,Dual{T}}) where {T<:Real} = x == 0 ? one(x) 
 
 expm1nlog1p(n,x) = x == 0 ? one(x) : expm1(n*log1p(x))/(n*x)
 
+logandpoly(x) = x == 0 ? one(x) : 6*(-2x+(x-2)*log1p(-x))/x^3
+function logandpoly(x::Union{Float64, Complex128})
+    if abs(x) > 0.2
+        6*(-2x+(x-2)*log1p(-x))/x^3
+    else
+        logandpolyseries(x)
+    end
+end
+
+logandpolyseries(x::Union{Float64, Dual128, Complex128, DualComplex256}) = @evalpoly(x, 1.0, 1.0, 0.9, 0.8, 0.7142857142857143, 0.6428571428571429, 0.5833333333333334, 0.5333333333333333, 0.4909090909090909, 0.45454545454545453, 0.4230769230769231, 0.3956043956043956, 0.37142857142857144, 0.35, 0.33088235294117646, 0.3137254901960784, 0.2982456140350877, 0.28421052631578947, 0.2714285714285714, 0.2597402597402597)
+
 speciallog(x) = x == 0 ? one(x) : (x > 0 ? (s = sqrt(x); 3(atanh(s)-s)/s^3) : (s = sqrt(-x); 3(s-atan(s))/s^3))
 speciallog(x::Directed) = (s = sqrt(-x); 3(s-atan(s))/s^3)
 function speciallog(x::Float64)
@@ -77,7 +88,7 @@ unsafe_gamma(x::Float32) = ccall((:tgammaf,libm),  Float32, (Float32,), x)
 unsafe_gamma(x::Real) = unsafe_gamma(float(x))
 function unsafe_gamma(x::BigFloat)
     z = BigFloat()
-    ccall((:mpfr_gamma, :libmpfr), Int32, (Ptr{BigFloat}, Ptr{BigFloat}, Int32), &z, &x, Base.MPFR.ROUNDING_MODE[end])
+    ccall((:mpfr_gamma, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Int32), z, x, Base.MPFR.ROUNDING_MODE[])
     return z
 end
 unsafe_gamma(z::Complex) = gamma(z)

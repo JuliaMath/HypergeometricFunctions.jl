@@ -43,8 +43,7 @@ function _₂F₁(a::Number,b::Number,c::Number,z::Number)
         end
     elseif isequal(c,4)
         if abeqcd(a,b,2)
-            return 6*(-2undirected(z) + (undirected(z)-2)*log1p(-z)) /
-                    undirected(z)^3 # from wolfram alpha
+            return logandpoly(z)
         end
     elseif isequal(c,2.5) && abeqcd(a,b,1,1.5)
          return speciallog(z)
