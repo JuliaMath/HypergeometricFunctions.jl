@@ -41,6 +41,11 @@ function _₂F₁(a::Number,b::Number,c::Number,z::Number)
         elseif a == 1 && b ∈ ℤ # 5.
             return expm1nlog1p(1-b,-z)
         end
+    elseif isequal(c,4)
+        if abeqcd(a,b,2)
+            return 6*(-2undirected(z) + (undirected(z)-2)*log1p(-z)) /
+                    undirected(z)^3 # from wolfram alpha
+        end
     elseif isequal(c,2.5) && abeqcd(a,b,1,1.5)
          return speciallog(z)
     end
