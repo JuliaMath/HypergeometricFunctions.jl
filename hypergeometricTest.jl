@@ -12,7 +12,7 @@ for z in (.9rand(Float64,10),10rand(Complex128,10))
                     (-.4,.4,.5),(-.3,1.3,.5),(.35,.85,.5),
                     (.5,.5,1.5),(1.,1.,1.5),(.5,1.,1.5),(.3,.7,1.5),(.7,1.3,1.5),(.35,.85,1.5),
                     (1.,1.,2.),(3.,1.,2.),(-2.,1.,2.),(-3.,1.,2.),(1.,-4.,2.),
-                    (1.,1.5,2.5))
+                    (2.,2.,4.),(1.,1.5,2.5))
         normj = 0.0
         for zi in z
             twoFone = _₂F₁(a,b,c,zi)
@@ -24,13 +24,4 @@ for z in (.9rand(Float64,10),10rand(Complex128,10))
         println("This is the cumulative error for Case $j: ",normj)
         j+=1
     end
-end
-
-
-
-# Check new special case
-
-for z in (0.8,2.0+2.0im,2.0-2.0im)
-    @test SingularIntegralEquations.HypergeometricFunctions._₂F₁general(2,2,4,z) ≈
-    SingularIntegralEquations.HypergeometricFunctions._₂F₁(2,2,4,z)
 end
