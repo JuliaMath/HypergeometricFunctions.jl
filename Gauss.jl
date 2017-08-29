@@ -53,6 +53,21 @@ function _₂F₁(a::Number,b::Number,c::Number,z::Number)
 end
 
 
+# Special case of (-x)^a*_₂F₁ to handle LogNumber correctly in RiemannHilbert.jl
+function mxa_₂F₁(a,b,c,z)
+    if isequal(c,2)
+        if abeqcd(a,b,1) # 6. 15.4.1
+            return log1p(-z)
+        end
+    elseif isequal(c,4)
+        if abeqcd(a,b,2)
+            return 6*(-2 + (1-2/undirected(z))*log1p(-z))
+        end
+    end
+    undirected(-z)^a*_₂F₁(a,b,c,z)
+end
+
+
 _₂F₁(a::Number,b::Number,c::Number,z::AbstractArray) = reshape(promote_type(typeof(a),typeof(b),typeof(c),eltype(z))[ _₂F₁(a,b,c,z[i]) for i in eachindex(z) ], size(z))
 
 """
