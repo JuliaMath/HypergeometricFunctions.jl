@@ -125,10 +125,10 @@ function H(z::Union{Float64,Complex128,Dual128,DualComplex256},ϵ::Union{Float64
     else
         tpz = tanpi(z)
         if z == z+ϵ # ϵ is numerical 0
-            H(1.-z,ϵ) - π/tpz
+            H(1-z,ϵ) - π/tpz
         else
             temp = (cospi(ϵ) + sinpi(ϵ)/tpz)*H(1.-z,-ϵ) + .5ϵ*(π*sinc(.5ϵ))^2 - π*sinc(ϵ)/tpz
-            temp/(1.-ϵ*temp)
+            temp/(1-ϵ*temp)
         end
     end
 end
