@@ -1,4 +1,4 @@
-using ApproxFun, SingularIntegralEquations, Compat.Test
+using ApproxFun, SingularIntegralEquations, Test
     import SingularIntegralEquations: x̄sqrtx2real, sqrtx2, joukowskyinverse,
             joukowskyinversereal, joukowskyinverseabs, ⁺, ⁻, logabslegendremoment,
             stieltjeslegendremoment, stieltjesjacobimoment, stieltjesmoment, Directed,
