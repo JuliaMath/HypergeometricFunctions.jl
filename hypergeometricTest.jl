@@ -6,7 +6,7 @@ println()
 println("Testing Hypergeometric function ₂F₁(a,b;c;z) against known transcendental cases")
 println()
 
-for z in (.9rand(Float64,10),10rand(Complex128,10))
+for z in (.9rand(Float64,10),10rand(ComplexF64,10))
     j=1
     for (a,b,c) in ((√2/e,1.3,1.3),(1.2,√3,1.2),
                     (-.4,.4,.5),(-.3,1.3,.5),(.35,.85,.5),
