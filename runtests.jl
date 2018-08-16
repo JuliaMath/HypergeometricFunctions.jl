@@ -47,43 +47,19 @@ using ApproxFun, SingularIntegralEquations, SpecialFunctions, LinearAlgebra, Tes
     @test stieltjesjacobimoment(0.5,0,0,Directed{false}(0.1)) ≈ stieltjesjacobimoment(0.5,0,0,0.1-0.0im)
 end
 
-
-
-println("Hilbert test")
 include("HilbertTest.jl")
-
-println("Stieltjes moment test")
 include("stieltjesmomentTest.jl")
-
-println("Stieltjes integral test")
 include("stieltjesintegraltest.jl")
-
-println("Log kernel test")
 include("logkerneltest.jl")
-
-println("Curve Test")
 include("CurveTest.jl")
-
-println("FundamentalSolutions test")
 include("FundamentalSolutionsTest.jl")
-
-println("Convolution ProductFun test")
 include("convolutionProductFunTest.jl")
 
 ## TODO: Move these into ApproxFun tests (since the code is there now).
-println("LowRankMatrix test")
 include("LowRankMatrixTest.jl")
-
-println("GreensFun test")
 include("GreensFunTest.jl")
-
-println("Fractal test")
 include("FractalTest.jl")
-
-println("HierarchicalVector test")
 include("HierarchicalVectorTest.jl")
-
-println("Hierarchical solve test")
 include("hierarchicalsolveTest.jl")
 
 # Testing Travis CI abilities. Currently, Examples tests are slow.
