@@ -58,9 +58,7 @@ include("convolutionProductFunTest.jl")
 ## TODO: Move these into ApproxFun tests (since the code is there now).
 include("LowRankMatrixTest.jl")
 include("GreensFunTest.jl")
-include("FractalTest.jl")
-include("HierarchicalVectorTest.jl")
-include("hierarchicalsolveTest.jl")
+
 
 # Testing Travis CI abilities. Currently, Examples tests are slow.
 #println("\nExamples test\n")
