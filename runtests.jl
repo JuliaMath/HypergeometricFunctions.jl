@@ -54,9 +54,6 @@ include("logkerneltest.jl")
 include("CurveTest.jl")
 include("FundamentalSolutionsTest.jl")
 include("convolutionProductFunTest.jl")
-
-## TODO: Move these into ApproxFun tests (since the code is there now).
-include("LowRankMatrixTest.jl")
 include("GreensFunTest.jl")
 
 
