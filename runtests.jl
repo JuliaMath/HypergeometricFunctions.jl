@@ -55,6 +55,7 @@ include("CurveTest.jl")
 include("FundamentalSolutionsTest.jl")
 include("convolutionProductFunTest.jl")
 include("GreensFunTest.jl")
+include("NonlocalOperatorsTest.jl")
 
 
 # Testing Travis CI abilities. Currently, Examples tests are slow.
