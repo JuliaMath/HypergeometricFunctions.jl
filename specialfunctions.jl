@@ -111,16 +111,22 @@ macro lanczosratio(z, ϵ, c₀, c...)
     Expr(:block, :(zm1 = $(esc(z))), :(zm1pϵ = $(esc(z))+$(esc(ϵ))), ex)
 end
 
-Hsum(z::Union{Float64,ComplexF64,Dual128,DualComplex256},ϵ::Union{Float64,ComplexF64,Dual128,DualComplex256}) = @lanczosratio(z,ϵ,0.99999999999999709182,57.156235665862923517,-59.597960355475491248,14.136097974741747174,-0.49191381609762019978,0.33994649984811888699E-4,0.46523628927048575665E-4,-0.98374475304879564677E-4,0.15808870322491248884E-3,-0.21026444172410488319E-3,0.21743961811521264320E-3,-0.16431810653676389022E-3,0.84418223983852743293E-4,-0.26190838401581408670E-4,0.36899182659531622704E-5)
+lanczosratio(z::Union{Float64,ComplexF64,Dual128,DualComplex256},ϵ::Union{Float64,ComplexF64,Dual128,DualComplex256}) = @lanczosratio(z,ϵ,0.99999999999999709182,57.156235665862923517,-59.597960355475491248,14.136097974741747174,-0.49191381609762019978,0.33994649984811888699E-4,0.46523628927048575665E-4,-0.98374475304879564677E-4,0.15808870322491248884E-3,-0.21026444172410488319E-3,0.21743961811521264320E-3,-0.16431810653676389022E-3,0.84418223983852743293E-4,-0.26190838401581408670E-4,0.36899182659531622704E-5)
+
+function lanczosapprox(z::Union{Float64,ComplexF64,Dual128,DualComplex256}, ϵ::Union{Float64,ComplexF64,Dual128,DualComplex256})
+    zm0p5 = z-0.5
+    zpgm0p5 = zm0p5+4.7421875
+    return zm0p5*log1p(ϵ/zpgm0p5) + ϵ*log(zpgm0p5+ϵ) - ϵ + log1p(-ϵ*lanczosratio(z,ϵ))
+end
 
 function H(z::Union{Float64,ComplexF64,Dual128,DualComplex256},ϵ::Union{Float64,ComplexF64,Dual128,DualComplex256})
     zm0p5 = z-0.5
     zpgm0p5 = zm0p5+4.7421875
     if real(z) ≥ 1/2
         if z == z+ϵ # ϵ is numerical 0
-            zm0p5/zpgm0p5 + log(zpgm0p5) - 1 - Hsum(z,ϵ)
+            zm0p5/zpgm0p5 + log(zpgm0p5) - 1 - lanczosratio(z,ϵ)
         else
-            expm1( zm0p5*log1p(ϵ/zpgm0p5) + ϵ*log(zpgm0p5+ϵ) - ϵ + log1p(-ϵ*Hsum(z,ϵ)) )/ϵ
+            expm1( zm0p5*log1p(ϵ/zpgm0p5) + ϵ*log(zpgm0p5+ϵ) - ϵ + log1p(-ϵ*lanczosratio(z,ϵ)) )/ϵ
         end
     else
         tpz = tanpi(z)
