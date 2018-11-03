@@ -47,18 +47,3 @@ using ApproxFun, SingularIntegralEquations, SpecialFunctions, LinearAlgebra, Tes
     @test stieltjesjacobimoment(0.5,0,0,Directed{false}(0.1)) ≈ stieltjesjacobimoment(0.5,0,0,0.1-0.0im)
 end
 
-include("HilbertTest.jl")
-include("stieltjesmomentTest.jl")
-include("stieltjesintegraltest.jl")
-include("logkerneltest.jl")
-include("CurveTest.jl")
-include("FundamentalSolutionsTest.jl")
-include("convolutionProductFunTest.jl")
-include("GreensFunTest.jl")
-include("NonlocalOperatorsTest.jl")
-
-
-# Testing Travis CI abilities. Currently, Examples tests are slow.
-#println("\nExamples test\n")
-#
-#include("ExamplesTest.jl")
