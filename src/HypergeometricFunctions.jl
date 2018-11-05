@@ -8,7 +8,6 @@ module HypergeometricFunctions
 using DualNumbers, SpecialFunctions
 import ApproxFun: @clenshaw, real, eps, reverseorientation
 import FastTransforms: pochhammer
-#import SingularIntegralEquations: undirected, Directed
 
 const underected = identity # will phase out directedness slowly
 
@@ -19,6 +18,4 @@ include("specialfunctions.jl")
 
 end #module
 
-using .HypergeometricFunctions
 
-export _₂F₁, _₃F₂, mFn
