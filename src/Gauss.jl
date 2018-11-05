@@ -1,6 +1,8 @@
 # The references to special cases are to Table of Integrals, Series, and Products, § 9.121, followed by NIST's DLMF.
 
-
+import ApproxFun: real, reverseorientation
+reverseorientation(x::Number) = x
+const undirected = identity
 """
 Compute the Gauss hypergeometric function `₂F₁(a,b;c;z)`.
 """

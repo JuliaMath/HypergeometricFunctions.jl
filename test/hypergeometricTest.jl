@@ -1,6 +1,12 @@
-using ApproxFun, SingularIntegralEquations, Test
+using ApproxFun, Test, LinearAlgebra
 
-import SingularIntegralEquations.HypergeometricFunctions: _₂F₁general
+#import SingularIntegralEquations.HypergeometricFunctions: _₂F₁general
+
+include("../src/specialfunctions.jl")
+include("../src/Gauss.jl")
+include("../src/HypergeometricFunctions.jl")
+
+const e = exp(1.0)
 
 @testset "Hypergeometric function ₂F₁(a,b;c;z) against known transcendental cases" begin
     for z in (.9rand(Float64,10),10rand(ComplexF64,10))
@@ -19,6 +25,7 @@ import SingularIntegralEquations.HypergeometricFunctions: _₂F₁general
                 normj += Float64(norm(twoFone/twoFonegeneral-1))
             end
             println("This is the cumulative error for Case $j: ",normj)
+            @test normj < 6.0e-14
             j+=1
         end
     end
