@@ -1,0 +1,21 @@
+# Documentation: http://docs.travis-ci.com/user/languages/julia/
+language: julia
+sudo: true
+os:
+  - linux
+  - osx
+julia:
+  - 0.7
+  - 1.0
+matrix:
+  allow_failures: false
+
+notifications:
+  email: false
+
+script:
+  - julia --color=yes --check-bounds=yes -e 'using Pkg; Pkg.add("Test"); Pkg.add("LinearAlgebra"); Pkg.add("ApproxFun"); Pkg.add("FastTransforms"); Pkg.add("SpecialFunctions"); Pkg.add("DualNumbers"); Pkg.update(); Pkg.test("HypergeometricFunctions", coverage=true)'
+
+after_success:
+  - julia -e 'using Pkg; cd(Pkg.dir("HypergeometricFunctions")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+
