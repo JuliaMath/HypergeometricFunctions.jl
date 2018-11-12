@@ -4,7 +4,7 @@ import HypergeometricFunctions: _₂F₁general # not exported
 #import SingularIntegralEquations: mFn
 
 const rtol = 1.0e-3
-const NumberType = Float128
+const NumberType = Float64
 
 @testset "Hypergeometric Function tests" begin
   @testset "_₂F₁ vs _₂F₁general" begin
