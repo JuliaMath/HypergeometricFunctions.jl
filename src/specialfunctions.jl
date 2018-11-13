@@ -1,6 +1,6 @@
 import DualNumbers: Dual, Dual128, DualComplex256
 import ApproxFun: @clenshaw, real, eps, reverseorientation
-import SpecialFunctions: gamma, digamma
+import SpecialFunctions: gamma, digamma, factorial
 import FastTransforms: pochhammer
 
 const ρ = 0.72

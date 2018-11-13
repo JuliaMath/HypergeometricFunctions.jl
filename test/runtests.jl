@@ -261,5 +261,4 @@ const NumberType = Float64
     @test _₃F₂(a..., b..., c) ≈ result atol=eps() rtol=rtol
   end
 
-
 end
