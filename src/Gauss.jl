@@ -187,7 +187,7 @@ function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::Number
   if abs(z) ≤ ρ || length(a) ≤ length(b)
     mFnmaclaurin(a, b, z)
   else
-    mFnnaive(a, b, z) #  zero(promote_type(S, V, typeof(z)))
+    zero(promote_type(S, V, typeof(z)))
   end
 end
 function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
@@ -195,12 +195,3 @@ function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
   reshape(promote_type(S, V, eltype(z))[mFn(a, b, z[i]) for i in eachindex(z)], size(z))
 end
 
-"""
-Naive computation of the generalized hypergeometric function `mFn(a;b;z)`
-"""
-function mFnnaive(a::AbstractVector{S}, b::AbstractVector{V}, z::Number
-            ) where {S<:Number, V<:Number}
-  summand(a, b, z, n) = z^n / factorial(n) *
-    prod(pochhammer.(a, n)) / prod(pochhammer.(b, n))
-  return mapreduce(i -> summand(a, b, z, i), +, 0:20)
-end
