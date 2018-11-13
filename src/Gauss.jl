@@ -193,6 +193,7 @@ end
 function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
             ) where {S<:Number, V<:Number}
   reshape(promote_type(S, V, eltype(z))[mFn(a, b, z[i]) for i in eachindex(z)], size(z))
+end
 
 """
 Naive computation of the generalized hypergeometric function `mFn(a;b;z)`
