@@ -9,8 +9,6 @@ using DualNumbers, SpecialFunctions
 import ApproxFun: @clenshaw, real, eps, reverseorientation
 import FastTransforms: pochhammer
 
-const underected = identity # will phase out directedness slowly
-
 export _₂F₁, _₃F₂, mFn
 
 include("Gauss.jl")

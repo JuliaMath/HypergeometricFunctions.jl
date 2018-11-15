@@ -48,7 +48,7 @@ expnlog1psinhatanhsqrt(n, x::Union{T, Dual{T}}) where {T<:Real} = x == 0 ? one(x
 
 expm1nlog1p(n, x) = x == 0 ? one(x) : expm1(n*log1p(x))/(n*x)
 
-logandpoly(x) = undirected(x) == 0 ? one(x) : 6*(-2undirected(x)+(undirected(x)-2)*log1p(-x))/undirected(x)^3
+logandpoly(x) = x == 0 ? one(x) : 6*(-2x+(x-2)*log1p(-x))/x^3
 function logandpoly(x::Union{Float64, ComplexF64})
   if abs(x) > 0.2
     6*(-2x+(x-2)*log1p(-x))/x^3
@@ -60,7 +60,6 @@ end
 logandpolyseries(x::Union{Float64, Dual128, ComplexF64, DualComplex256}) = @evalpoly(x, 1.0, 1.0, 0.9, 0.8, 0.7142857142857143, 0.6428571428571429, 0.5833333333333334, 0.5333333333333333, 0.4909090909090909, 0.45454545454545453, 0.4230769230769231, 0.3956043956043956, 0.37142857142857144, 0.35, 0.33088235294117646, 0.3137254901960784, 0.2982456140350877, 0.28421052631578947, 0.2714285714285714, 0.2597402597402597)
 
 speciallog(x) = x == 0 ? one(x) : (x > 0 ? (s = sqrt(x); 3(atanh(s)-s)/s^3) : (s = sqrt(-x); 3(s-atan(s))/s^3))
-#speciallog(x::Directed) = (s = sqrt(-x); 3(s-atan(s))/s^3)
 function speciallog(x::Float64)
   if x > 0.2
     s = sqrt(x)
@@ -253,7 +252,7 @@ function _₂F₁one(a, b, c, z)
   m = round(Int, real(c-(a+b)))
   ϵ = c-(a+b)-m
   w = 1-z
-  (-1)^m/sinc(ϵ)*(Aone(a, b, c, undirected(w), m, ϵ) + Bone(a, b, c, w, m, ϵ))
+  (-1)^m/sinc(ϵ)*(Aone(a, b, c, w, m, ϵ) + Bone(a, b, c, w, m, ϵ))
 end
 
 # Transformation formula w = 1/z
@@ -278,7 +277,7 @@ function AInf(a, b, c, w, m::Int, ϵ)
 end
 
 function BInf(a, b, c, win, m::Int, ϵ)
-  w=undirected(win)
+  w=win
   βₙ, γₙ = recInfβ₀(a, b, c, win, m, ϵ)*one(w), recInfγ₀(a, b, c, win, m, ϵ)*w
   ret, err, n = βₙ, 1.0, 0
   while err > 10eps()
@@ -295,7 +294,7 @@ function _₂F₁Inf(a, b, c, z)
   m = round(Int, real(b-a))
   ϵ = b-a-m
   w = reverseorientation(inv(z))  # we've swapped the branch cut
-  (-1)^m*(-w)^a/sinc(ϵ)*(AInf(a, b, c, undirected(w), m, ϵ) + BInf(a, b, c, w, m, ϵ))
+  (-1)^m*(-w)^a/sinc(ϵ)*(AInf(a, b, c, w, m, ϵ) + BInf(a, b, c, w, m, ϵ))
 end
 
 
