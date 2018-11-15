@@ -1,6 +1,8 @@
 # The references to special cases are to Table of Integrals, Series, and Products, § 9.121, followed by NIST's DLMF.
 
 import ApproxFun: real, reverseorientation
+import SeriesAccelerators: shanks
+
 reverseorientation(x::Number) = x
 """
 Compute the Gauss hypergeometric function `₂F₁(a, b;c;z)`.
@@ -186,11 +188,19 @@ function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::Number
   if abs(z) ≤ ρ || length(a) ≤ length(b)
     mFnmaclaurin(a, b, z)
   else
-    zero(promote_type(S, V, typeof(z)))
+    mFnnaiveaccelerated(a, b, z) # zero(promote_type(S, V, typeof(z)))
   end
 end
 function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
             ) where {S<:Number, V<:Number}
   reshape(promote_type(S, V, eltype(z))[mFn(a, b, z[i]) for i in eachindex(z)], size(z))
 end
-
+"""
+Naive computation of the generalized hypergeometric function `mFn(a;b;z)`
+"""
+function mFnnaiveaccelerated(a::AbstractVector{S}, b::AbstractVector{V}, 
+                             z::Number) where {S<:Number, V<:Number}
+  summand(a, b, z, n) = z^n / factorial(n) *
+    prod(pochhammer.(a, n)) / prod(pochhammer.(b, n))
+  return shanks(i -> summand(a, b, z, i), 5, 20)
+end
