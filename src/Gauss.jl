@@ -215,8 +215,10 @@ end
 
 function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U},
     z::V) where {S<:Number, U<:Number, V<:Number}
-  numerator(i) = - z * prod(i .+ a) / (i + 1) / prod(i .+ b)
+  T = promote_type(S, U, V)
+  numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1) 
   denominator(i) = 1 - numerator(i)
-  K = continuedfraction(denominator, numerator, tol) - denominator(0)
+  K = continuedfraction(denominator, numerator, 10eps(T)) - denominator(0)
+  @assert !iszero(K + 1) "K cannot equal -1, $a, $b, $z"
   return 1 + z * prod(a) / prod(b) / (1 + K)
 end
