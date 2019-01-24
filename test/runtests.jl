@@ -26,7 +26,7 @@ const NumberType = Float64
           norm(twoFone / twoFonegeneral - 1) > sqrt(eps()) && println("This is ₂F₁($a,$b;$c;zi) - ₂F₁general($a,$b;$c;zi): ", norm(twoFone / twoFonegeneral - 1), "   ", twoFone, "   ", twoFonegeneral, "   ", isfinite(twoFone), "   ", isfinite(twoFonegeneral), " this is zi: ", zi)
           error_accum += Float64(norm(twoFone / twoFonegeneral - 1))
         end
-        println("This is the cumulative error for Case $j: ", error_accum)
+        println("Cumulative error for case $j: ", error_accum)
         @test error_accum < regression_max_accumulated_error
         j += 1
       end

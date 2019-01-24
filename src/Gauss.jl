@@ -1,7 +1,7 @@
 # The references to special cases are to Table of Integrals, Series, and Products, § 9.121, followed by NIST's DLMF.
 
 import ApproxFun: real, reverseorientation
-import SeriesAccelerators: shanks
+#import SeriesAccelerators: shanks
 
 reverseorientation(x::Number) = x
 """
@@ -121,7 +121,8 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif a-b ∉ ℤ # 15.8.2
       gamma(c)*((-w)^a*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, a-c+1, a-b+1, w)+(-w)^b*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, b-c+1, b-a+1, w))
     else
-      zero(T) # TODO: full 15.8.8
+      #throw("Not implemented") # TODO: full 15.8.8
+      mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(inv(1-z)) ≤ ρ && absarg(-z) < convert(real(T), π)
     w = inv(1-z)
@@ -130,7 +131,8 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif a-b ∉ ℤ # 15.8.3
       gamma(c)*(exp(-a*log1p(-z))*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, c-b, a-b+1, w)+exp(-b*log1p(-z))*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, c-a, b-a+1, w))
     else
-      zero(T) # TODO: full 15.8.9
+      #throw("Not implemented") # TODO: full 15.8.9
+      mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(1-z) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
     w = 1-z
@@ -139,7 +141,8 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif c - a - b ∉ ℤ # 15.8.4
       gamma(c)*(gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, b, a+b-c+1, w)+exp((c-a-b)*log1p(-z))*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, c-b, c-a-b+1, w))
     else
-      zero(T) # TODO: full 15.8.10
+      #throw("Not implemented") # TODO: full 15.8.10
+      mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(1-inv(z)) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
     w = 1-inv(z)
@@ -148,7 +151,8 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif c - a - b ∉ ℤ # 15.8.5
       gamma(c)*(z^(-a)*gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, a-c+1, a+b-c+1, w)+z^(a-c)*(1-z)^(c-a-b)*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, 1-a, c-a-b+1, w))
     else
-      zero(T) # TODO: full 15.8.11
+      #throw("Not implemented") # TODO: full 15.8.11
+      mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(z-0.5) > 0.5
     if isapprox(a, b) && !isapprox(c, a+0.5)
@@ -156,10 +160,11 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif a-b ∉ ℤ
       gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z))
     else
-      zero(T)
+      #throw("Not implemented / Domain Error")
+      mFncontinuedfraction([a, b], [c], z)
     end
   else
-    zero(T)#throw(DomainError())
+    throw(DomainError())
   end
 end
 
@@ -170,7 +175,8 @@ function _₃F₂(a₁::Number, a₂::Number, a₃::Number, b₁::Number, b₂::
   if abs(z) ≤ ρ
     _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
   else
-    zero(z)
+    #throw("Not implemented / Domain Error: abs(z) > ρ; $(abs(z)) > $(ρ)")
+    mFncontinuedfraction([a₁, a₂, a₃], [b₁, b₂], z)
   end
 end
 function _₃F₂(a₁::Number, a₂::Number, a₃::Number, b₁::Number,
@@ -188,19 +194,29 @@ function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::Number
   if abs(z) ≤ ρ || length(a) ≤ length(b)
     mFnmaclaurin(a, b, z)
   else
-    mFnnaiveaccelerated(a, b, z) # zero(promote_type(S, V, typeof(z)))
+    mFncontinuedfraction(a, b, z)
+    #@show a, b, z, ρ
+    #throw("Not implemented / Domain Error: abs(z) > ρ && length(a) > length(b)")
   end
 end
 function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
             ) where {S<:Number, V<:Number}
   reshape(promote_type(S, V, eltype(z))[mFn(a, b, z[i]) for i in eachindex(z)], size(z))
 end
-"""
-Naive computation of the generalized hypergeometric function `mFn(a;b;z)`
-"""
-function mFnnaiveaccelerated(a::AbstractVector{S}, b::AbstractVector{V}, 
-                             z::Number) where {S<:Number, V<:Number}
-  summand(a, b, z, n) = z^n / factorial(n) *
-    prod(pochhammer.(a, n)) / prod(pochhammer.(b, n))
-  return shanks(i -> summand(a, b, z, i), 5, 20)
+#"""
+#Naive computation of the generalized hypergeometric function `mFn(a;b;z)`
+#"""
+#function mFnnaiveaccelerated(a::AbstractVector{S}, b::AbstractVector{V},
+#                             z::Number) where {S<:Number, V<:Number}
+#  summand(n) = z^n / exp(lfactorial(n)) *
+#    prod(pochhammer.(a, n)) / prod(pochhammer.(b, n))
+#  return shanks(summand, 9)
+#end
+
+function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U},
+    z::V) where {S<:Number, U<:Number, V<:Number}
+  numerator(i) = - z * prod(i .+ a) / (i + 1) / prod(i .+ b)
+  denominator(i) = 1 - numerator(i)
+  K = continuedfraction(denominator, numerator, tol) - denominator(0)
+  return 1 + z * prod(a) / prod(b) / (1 + K)
 end

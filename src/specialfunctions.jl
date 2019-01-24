@@ -450,3 +450,22 @@ rtoldefault(::Type{T}) where {T<:AbstractFloat} = sqrt(eps(T))
 rtoldefault(::Type{T}) where {T<:Real} = 0
 rtoldefault(::Type{Dual{T}}) where {T<:Real} = rtoldefault(T)
 rtoldefault(x::Union{T, Type{T}}, y::Union{S, Type{S}}) where {T<:Number, S<:Number} = rtoldefault(promote_type(real(T), real(S)))
+
+function continuedfraction(v::V, u::U) where {V<:Function, U<:Function}
+  n = 16
+  while n < 10^6 # massive upper limit
+    a = continuedfraction(v, u, n)
+    b = continuedfraction(v, u, n + 1)
+    isapprox(a, b, rtol=tol.rel, atol=tol.abs) && return b
+    n *= 2
+  end
+  error("No convergence of generlised hypergeometric function")
+end
+
+function continuedfraction(v::V, u::U, n::Int) where {V<:Function, U<:Function}
+  output = u(n) / v(n)
+  for i ∈ reverse(1:n-1)
+    output = u(i) / (v(i) + output)
+  end
+  return v(0) + output
+end
