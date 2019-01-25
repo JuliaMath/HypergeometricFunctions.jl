@@ -13,7 +13,7 @@ matrix:
 branches:
   only:
   - master
-  - stable
+  - dev
 
 notifications:
   email: false
