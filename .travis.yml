@@ -10,6 +10,11 @@ julia:
 matrix:
   allow_failures: false
 
+branches:
+  only:
+  - master
+  - stable
+
 notifications:
   email: false
 
