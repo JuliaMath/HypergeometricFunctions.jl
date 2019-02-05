@@ -120,7 +120,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif a-b ∉ ℤ # 15.8.2
       gamma(c)*((-w)^a*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, a-c+1, a-b+1, w)+(-w)^b*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, b-c+1, b-a+1, w))
     else
-      #throw("Not implemented") # TODO: full 15.8.8
+      # TODO: full 15.8.8
       mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(inv(1-z)) ≤ ρ && absarg(-z) < convert(real(T), π)
@@ -130,7 +130,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif a-b ∉ ℤ # 15.8.3
       gamma(c)*(exp(-a*log1p(-z))*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, c-b, a-b+1, w)+exp(-b*log1p(-z))*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, c-a, b-a+1, w))
     else
-      #throw("Not implemented") # TODO: full 15.8.9
+      # TODO: full 15.8.9
       mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(1-z) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
@@ -140,7 +140,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif c - a - b ∉ ℤ # 15.8.4
       gamma(c)*(gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, b, a+b-c+1, w)+exp((c-a-b)*log1p(-z))*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, c-b, c-a-b+1, w))
     else
-      #throw("Not implemented") # TODO: full 15.8.10
+      # TODO: full 15.8.10
       mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(1-inv(z)) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
@@ -150,7 +150,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif c - a - b ∉ ℤ # 15.8.5
       gamma(c)*(z^(-a)*gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, a-c+1, a+b-c+1, w)+z^(a-c)*(1-z)^(c-a-b)*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, 1-a, c-a-b+1, w))
     else
-      #throw("Not implemented") # TODO: full 15.8.11
+      # TODO: full 15.8.11
       mFncontinuedfraction([a, b], [c], z)
     end
   elseif abs(z-0.5) > 0.5
@@ -159,7 +159,6 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif a-b ∉ ℤ
       gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z))
     else
-      #throw("Not implemented / Domain Error")
       mFncontinuedfraction([a, b], [c], z)
     end
   else
@@ -174,7 +173,6 @@ function _₃F₂(a₁::Number, a₂::Number, a₃::Number, b₁::Number, b₂::
   if abs(z) ≤ ρ
     _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
   else
-    #throw("Not implemented / Domain Error: abs(z) > ρ; $(abs(z)) > $(ρ)")
     mFncontinuedfraction([a₁, a₂, a₃], [b₁, b₂], z)
   end
 end
@@ -194,8 +192,6 @@ function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::Number
     mFnmaclaurin(a, b, z)
   else
     mFncontinuedfraction(a, b, z)
-    #@show a, b, z, ρ
-    #throw("Not implemented / Domain Error: abs(z) > ρ && length(a) > length(b)")
   end
 end
 function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
@@ -209,14 +205,10 @@ fraction`
 """
 function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U},
     z::V) where {S<:Number, U<:Number, V<:Number}
-  try
-    T = promote_type(S, U, V)
-    numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1)
-    denominator(i) = 1 - numerator(i)
-    K = continuedfraction(denominator, numerator, 10eps(T)) - denominator(0)
-    iszero(K + 1) && error("Non convergence of continued fraction; inputs $a, $b, $z")
-    return 1 + z * prod(a) / prod(b) / (1 + K)
-  catch
-    return mFnnaiveaccelerated(a, b, z)
-  end
+  T = promote_type(S, U, V)
+  numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1)
+  denominator(i) = 1 - numerator(i)
+  K = continuedfraction(denominator, numerator, 10eps(T)) - denominator(0)
+  iszero(K + 1) && error("Non convergence of continued fraction; inputs $a, $b, $z")
+  return 1 + z * prod(a) / prod(b) / (1 + K)
 end
