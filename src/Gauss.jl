@@ -1,7 +1,6 @@
 # The references to special cases are to Table of Integrals, Series, and Products, § 9.121, followed by NIST's DLMF.
 
 import ApproxFun: real, reverseorientation
-#import SeriesAccelerators: shanks
 
 reverseorientation(x::Number) = x
 """
@@ -203,22 +202,21 @@ function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
             ) where {S<:Number, V<:Number}
   reshape(promote_type(S, V, eltype(z))[mFn(a, b, z[i]) for i in eachindex(z)], size(z))
 end
-#"""
-#Naive computation of the generalized hypergeometric function `mFn(a;b;z)`
-#"""
-#function mFnnaiveaccelerated(a::AbstractVector{S}, b::AbstractVector{V},
-#                             z::Number) where {S<:Number, V<:Number}
-#  summand(n) = z^n / exp(lfactorial(n)) *
-#    prod(pochhammer.(a, n)) / prod(pochhammer.(b, n))
-#  return shanks(summand, 9)
-#end
 
+"""
+computation of the generalized hypergeometric function `mFn(a;b;z) by continued
+fraction`
+"""
 function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U},
     z::V) where {S<:Number, U<:Number, V<:Number}
-  T = promote_type(S, U, V)
-  numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1) 
-  denominator(i) = 1 - numerator(i)
-  K = continuedfraction(denominator, numerator, 10eps(T)) - denominator(0)
-  iszero(K + 1) && error("Non convergence of continued fraction; inputs $a, $b, $z")
-  return 1 + z * prod(a) / prod(b) / (1 + K)
+  try
+    T = promote_type(S, U, V)
+    numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1)
+    denominator(i) = 1 - numerator(i)
+    K = continuedfraction(denominator, numerator, 10eps(T)) - denominator(0)
+    iszero(K + 1) && error("Non convergence of continued fraction; inputs $a, $b, $z")
+    return 1 + z * prod(a) / prod(b) / (1 + K)
+  catch
+    return mFnnaiveaccelerated(a, b, z)
+  end
 end
