@@ -219,6 +219,6 @@ function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U},
   numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1) 
   denominator(i) = 1 - numerator(i)
   K = continuedfraction(denominator, numerator, 10eps(T)) - denominator(0)
-  @assert !iszero(K + 1) "K cannot equal -1, $a, $b, $z"
+  iszero(K + 1) && error("Non convergence of continued fraction; inputs $a, $b, $z")
   return 1 + z * prod(a) / prod(b) / (1 + K)
 end

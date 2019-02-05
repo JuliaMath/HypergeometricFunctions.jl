@@ -454,21 +454,30 @@ rtoldefault(x::Union{T, Type{T}}, y::Union{S, Type{S}}) where {T<:Number, S<:Num
 function continuedfraction(v::V, u::U, rtol::T
     ) where {V<:Function, U<:Function, T<:Number}
   n = 4
-  while n < 2^16 # massive upper limit
-    a = continuedfraction(v, u, n)
-    b = continuedfraction(v, u, n + 1)
-    isapprox(a, b, rtol=rtol, atol=eps(T)) && return b
-    n *= 4 # let's not muck about
+  a, b = continuedfraction(v, u, n, n + 1)
+  isapprox(a, b, rtol=rtol) && return b
+  while n <= 2^16
+    a, b = continuedfraction(v, u, n, n + 1)
+    isapprox(a, b, rtol=rtol) && return b
+    n *= 4
   end
   error("No convergence of generlised hypergeometric function")
 end
-
-function continuedfraction(v::V, u::U, n::Int) where {V<:Function, U<:Function}
-  output = u(n) / v(n)
-  for i ∈ reverse(1:n-1)
-    output = u(i) / (v(i) + output)
-    @assert isfinite(output) "$(v(i)), $(u(i)), $output"
+function continuedfraction(v::V, u::U, n::Int, m::Int
+    ) where {V<:Function, U<:Function}
+  @assert m > n
+  output_m = u(m) / v(m)
+  for i ∈ reverse(n+1:m-1)
+    output_m = u(i) / (v(i) + output_m)
   end
-  output += v(0)
-  return output
+  ui, vi = u(n), v(n)
+  output_m = ui / (vi + output_m)
+  output_n = ui / vi
+  for i ∈ reverse(1:n-1)
+    ui, vi = u(i), v(i)
+    output_m = ui / (vi + output_m)
+    output_n = ui / (vi + output_n)
+  end
+  vi = v(0)
+  return vi + output_n, vi + output_m
 end
