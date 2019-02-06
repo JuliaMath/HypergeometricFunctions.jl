@@ -5,15 +5,16 @@ os:
   - linux
   - osx
 julia:
-  - 0.7
   - 1.0
+  - 1.1
+  - nightly
 matrix:
   allow_failures: false
 
 branches:
   only:
   - master
-  - stable
+  - dev
 
 notifications:
   email: false
