@@ -35,7 +35,7 @@ function _₂F₁(a::Number, b::Number, c::Number, z::Number)
     end
   elseif isequal(c, 2)
     if abeqcd(a, b, 1) # 6. 15.4.1
-      return (s = -z; log1p(s)/s)
+      return log1pover(-z)
     elseif a ∈ ℤ && b == 1 # 5.
       return expm1nlog1p(1-a, -z)
     elseif a == 1 && b ∈ ℤ # 5.
@@ -50,6 +50,8 @@ function _₂F₁(a::Number, b::Number, c::Number, z::Number)
   end
   _₂F₁general(a, b, c, z) # catch-all
 end
+
+
 
 
 # Special case of (-x)^a*_₂F₁ to handle LogNumber correctly in RiemannHilbert.jl
