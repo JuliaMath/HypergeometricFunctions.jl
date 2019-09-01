@@ -1,7 +1,5 @@
 # The references to special cases are to Table of Integrals, Series, and Products, § 9.121, followed by NIST's DLMF.
 
-import ApproxFun: real, reverseorientation
-
 reverseorientation(x::Number) = x
 """
 Compute the Gauss hypergeometric function `₂F₁(a, b;c;z)`.
@@ -208,7 +206,7 @@ function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U},
   T = promote_type(S, U, V)
   numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1)
   denominator(i) = 1 - numerator(i)
-  K = continuedfraction(denominator, numerator, 10eps(T)) - denominator(0)
+  K = continuedfraction(denominator, numerator, 10eps(real(T))) - denominator(0)
   iszero(K + 1) && error("Non convergence of continued fraction; inputs $a, $b, $z")
   return 1 + z * prod(a) / prod(b) / (1 + K)
 end

@@ -1,7 +1,47 @@
 import DualNumbers: Dual, Dual128, DualComplex256
-import ApproxFun: @clenshaw, real, eps, reverseorientation
 import SpecialFunctions: gamma, digamma, factorial
-import FastTransforms: pochhammer
+
+# Same as in FastTransforms.jl
+"""
+Pochhammer symbol ``(x)_n = \\frac{\\Gamma(x+n)}{\\Gamma(x)}`` for the rising factorial.
+"""
+function pochhammer(x::Number,n::Integer)
+    ret = one(x)
+    if n≥0
+        for i=0:n-1
+            ret *= x+i
+        end
+    else
+        ret /= pochhammer(x+n,-n)
+    end
+    ret
+end
+
+pochhammer(x::Number,n::Number) = isinteger(n) ? pochhammer(x,Int(n)) : ogamma(x)/ogamma(x+n)
+
+function pochhammer(x::Number,n::UnitRange{T}) where T<:Real
+    ret = Vector{promote_type(typeof(x),T)}(length(n))
+    ret[1] = pochhammer(x,first(n))
+    for i=2:length(n)
+        ret[i] = (x+n[i]-1)*ret[i-1]
+    end
+    ret
+end
+
+macro clenshaw(x, c...)
+    a, b = :(zero(t)), :(zero(t))
+    as = []
+    N = length(c)
+    for k = N:-1:2
+        ak = Symbol("a",k)
+        push!(as, :($ak = $a))
+        a = :(muladd(t,$a,$(esc(c[k]))-$b))
+        b = :($ak)
+    end
+    ex = Expr(:block,as...,:(muladd(t/2,$a,$(esc(c[1]))-$b)))
+    Expr(:block, :(t = $(esc(2))*$(esc(x))), ex)
+end
+
 
 const ρ = 0.72
 const ρϵ = 0.71
@@ -301,7 +341,7 @@ end
 function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
   T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
   S₀, S₁, err, j = one(T), one(T)+a*b*z/c, one(real(T)), 1
-  while err > 10eps(T)
+  while err > 10eps(real(T))
     rⱼ = (a+j)/(j+1)*(b+j)/(c+j)
     S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
     err = errcheck(S₁-S₀, S₀)
@@ -313,7 +353,7 @@ end
 function _₂F₁maclaurinalt(a::Number, b::Number, c::Number, z::Number)
   T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
   C, S, err, j = one(T), one(T), one(real(T)), 0
-  while err > 10eps(T)
+  while err > 10eps(real(T))
     C *= (a+j)/(j+1)*(b+j)/(c+j)*z
     S += C
     err = errcheck(C, S)
@@ -326,7 +366,7 @@ function _₂F₁continuation(s::Number, t::Number, c::Number, z₀::Number, z::
   T = promote_type(typeof(s), typeof(t), typeof(c), typeof(z₀), typeof(z))
   izz₀, d0, d1 = inv(z-z₀), one(T), s/(2s-t+one(T))*((s+1)*(1-2z₀)+(t+1)*z₀-c)
   S₀, S₁, izz₀j, err, j = one(T), one(T)+d1*izz₀, izz₀, one(real(T)), 2
-  while err > 10eps(T)
+  while err > 10eps(real(T))
     d0, d1, izz₀j = d1, (j+s-one(T))/j/(j+2s-t)*(((j+s)*(1-2z₀)+(t+1)*z₀-c)*d1 + z₀*(1-z₀)*(j+s-2)*d0), izz₀j*izz₀
     S₀, S₁ = S₁, S₁+d1*izz₀j
     err = errcheck(S₁-S₀, S₀)
@@ -345,7 +385,7 @@ function _₂F₁continuationalt(a::Number, c::Number, z₀::Number, z::Number)
   cⱼ += 2/one(T)-one(T)/a
   C = a*izz₀
   S₁, err, j = S₀+(e1*cⱼ-f1)*C, one(real(T)), 2
-  while err > 10eps(T)
+  while err > 10eps(real(T))
     f0, f1 = f1, (((j+a)*(1-2z₀)+(2a+1)*z₀-c)*f1+z₀*(1-z₀)*(j-1)*f0+(1-2z₀)*e1+2z₀*(1-z₀)*e0)/j
     e0, e1 = e1, (((j+a)*(1-2z₀)+(2a+1)*z₀-c)*e1+z₀*(1-z₀)*(j-1)*e0)/j
     C *= (a+j-1)*izz₀/j
@@ -361,7 +401,7 @@ function _₂F₁logsum(a::Number, b::Number, z::Number, w::Number, s::Int)
   T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
   cⱼ = 2digamma(one(T))-digamma(a)-digamma(b)+s*log1p(-z)
   C, S, err, j = one(T), cⱼ, one(real(T)), 0
-  while err > 10eps(T)
+  while err > 10eps(real(T))
     C *= (a+j)/(j+1)^2*(b+j)*w
     cⱼ += 2/(j+one(T))-one(T)/(a+j)-one(T)/(b+j)
     S += C*cⱼ
@@ -375,7 +415,7 @@ function _₂F₁logsumalt(a::Number, b::Number, z::Number, w::Number)
   T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
   d, cⱼ = one(T)-b, 2digamma(one(T))-digamma(a)-digamma(b)-log(-w)
   C, S, err, j = one(T), cⱼ, one(real(T)), 0
-  while err > 10eps(T)
+  while err > 10eps(real(T))
     C *= (a+j)/(j+1)^2*(d+j)*w
     cⱼ += 2/(j+one(T))-one(T)/(a+j)+one(T)/(b-(j+one(T)))
     S += C*cⱼ
@@ -391,7 +431,7 @@ function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
   q₀, q₁ = _₂F₁(a, b, c, z₀), a*b/c*_₂F₁(a+1, b+1, c+1, z₀)
   S₀, zz₀ = q₀, z-z₀
   S₁, err, zz₀j, j = S₀+q₁*zz₀, one(real(T)), zz₀, 0
-  while err > 10eps(T)
+  while err > 10eps(real(T))
     q₀, q₁ = q₁, ((j*(2z₀-one(T))-c+(a+b+one(T))*z₀)*q₁ + (a+j)*(b+j)/(j+one(T))*q₀)/(z₀*(one(T)-z₀)*(j+2))
     zz₀j *= zz₀
     S₀, S₁ = S₁, S₁+q₁*zz₀j
@@ -404,7 +444,7 @@ end
 function _₃F₂maclaurin(a₁::Number, a₂::Number, a₃::Number, b₁::Number, b₂::Number, z::Number)
   T = promote_type(typeof(a₁), typeof(a₂), typeof(a₃), typeof(b₁), typeof(b₂), typeof(z))
   S₀, S₁, err, j = one(T), one(T)+(a₁*a₂*a₃*z)/(b₁*b₂), one(real(T)), 1
-  while err > 100eps(T)
+  while err > 100eps(real(T))
     rⱼ = ((a₁+j)*(a₂+j)*(a₃+j))/((b₁+j)*(b₂+j)*(j+1))
     S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
     err = errcheck(S₁-S₀, S₀)
@@ -416,7 +456,7 @@ end
 function mFnmaclaurin(a::AbstractVector{S}, b::AbstractVector{V}, z::Number) where {S<:Number, V<:Number}
   T = promote_type(S, V, typeof(z))
   S₀, S₁, err, j = one(T), one(T)+prod(a)*z/prod(b), one(real(T)), 1
-  while err > 100eps(T)
+  while err > 100eps(real(T))
     rⱼ = inv(j+one(T))
     for i=1:length(a) rⱼ *= a[i]+j end
     for i=1:length(b) rⱼ /= b[i]+j end
