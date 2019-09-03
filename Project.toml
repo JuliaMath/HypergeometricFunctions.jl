@@ -1,6 +1,6 @@
 name = "HypergeometricFunctions"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
-version = "0.1"
+version = "0.1.1"
 
 [deps]
 DualNumbers = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
@@ -10,5 +10,5 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 DualNumbers = "0.5,0.6"
-SpecialFunctions = "0.7"
+SpecialFunctions = "0.7,0.8"
 julia = "1"
