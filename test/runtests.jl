@@ -9,7 +9,7 @@ const NumberType = Float64
 @testset "Hypergeometric Function tests" begin
   @testset "_₂F₁ vs _₂F₁general" begin
     e = exp(1.0)
-    regression_max_accumulated_error = 1.0e-13 # discovered by running the test
+    regression_max_accumulated_error = 2.0e-13 # discovered by running the test
     for z in (.9rand(Float64,10), 10rand(ComplexF64, 10))
       j = 1
       for (a,b,c) in ((√2/e, 1.3, 1.3), (1.2, √3, 1.2), (-0.4, 0.4, 0.5),
