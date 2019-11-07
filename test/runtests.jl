@@ -1,7 +1,10 @@
 using HypergeometricFunctions, Test
 import LinearAlgebra: norm
-import HypergeometricFunctions: _₂F₁general # not exported 
-#import SingularIntegralEquations: mFn
+import HypergeometricFunctions: _₂F₁general # not exported
+
+import HypergeometricFunctions: drummond0F0, drummond1F0, drummond0F1,
+                                drummond2F0, drummond1F1, drummond0F2,
+                                drummond2F1
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -26,7 +29,6 @@ const NumberType = Float64
           norm(twoFone / twoFonegeneral - 1) > sqrt(eps()) && println("This is ₂F₁($a,$b;$c;zi) - ₂F₁general($a,$b;$c;zi): ", norm(twoFone / twoFonegeneral - 1), "   ", twoFone, "   ", twoFonegeneral, "   ", isfinite(twoFone), "   ", isfinite(twoFonegeneral), " this is zi: ", zi)
           error_accum += Float64(norm(twoFone / twoFonegeneral - 1))
         end
-        println("Cumulative error for case $j: ", error_accum)
         @test error_accum < regression_max_accumulated_error
         j += 1
       end
@@ -263,3 +265,80 @@ const NumberType = Float64
 
 end
 
+@testset "Drummond ₀F₀" begin
+    for (S, T) in ((Float16, Float32),
+                   (Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = 1000eps(S)
+        for z in S(-4):S(0.25):S(4)
+            @test drummond0F0(z) ≈ S(mFn(T[], T[], T(z))) atol=atol rtol=rtol
+        end
+    end
+end
+
+@testset "Drummond ₁F₀" begin
+    for (S, T) in ((Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = 1000eps(S)
+        for α in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.25)
+            @test drummond1F0(α, z) ≈ S(mFn(T[α], T[], T(z))) atol=atol rtol=rtol
+        end
+    end
+end
+
+@testset "Drummond ₀F₁" begin
+    for (S, T) in ((Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = 1000eps(S)
+        for α in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
+            @test drummond0F1(α, z) ≈ S(mFn(T[], T[α], T(z))) atol=atol rtol=rtol
+        end
+    end
+end
+
+@testset "Drummond ₂F₀" begin
+    for (S, T) in ((Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = 1000eps(S)
+        for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-1.0):S(0.25):S(0.0)
+            @test drummond2F0(α, β, z) ≈ S(drummond2F0(T(α), T(β), T(z))) atol=atol rtol=rtol
+        end
+    end
+end
+
+@testset "Drummond ₁F₁" begin
+    for (S, T) in ((Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = 1000eps(S)
+        for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
+            @test drummond1F1(α, β, z) ≈ S(mFn(T[α], T[β], T(z))) atol=atol rtol=rtol
+        end
+    end
+end
+
+@testset "Drummond ₀F₂" begin
+    for (S, T) in ((Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = 1000eps(S)
+        for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
+            @test drummond0F2(α, β, z) ≈ S(mFn(T[], T[α, β], T(z))) atol=atol rtol=rtol
+        end
+    end
+end
+
+@testset "Drummond ₂F₁" begin
+    for (S, T) in ((Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = 1000eps(S)
+        for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.25)
+            @test drummond2F1(α, β, γ, z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
+        end
+    end
+end

@@ -5,13 +5,12 @@ This module calculates (generalized) hypergeometric functions:
 """
 module HypergeometricFunctions
 
-using DualNumbers, SpecialFunctions
+using DualNumbers, LinearAlgebra, SpecialFunctions
 
 export _₂F₁, _₃F₂, mFn
 
 include("Gauss.jl")
 include("specialfunctions.jl")
+include("drummond.jl")
 
 end #module
-
-

@@ -28,6 +28,8 @@ function pochhammer(x::Number,n::UnitRange{T}) where T<:Real
     ret
 end
 
+ogamma(x::Number) = (isinteger(x) && x<0) ? zero(float(x)) : inv(gamma(x))
+
 macro clenshaw(x, c...)
     a, b = :(zero(t)), :(zero(t))
     as = []
