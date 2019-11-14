@@ -235,3 +235,125 @@ function drummond2F1(α::T1, β::T2, γ::T3, z::T4) where {T1, T2, T3, T4}
     end
     return isnan(Thi) ? isnan(Tmid) ? Tlo : Tmid : Thi
 end
+
+# ₘFₙ(α;β;z)
+function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where {T1, T2, T3}
+    T = promote_type(T1, T2, T3)
+    if norm(z) < eps(real(T)) || norm(prod(α)) < eps(real(T))
+        return one(T)
+    end
+    ζ = inv(z)
+    p = length(α)
+    q = length(β)
+    r = max(p+1, q+2)
+    P = finite_differences_P(T, α)
+    Q = finite_differences_Q(T, β)
+    N = zeros(T, r+1)
+    D = zeros(T, r+1)
+    R = zeros(T, r+1)
+    N[r+1] = prod(β)*ζ/prod(α)
+    D[r+1] = prod(β)*ζ/prod(α)
+    R[r+1] = N[r+1]/D[r+1]
+    k = 0
+    while (abs(R[r+1]-R[r]) > 10*abs(R[r+1])*eps(real(T)) && k < 10_000) || k < r
+        for j in 1:r
+            N[j] = N[j+1]
+            D[j] = D[j+1]
+            R[j] = R[j+1]
+        end
+        t1 = zero(T)
+        for j in 0:min(k, q+1)
+            t1 += binomial(k, j)*Q[q+2-j, j+1]*N[r-j]
+        end
+        if k ≤ q+1
+            t1 += Q[q+2-k, k+1]
+        end
+        t2 = zero(T)
+        t2 += P[p+1, 1]*N[r]
+        for j in 1:min(k, p)
+            t2 += binomial(k, j)*P[p+1-j, j+1]*(N[r-j+1]+N[r-j])
+        end
+        N[r+1] = (ζ*t1-t2)/P[p+1, 1]
+        t1 = zero(T)
+        for j in 0:min(k, q+1)
+            t1 += binomial(k, j)*Q[q+2-j, j+1]*D[r-j]
+        end
+        t2 = zero(T)
+        t2 += P[p+1, 1]*D[r]
+        for j in 1:min(k, p)
+            t2 += binomial(k, j)*P[p+1-j, j+1]*(D[r-j+1]+D[r-j])
+        end
+        D[r+1] = (ζ*t1-t2)/P[p+1, 1]
+        R[r+1] = N[r+1]/D[r+1]
+        update_P!(P, α, k+1)
+        update_Q!(Q, β, k+1)
+        k += 1
+    end
+    return isfinite(R[r+1]) ? R[r+1] : R[r]
+end
+
+function finite_differences_P(::Type{T}, α::AbstractVector{T1}) where {T, T1}
+    p = length(α)
+    P = zeros(T, p+1, p+1)
+    t = one(T)
+    for k in 1:p
+        t *= α[k]+1
+    end
+    P[p+1, 1] = t
+    return P
+end
+
+function update_P!(P::Matrix{T}, α::AbstractVector{T1}, k::Int) where {T, T1}
+    p = length(α)
+    @assert size(P, 1) == size(P, 2) == p+1
+    # Pop the first row
+    for j in 1:p
+        for i in 1:p+1-j
+            P[i, j] = P[i+1, j]
+        end
+    end
+    # Add p[k]
+    t = one(T)
+    for j in 1:p
+        t *= α[j]+k+1
+    end
+    P[p+1, 1] = t
+    # Do p-1 finite differences
+    for j in 2:p+1
+        P[p+2-j, j] = P[p+3-j, j-1] - P[p+2-j, j-1]
+    end
+    return P
+end
+
+function finite_differences_Q(::Type{T}, β::AbstractVector{T2}) where {T, T2}
+    q = length(β)
+    Q = zeros(T, q+2, q+2)
+    t = one(T)
+    for k in 1:q
+        t *= β[k]+1
+    end
+    Q[q+2, 1] = 2t
+    return Q
+end
+
+function update_Q!(Q::Matrix{T}, β::AbstractVector{T1}, k::Int) where {T, T1}
+    q = length(β)
+    @assert size(Q, 1) == size(Q, 2) == q+2
+    # Pop the first row
+    for j in 1:q+1
+        for i in 1:q+2-j
+            Q[i, j] = Q[i+1, j]
+        end
+    end
+    # Add q[k]
+    t = one(T)
+    for j in 1:q
+        t *= β[j]+k+1
+    end
+    Q[q+2, 1] = t*(k+2)
+    # Do q finite differences
+    for j in 2:q+2
+        Q[q+3-j, j] = Q[q+4-j, j-1] - Q[q+3-j, j-1]
+    end
+    return Q
+end

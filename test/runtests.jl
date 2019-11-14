@@ -4,7 +4,7 @@ import HypergeometricFunctions: _₂F₁general # not exported
 
 import HypergeometricFunctions: drummond0F0, drummond1F0, drummond0F1,
                                 drummond2F0, drummond1F1, drummond0F2,
-                                drummond2F1
+                                drummond2F1, drummondpFq
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -273,6 +273,7 @@ end
         atol = rtol = 1000eps(S)
         for z in S(-4):S(0.25):S(4)
             @test drummond0F0(z) ≈ S(mFn(T[], T[], T(z))) atol=atol rtol=rtol
+            @test drummondpFq(S[], S[], z) ≈ S(mFn(T[], T[], T(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -284,6 +285,7 @@ end
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.25)
             @test drummond1F0(α, z) ≈ S(mFn(T[α], T[], T(z))) atol=atol rtol=rtol
+            @test drummondpFq(S[α], S[], z) ≈ S(mFn(T[α], T[], T(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -295,6 +297,7 @@ end
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
             @test drummond0F1(α, z) ≈ S(mFn(T[], T[α], T(z))) atol=atol rtol=rtol
+            @test drummondpFq(S[], S[α], z) ≈ S(mFn(T[], T[α], T(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -306,6 +309,7 @@ end
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-1.0):S(0.25):S(0.0)
             @test drummond2F0(α, β, z) ≈ S(drummond2F0(T(α), T(β), T(z))) atol=atol rtol=rtol
+            @test drummondpFq(S[α, β], S[], z) ≈ S(drummondpFq(T[α, β], T[], T(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -317,6 +321,7 @@ end
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
             @test drummond1F1(α, β, z) ≈ S(mFn(T[α], T[β], T(z))) atol=atol rtol=rtol
+            @test drummondpFq(S[α], S[β], z) ≈ S(mFn(T[α], T[β], T(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -328,6 +333,7 @@ end
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
             @test drummond0F2(α, β, z) ≈ S(mFn(T[], T[α, β], T(z))) atol=atol rtol=rtol
+            @test drummondpFq(S[], S[α, β], z) ≈ S(mFn(T[], T[α, β], T(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -339,6 +345,7 @@ end
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.25)
             @test drummond2F1(α, β, γ, z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
+            @test drummondpFq(S[α, β], S[γ], z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
         end
     end
 end
