@@ -1,4 +1,4 @@
-using HypergeometricFunctions, Test
+using HypergeometricFunctions, IntervalArithmetic, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: _₂F₁general # not exported
 
@@ -346,6 +346,20 @@ end
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.25)
             @test drummond2F1(α, β, γ, z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
             @test drummondpFq(S[α, β], S[γ], z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
+        end
+    end
+end
+
+@testset "Drummond ₂F₁ with interval arithmetic" begin
+    for (S, IS, T, IT) in ((Float32, Interval{Float32}, Float64, Interval{Float64}),
+                   (Float64, Interval{Float64}, BigFloat, Interval{BigFloat}),
+                   (BigFloat, Interval{BigFloat}, BigFloat, Interval{BigFloat}))
+        atol = rtol = sqrt(eps(S))
+        α = S(0.125)
+        β = S(0.25)
+        γ = S(0.5)
+        for z in S(-0.75):S(0.25):S(0.25)
+            @test drummondpFq(IS[α, β], IS[γ], IS(z)) ≈ IS(mFn(IT[α, β], IT[γ], IT(z))) atol=atol rtol=rtol
         end
     end
 end
