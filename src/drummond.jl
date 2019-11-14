@@ -248,6 +248,8 @@ function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) wher
     r = max(p+1, q+2)
     P = finite_differences_P(T, α)
     Q = finite_differences_Q(T, β)
+    C = zeros(T, r)
+    C[1] = one(T)
     N = zeros(T, r+1)
     D = zeros(T, r+1)
     R = zeros(T, r+1)
@@ -263,7 +265,7 @@ function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) wher
         end
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += binomial(k, j)*Q[q+2-j, j+1]*N[r-j]
+            t1 += C[j+1]*Q[q+2-j, j+1]*N[r-j]
         end
         if k ≤ q+1
             t1 += Q[q+2-k, k+1]
@@ -271,23 +273,26 @@ function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) wher
         t2 = zero(T)
         t2 += P[p+1, 1]*N[r]
         for j in 1:min(k, p)
-            t2 += binomial(k, j)*P[p+1-j, j+1]*(N[r-j+1]+N[r-j])
+            t2 += C[j+1]*P[p+1-j, j+1]*(N[r-j+1]+N[r-j])
         end
         N[r+1] = (ζ*t1-t2)/P[p+1, 1]
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += binomial(k, j)*Q[q+2-j, j+1]*D[r-j]
+            t1 += C[j+1]*Q[q+2-j, j+1]*D[r-j]
         end
         t2 = zero(T)
         t2 += P[p+1, 1]*D[r]
         for j in 1:min(k, p)
-            t2 += binomial(k, j)*P[p+1-j, j+1]*(D[r-j+1]+D[r-j])
+            t2 += C[j+1]*P[p+1-j, j+1]*(D[r-j+1]+D[r-j])
         end
         D[r+1] = (ζ*t1-t2)/P[p+1, 1]
         R[r+1] = N[r+1]/D[r+1]
-        update_P!(P, α, k+1)
-        update_Q!(Q, β, k+1)
         k += 1
+        update_P!(P, α, k)
+        update_Q!(Q, β, k)
+        for j in min(k, max(p, q+1)):-1:1
+            C[j+1] = C[j+1] + C[j]
+        end
     end
     return isfinite(R[r+1]) ? R[r+1] : R[r]
 end
@@ -318,7 +323,7 @@ function update_P!(P::Matrix{T}, α::AbstractVector{T1}, k::Int) where {T, T1}
         t *= α[j]+k+1
     end
     P[p+1, 1] = t
-    # Do p-1 finite differences
+    # Do p finite differences
     for j in 2:p+1
         P[p+2-j, j] = P[p+3-j, j-1] - P[p+2-j, j-1]
     end
@@ -351,7 +356,7 @@ function update_Q!(Q::Matrix{T}, β::AbstractVector{T1}, k::Int) where {T, T1}
         t *= β[j]+k+1
     end
     Q[q+2, 1] = t*(k+2)
-    # Do q finite differences
+    # Do q+1 finite differences
     for j in 2:q+2
         Q[q+3-j, j] = Q[q+4-j, j-1] - Q[q+3-j, j-1]
     end
