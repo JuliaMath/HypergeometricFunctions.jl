@@ -9,8 +9,9 @@ using DualNumbers, LinearAlgebra, SpecialFunctions
 
 export _₂F₁, _₃F₂, mFn
 
-include("Gauss.jl")
+include("gauss.jl")
 include("specialfunctions.jl")
 include("drummond.jl")
+include("weniger.jl")
 
 end #module
