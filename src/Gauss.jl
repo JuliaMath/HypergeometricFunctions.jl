@@ -121,7 +121,7 @@ function _₂F₁general2(a, b, c, z)
       gamma(c)*((-w)^a*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, a-c+1, a-b+1, w)+(-w)^b*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, b-c+1, b-a+1, w))
     else
       # TODO: full 15.8.8
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(inv(1-z)) ≤ ρ && absarg(-z) < convert(real(T), π)
     w = inv(1-z)
@@ -131,7 +131,7 @@ function _₂F₁general2(a, b, c, z)
       gamma(c)*(exp(-a*log1p(-z))*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, c-b, a-b+1, w)+exp(-b*log1p(-z))*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, c-a, b-a+1, w))
     else
       # TODO: full 15.8.9
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(1-z) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
     w = 1-z
@@ -141,7 +141,7 @@ function _₂F₁general2(a, b, c, z)
       gamma(c)*(gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, b, a+b-c+1, w)+exp((c-a-b)*log1p(-z))*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, c-b, c-a-b+1, w))
     else
       # TODO: full 15.8.10
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(1-inv(z)) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
     w = 1-inv(z)
@@ -151,7 +151,7 @@ function _₂F₁general2(a, b, c, z)
       gamma(c)*(z^(-a)*gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, a-c+1, a+b-c+1, w)+z^(a-c)*(1-z)^(c-a-b)*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, 1-a, c-a-b+1, w))
     else
       # TODO: full 15.8.11
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(z-0.5) > 0.5
     if isapprox(a, b) && !isapprox(c, a+0.5)
@@ -159,7 +159,7 @@ function _₂F₁general2(a, b, c, z)
     elseif a-b ∉ ℤ
       gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z))
     else
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   else
     throw(DomainError())
@@ -173,7 +173,7 @@ function _₃F₂(a₁, a₂, a₃, b₁, b₂, z)
   if abs(z) ≤ ρ
     _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
   else
-    mFncontinuedfraction([a₁, a₂, a₃], [b₁, b₂], z)
+    wenigerpFq([a₁, a₂, a₃], [b₁, b₂], z)
   end
 end
 _₃F₂(a₁, b₁, z) = _₃F₂(1, 1, a₁, 2, b₁, z)
@@ -185,7 +185,7 @@ function mFn(a::AbstractVector, b::AbstractVector, z)
     if abs(z) ≤ ρ || length(a) ≤ length(b)
         mFnmaclaurin(a, b, z)
     else
-        mFncontinuedfraction(a, b, z)
+        wenigerpFq(a, b, z)
     end
 end
 
