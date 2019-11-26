@@ -4,7 +4,7 @@ reverseorientation(x::Number) = x
 """
 Compute the Gauss hypergeometric function `₂F₁(a, b;c;z)`.
 """
-function _₂F₁(a::Number, b::Number, c::Number, z::Number)
+function _₂F₁(a, b, c, z)
   if real(a) > real(b)
     return _₂F₁(b, a, c, z) # ensure a ≤ b
   elseif isequal(a, c) # 1. 15.4.6
@@ -77,7 +77,7 @@ This polyalgorithm is designed based on the paper
 
 N. Michel and M. V. Stoitsov, Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions, Comp. Phys. Commun., 178:535–551, 2008.
 """
-function _₂F₁general(a::Number, b::Number, c::Number, z::Number)
+function _₂F₁general(a, b, c, z)
   T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
 
   real(b) < real(a) && return _₂F₁general(b, a, c, z)
@@ -106,7 +106,7 @@ This polyalgorithm is designed based on the review
 
 J. W. Pearson, S. Olver and M. A. Porter, Numerical methos for the computation of the confluent and Gauss hypergeometric functions, arXiv:1407.7786, 2014.
 """
-function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
+function _₂F₁general2(a, b, c, z)
   T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
   if abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
     _₂F₁maclaurin(a, b, c, z)
@@ -121,7 +121,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
       gamma(c)*((-w)^a*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, a-c+1, a-b+1, w)+(-w)^b*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, b-c+1, b-a+1, w))
     else
       # TODO: full 15.8.8
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(inv(1-z)) ≤ ρ && absarg(-z) < convert(real(T), π)
     w = inv(1-z)
@@ -131,7 +131,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
       gamma(c)*(exp(-a*log1p(-z))*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, c-b, a-b+1, w)+exp(-b*log1p(-z))*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, c-a, b-a+1, w))
     else
       # TODO: full 15.8.9
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(1-z) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
     w = 1-z
@@ -141,7 +141,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
       gamma(c)*(gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, b, a+b-c+1, w)+exp((c-a-b)*log1p(-z))*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, c-b, c-a-b+1, w))
     else
       # TODO: full 15.8.10
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(1-inv(z)) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
     w = 1-inv(z)
@@ -151,7 +151,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
       gamma(c)*(z^(-a)*gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, a-c+1, a+b-c+1, w)+z^(a-c)*(1-z)^(c-a-b)*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, 1-a, c-a-b+1, w))
     else
       # TODO: full 15.8.11
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   elseif abs(z-0.5) > 0.5
     if isapprox(a, b) && !isapprox(c, a+0.5)
@@ -159,7 +159,7 @@ function _₂F₁general2(a::Number, b::Number, c::Number, z::Number)
     elseif a-b ∉ ℤ
       gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z))
     else
-      mFncontinuedfraction([a, b], [c], z)
+      wenigerpFq([a, b], [c], z)
     end
   else
     throw(DomainError())
@@ -169,42 +169,31 @@ end
 """
 Compute the generalized hypergeometric function `₃F₂(a₁, a₂, a₃;b₁, b₂;z)` with the Maclaurin series.
 """
-function _₃F₂(a₁::Number, a₂::Number, a₃::Number, b₁::Number, b₂::Number, z::Number)
+function _₃F₂(a₁, a₂, a₃, b₁, b₂, z)
   if abs(z) ≤ ρ
     _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
   else
-    mFncontinuedfraction([a₁, a₂, a₃], [b₁, b₂], z)
+    wenigerpFq([a₁, a₂, a₃], [b₁, b₂], z)
   end
 end
-function _₃F₂(a₁::Number, a₂::Number, a₃::Number, b₁::Number,
-              b₂::Number, z::AbstractArray)
-  reshape(promote_type(typeof(a₁), typeof(a₂), typeof(a₃), typeof(b₁), typeof(b₂),
-    eltype(z))[_₃F₂(a₁, a₂, a₃, b₁, b₂, z[i]) for i in eachindex(z)], size(z))
-end
-_₃F₂(a₁::Number, b₁::Number, z) = _₃F₂(1, 1, a₁, 2, b₁, z)
+_₃F₂(a₁, b₁, z) = _₃F₂(1, 1, a₁, 2, b₁, z)
 
 """
 Compute the generalized hypergeometric function `mFn(a;b;z)` with the Maclaurin series.
 """
-function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::Number
-            ) where {S<:Number, V<:Number}
-  if abs(z) ≤ ρ || length(a) ≤ length(b)
-    mFnmaclaurin(a, b, z)
-  else
-    mFncontinuedfraction(a, b, z)
-  end
-end
-function mFn(a::AbstractVector{S}, b::AbstractVector{V}, z::AbstractArray
-            ) where {S<:Number, V<:Number}
-  reshape(promote_type(S, V, eltype(z))[mFn(a, b, z[i]) for i in eachindex(z)], size(z))
+function mFn(a::AbstractVector, b::AbstractVector, z)
+    if abs(z) ≤ ρ || length(a) ≤ length(b)
+        mFnmaclaurin(a, b, z)
+    else
+        wenigerpFq(a, b, z)
+    end
 end
 
 """
 computation of the generalized hypergeometric function `mFn(a;b;z) by continued
 fraction`
 """
-function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U},
-    z::V) where {S<:Number, U<:Number, V<:Number}
+function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U}, z::V) where {S, U, V}
   T = promote_type(S, U, V)
   numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1)
   denominator(i) = 1 - numerator(i)

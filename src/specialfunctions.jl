@@ -5,28 +5,31 @@ import SpecialFunctions: gamma, digamma, factorial
 """
 Pochhammer symbol ``(x)_n = \\frac{\\Gamma(x+n)}{\\Gamma(x)}`` for the rising factorial.
 """
-function pochhammer(x::Number,n::Integer)
-    ret = one(x)
-    if n≥0
-        for i=0:n-1
+function pochhammer(x::T, n::Integer) where T
+    S = typeof(zero(T)/one(T))
+    ret = one(S)
+    if n ≥ 0
+        for i = 0:n-1
             ret *= x+i
         end
     else
-        ret /= pochhammer(x+n,-n)
+        ret /= pochhammer(x+n, -n)
     end
     ret
 end
 
-pochhammer(x::Number,n::Number) = isinteger(n) ? pochhammer(x,Int(n)) : ogamma(x)/ogamma(x+n)
+pochhammer(x::T, n::Number) where T = isinteger(n) ? pochhammer(x, Int(n)) : ogamma(x)/ogamma(x+n)
 
-function pochhammer(x::Number,n::UnitRange{T}) where T<:Real
-    ret = Vector{promote_type(typeof(x),T)}(length(n))
-    ret[1] = pochhammer(x,first(n))
-    for i=2:length(n)
+function pochhammer(x::Number, n::UnitRange{T}) where T <: Real
+    ret = Vector{promote_type(typeof(x),T)}(undef, length(n))
+    ret[1] = pochhammer(x, first(n))
+    for i = 2:length(n)
         ret[i] = (x+n[i]-1)*ret[i-1]
     end
     ret
 end
+
+ogamma(x::Number) = (isinteger(x) && x<0) ? zero(float(x)) : inv(gamma(x))
 
 macro clenshaw(x, c...)
     a, b = :(zero(t)), :(zero(t))
@@ -443,7 +446,7 @@ function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
   return S₁
 end
 
-function _₃F₂maclaurin(a₁::Number, a₂::Number, a₃::Number, b₁::Number, b₂::Number, z::Number)
+function _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
   T = promote_type(typeof(a₁), typeof(a₂), typeof(a₃), typeof(b₁), typeof(b₂), typeof(z))
   S₀, S₁, err, j = one(T), one(T)+(a₁*a₂*a₃*z)/(b₁*b₂), one(real(T)), 1
   while err > 100eps(real(T))
@@ -455,8 +458,8 @@ function _₃F₂maclaurin(a₁::Number, a₂::Number, a₃::Number, b₁::Numbe
   return S₁
 end
 
-function mFnmaclaurin(a::AbstractVector{S}, b::AbstractVector{V}, z::Number) where {S<:Number, V<:Number}
-  T = promote_type(S, V, typeof(z))
+function mFnmaclaurin(a::AbstractVector{S}, b::AbstractVector{U}, z::V) where {S, U, V}
+  T = promote_type(S, U, V)
   S₀, S₁, err, j = one(T), one(T)+prod(a)*z/prod(b), one(real(T)), 1
   while err > 100eps(real(T))
     rⱼ = inv(j+one(T))
@@ -503,7 +506,7 @@ function continuedfraction(v::V, u::U, rtol::T
     isapprox(a, b, rtol=rtol) && return b
     n *= 4
   end
-  error("No convergence of generlised hypergeometric function")
+  error("No convergence of generalized hypergeometric function")
 end
 function continuedfraction(v::V, u::U, n::Int, m::Int
     ) where {V<:Function, U<:Function}
