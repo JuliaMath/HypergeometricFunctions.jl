@@ -4,3 +4,5 @@
 
 # HypergeometricFunctions.jl
 A Julia package for calculating hypergeometric functions
+
+This package implements some hypergeometric functions. In particular, the Gauss hypergeometric function is available as `_₂F₁(a,b,c,z)`, and also `_₃F₂([a1, a2, a3], [b1,b2], z)` and more general `mFn([a1,…,am], [b1,…,bn], z)`.
