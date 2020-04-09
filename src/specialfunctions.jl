@@ -499,13 +499,15 @@ rtoldefault(x::Union{T, Type{T}}, y::Union{S, Type{S}}) where {T<:Number, S<:Num
 function continuedfraction(v::V, u::U, rtol::T
     ) where {V<:Function, U<:Function, T<:Number}
   n = 4
-  a, b = continuedfraction(v, u, n, n + 1)
-  isapprox(a, b, rtol=rtol) && return b
+  a, b = continuedfraction(v, u, n, 2n)
+  n *= 2
   while n <= 2^16
-    a, b = continuedfraction(v, u, n, n + 1)
     isapprox(a, b, rtol=rtol) && return b
-    n *= 4
+    n *= 2
+    a = deepcopy(b)
+    b = continuedfraction(v, u, n)
   end
+  isapprox(a, b, rtol=rtol) && return b
   error("No convergence of generalized hypergeometric function")
 end
 function continuedfraction(v::V, u::U, n::Int, m::Int
@@ -525,4 +527,11 @@ function continuedfraction(v::V, u::U, n::Int, m::Int
   end
   vi = v(0)
   return vi + output_n, vi + output_m
+end
+function continuedfraction(v::V, u::U, n::Int) where {V<:Function, U<:Function}
+  output = u(n) / v(n)
+  for i ∈ reverse(1:n-1)
+    output = u(i) / (v(i) + output)
+  end
+  return v(0) + output
 end
