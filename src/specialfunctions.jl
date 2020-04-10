@@ -508,7 +508,7 @@ function continuedfraction(v::V, u::U, rtol::T
     b = continuedfraction(v, u, n)
   end
   isapprox(a, b, rtol=rtol) && return b
-  error("No convergence of generalized hypergeometric function")
+  error("Convergence failure for continued fraction for hypergeometric function")
 end
 function continuedfraction(v::V, u::U, n::Int, m::Int
     ) where {V<:Function, U<:Function}
