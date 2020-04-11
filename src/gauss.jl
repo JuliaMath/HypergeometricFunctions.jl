@@ -198,6 +198,6 @@ function mFncontinuedfraction(a::AbstractVector{S}, b::AbstractVector{U}, z::V) 
   numerator(i) = - z * prod(i .+ a) / prod(i .+ b) / (i + 1)
   denominator(i) = 1 - numerator(i)
   K = continuedfraction(denominator, numerator, 10eps(real(T))) - denominator(0)
-  iszero(K + 1) && error("Non convergence of continued fraction; inputs $a, $b, $z")
+  # iszero(K + 1) leads to Inf, when e.g. Float64s run out of digits
   return 1 + z * prod(a) / prod(b) / (1 + K)
 end

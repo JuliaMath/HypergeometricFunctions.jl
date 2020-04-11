@@ -193,6 +193,7 @@ const NumberType = Float64
     @test mFn(a, b, c) ≈ result atol=eps() rtol=rtol
     (a, b, c, result) = NumberType.([2.36231, -0.901808, 1.00893]), NumberType.([1.39985, -2.34968]), NumberType(0.970806084927347), 42731.87930657499
     @test_broken mFn(a, b, c) ≈ result atol=eps() rtol=rtol
+    @test HypergeometricFunctions.mFncontinuedfraction(a, b, c) ≈ result atol=eps() rtol=rtol
     (a, b, c, result) = NumberType.([-0.715302, 2.94101, -0.498188]), NumberType.([-0.393808, -0.0265878]), NumberType(0.4375358657735875), 61.68955383799459
     @test mFn(a, b, c) ≈ result atol=eps() rtol=rtol
     (a, b, c, result) = NumberType.([-1.14105, 1.9464, -2.44787]), NumberType.([0.54636, -0.654353]), NumberType(-2.9505198429994763), -53.189709409599516
