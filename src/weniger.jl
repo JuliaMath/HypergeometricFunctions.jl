@@ -5,7 +5,8 @@
 # γ ∉ ℕ
 function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where {T1, T2, T3}
     T = promote_type(T1, T2, T3)
-    if norm(z) < eps(real(T)) || norm(prod(α)) < eps(real(T))
+    absα = T.(abs.(α))
+    if norm(z) < eps(real(T)) || norm(prod(α)) < eps(prod(absα))
         return one(T)
     end
     γ = T(3)/2
@@ -28,11 +29,15 @@ function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where
     C3[ρ+1] = one(T)/pochhammer(γ-ρ-1, ρ+2)
     C3[ρ+2] = one(T)/pochhammer(γ-ρ, ρ+2)
     P = zeros(T, p+2)
-    t = one(T)
+    t = γ
     for j in 1:p
         t *= α[j]+1
     end
-    P[1] = γ*t
+    P[1] = t
+    err = abs(γ)
+    for j in 1:p
+        err *= absα[j]+1
+    end
     Q = zeros(T, q+2)
     t = one(T)
     for j in 1:q
@@ -87,12 +92,7 @@ function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where
         for j in 1:min(k, p+1)
             t2 += C[j+1]*P[j+1]*(ΔNold[r+2-j] + ΔNold[r+1-j])
         end
-        N[r+1] = (ζ*t1-t2)/(P[1]/pochhammer(γ+2k-ρ-1, ρ+2))
-        s1 = zero(T)
-        for s in max(0,ρ-k):ρ+1
-            s1 += Cρ[s+1]*C3[s+1]*(γ+2k-2ρ+2s-1)*N[r-ρ+s]
-        end
-        ΔN[r+1] = s1
+        N[r+1] = ζ*t1-t2
         t1 = zero(T)
         for j in 0:min(k, q+1)
             t1 += C[j+1]*Q[j+1]*ΔD[r-j]
@@ -112,13 +112,23 @@ function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where
         for j in 1:min(k, p+1)
             t2 += C[j+1]*P[j+1]*(ΔDold[r+2-j] + ΔDold[r+1-j])
         end
-        D[r+1] = (ζ*t1-t2)/(P[1]/pochhammer(γ+2k-ρ-1, ρ+2))
+        D[r+1] = ζ*t1-t2
+        if norm(P[1]) < eps(err)
+            return N[r+1]/D[r+1]
+        end
+        N[r+1] /= P[1]/pochhammer(γ+2k-ρ-1, ρ+2)
+        D[r+1] /= P[1]/pochhammer(γ+2k-ρ-1, ρ+2)
+        R[r+1] = N[r+1]/D[r+1]
+        s1 = zero(T)
+        for s in max(0,ρ-k):ρ+1
+            s1 += Cρ[s+1]*C3[s+1]*(γ+2k-2ρ+2s-1)*N[r-ρ+s]
+        end
+        ΔN[r+1] = s1
         s1 = zero(T)
         for s in max(0,ρ-k):ρ+1
             s1 += Cρ[s+1]*C3[s+1]*(γ+2k-2ρ+2s-1)*D[r-ρ+s]
         end
         ΔD[r+1] = s1
-        R[r+1] = N[r+1]/D[r+1]
         k += 1
         for j in min(k, p+1):-1:0
             ΔNold[r-j] = (γ+2k-ρ-j-4)*ΔNold[r-j+1] + (k-j-1)*ΔNold[r-j]
@@ -159,11 +169,14 @@ function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where
                 C3[s+1] *= (k+one(T))/(k-ρ+s)*(γ+2k-2ρ+s-3)/(γ+2k-ρ+s-1)*(γ+2k-2ρ+s-2)/(γ+2k-ρ+s)
             end
         end
-        t = one(T)
+        t = γ+k
         for j in 1:p
             t *= α[j]+k+1
         end
-        t *= k+γ
+        err = abs(γ)+k
+        for j in 1:p
+            err *= absα[j]+k+1
+        end
         for j in 2:p+2
             s = t - P[j-1]
             P[j-1] = t

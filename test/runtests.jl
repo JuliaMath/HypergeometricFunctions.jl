@@ -285,7 +285,7 @@ end
                    (Float64, BigFloat),
                    (BigFloat, BigFloat))
         atol = rtol = 1000eps(S)
-        for α in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.25)
+        for α in S(-1.5):S(0.5):S(1.5), z in S(-0.75):S(0.25):S(0.25)
             @test drummond1F0(α, z) ≈ S(mFn(T[α], T[], T(z))) atol=atol rtol=rtol
             @test drummondpFq(S[α], S[], z) ≈ S(mFn(T[α], T[], T(z))) atol=atol rtol=rtol
             @test wenigerpFq(S[α], S[], z) ≈ S(mFn(T[α], T[], T(z))) atol=atol rtol=rtol
@@ -324,7 +324,7 @@ end
                    (Float64, BigFloat),
                    (BigFloat, BigFloat))
         atol = rtol = 1000eps(S)
-        for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
+        for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
             @test drummond1F1(α, β, z) ≈ S(mFn(T[α], T[β], T(z))) atol=atol rtol=rtol
             @test drummondpFq(S[α], S[β], z) ≈ S(mFn(T[α], T[β], T(z))) atol=atol rtol=rtol
             @test wenigerpFq(S[α], S[β], z) ≈ S(mFn(T[α], T[β], T(z))) atol=atol rtol=rtol
@@ -350,7 +350,7 @@ end
                    (Float64, BigFloat),
                    (BigFloat, BigFloat))
         atol = rtol = 1000eps(S)
-        for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.625):S(0.25):S(0.125)
+        for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(0.5):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.625):S(0.25):S(0.125)
             @test drummond2F1(α, β, γ, z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
             @test drummondpFq(S[α, β], S[γ], z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
             @test wenigerpFq(S[α, β], S[γ], z) ≈ S(mFn(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
