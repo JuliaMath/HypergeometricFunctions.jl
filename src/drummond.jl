@@ -2,7 +2,7 @@
 # using Drummond's sequence transformation
 
 # ₀F₀(;z)
-function drummond0F0(z::T) where T
+function drummond0F0(z::T; kmax::Int = 10_000) where T
     if norm(z) < eps(real(T))
         return one(T)
     end
@@ -18,7 +18,7 @@ function drummond0F0(z::T) where T
     Dhi, Dlo = ((k+2)*ζ-1)*Dhi + k*ζ*Dlo, Dhi
     Thi, Tlo = Nhi/Dhi, Thi
     k += 1
-    while abs(Thi-Tlo) > 10*abs(Thi)*eps(real(T)) && k < 10_000
+    while k < kmax && errcheck(Tlo, Thi, 10eps(real(T)))
         Nhi, Nlo = ((k+2)*ζ-1)*Nhi + k*ζ*Nlo, Nhi
         Dhi, Dlo = ((k+2)*ζ-1)*Dhi + k*ζ*Dlo, Dhi
         Thi, Tlo = Nhi/Dhi, Thi
@@ -28,9 +28,9 @@ function drummond0F0(z::T) where T
 end
 
 # ₁F₀(α;z)
-function drummond1F0(α::T1, z::T2) where {T1, T2}
+function drummond1F0(α::T1, z::T2; kmax::Int = 10_000) where {T1, T2}
     T = promote_type(T1, T2)
-    absα = T(abs(α))
+    absα = abs(T(α))
     if norm(z) < eps(real(T)) || norm(α) < eps(absα)
         return one(T)
     end
@@ -56,7 +56,7 @@ function drummond1F0(α::T1, z::T2) where {T1, T2}
     Nhi /= α+k+1
     Dhi /= α+k+1
     k += 1
-    while abs(Thi-Tlo) > 10*abs(Thi)*eps(real(T)) && k < 10_000
+    while k < kmax && errcheck(Tlo, Thi, 10eps(real(T)))
         Nhi, Nlo = ((k+2)*ζ-(α+2k+1))*Nhi + k*(ζ-1)*Nlo, Nhi
         Dhi, Dlo = ((k+2)*ζ-(α+2k+1))*Dhi + k*(ζ-1)*Dlo, Dhi
         Thi, Tlo = Nhi/Dhi, Thi
@@ -71,7 +71,7 @@ function drummond1F0(α::T1, z::T2) where {T1, T2}
 end
 
 # ₀F₁(β;z)
-function drummond0F1(β::T1, z::T2) where {T1, T2}
+function drummond0F1(β::T1, z::T2; kmax::Int = 10_000) where {T1, T2}
     T = promote_type(T1, T2)
     if norm(z) < eps(real(T))
         return one(T)
@@ -91,7 +91,7 @@ function drummond0F1(β::T1, z::T2) where {T1, T2}
     Dhi, Dmid, Dlo = ((β+k+1)*(k+2)*ζ-1)*Dhi + k*(β+2k+2)*ζ*Dmid + k*(k-1)*ζ*Dlo, Dhi, Dmid
     Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
     k += 1
-    while abs(Thi-Tmid) > 10*abs(Thi)*eps(real(T)) && abs(Tmid-Tlo) > 10*abs(Tmid)*eps(real(T)) && k < 10_000
+    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
         Nhi, Nmid, Nlo = ((β+k+1)*(k+2)*ζ-1)*Nhi + k*(β+2k+2)*ζ*Nmid + k*(k-1)*ζ*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((β+k+1)*(k+2)*ζ-1)*Dhi + k*(β+2k+2)*ζ*Dmid + k*(k-1)*ζ*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -101,10 +101,10 @@ function drummond0F1(β::T1, z::T2) where {T1, T2}
 end
 
 # ₂F₀(α,β;z)
-function drummond2F0(α::T1, β::T2, z::T3) where {T1, T2, T3}
+function drummond2F0(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
     T = promote_type(T1, T2, T3)
-    absα = T(abs(α))
-    absβ = T(abs(β))
+    absα = abs(T(α))
+    absβ = abs(T(β))
     if norm(z) < eps(real(T)) || norm(α*β) < eps(absα*absβ)
         return one(T)
     end
@@ -129,7 +129,7 @@ function drummond2F0(α::T1, β::T2, z::T3) where {T1, T2, T3}
     Nhi /= (α+2)*(β+2)
     Dhi /= (α+2)*(β+2)
     k = 2
-    while abs(Thi-Tmid) > 10*abs(Thi)*eps(real(T)) && abs(Tmid-Tlo) > 10*abs(Tmid)*eps(real(T)) && k < 10_000
+    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
         Nhi, Nmid, Nlo = ((k+2)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Nhi - k*(α+β+3k-ζ)*Nmid - k*(k-1)*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((k+2)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Dhi - k*(α+β+3k-ζ)*Dmid - k*(k-1)*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -144,9 +144,9 @@ function drummond2F0(α::T1, β::T2, z::T3) where {T1, T2, T3}
 end
 
 # ₁F₁(α,β;z)
-function drummond1F1(α::T1, β::T2, z::T3) where {T1, T2, T3}
+function drummond1F1(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
     T = promote_type(T1, T2, T3)
-    absα = T(abs(α))
+    absα = abs(T(α))
     if norm(z) < eps(real(T)) || norm(α) < eps(absα)
         return one(T)
     end
@@ -180,7 +180,7 @@ function drummond1F1(α::T1, β::T2, z::T3) where {T1, T2, T3}
     Nhi /= α+k+1
     Dhi /= α+k+1
     k += 1
-    while abs(Thi-Tmid) > 10*abs(Thi)*eps(real(T)) && abs(Tmid-Tlo) > 10*abs(Tmid)*eps(real(T)) && k < 10_000
+    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
         Nhi, Nmid, Nlo = ((β+k+1)*(k+2)*ζ-(α+2k+1))*Nhi + k*((β+2k+2)*ζ-1)*Nmid + k*(k-1)*ζ*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((β+k+1)*(k+2)*ζ-(α+2k+1))*Dhi + k*((β+2k+2)*ζ-1)*Dmid + k*(k-1)*ζ*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -195,7 +195,7 @@ function drummond1F1(α::T1, β::T2, z::T3) where {T1, T2, T3}
 end
 
 # ₀F₂(α,β;z)
-function drummond0F2(α::T1, β::T2, z::T3) where {T1, T2, T3}
+function drummond0F2(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
     T = promote_type(T1, T2, T3)
     if norm(z) < eps(real(T)) || norm(α) < eps(real(T)) || norm(β) < eps(real(T))
         return one(T)
@@ -221,7 +221,7 @@ function drummond0F2(α::T1, β::T2, z::T3) where {T1, T2, T3}
     Dhi, Dmid1, Dmid2, Dlo = (ζ*(k+2)*(α+k+1)*(β+k+1)-1)*Dhi + ζ*k*((k+1)*(α+β+2k)+(α+k)*(β+k)+α+β+3k+2)*Dmid1 + ζ*k*(k-1)*(3k+α+β+1)*Dmid2 + ζ*k*(k-1)*(k-2)*Dlo, Dhi, Dmid1, Dmid2
     Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
     k += 1
-    while abs(Thi-Tmid1) > 10*abs(Thi)*eps(real(T)) && abs(Tmid1-Tmid2) > 10*abs(Tmid1)*eps(real(T)) && abs(Tmid2-Tlo) > 10*abs(Tmid2)*eps(real(T)) && k < 10_000
+    while k < kmax && errcheck(Tmid1, Thi, 10eps(real(T)))
         Nhi, Nmid1, Nmid2, Nlo = (ζ*(k+2)*(α+k+1)*(β+k+1)-1)*Nhi + ζ*k*((k+1)*(α+β+2k)+(α+k)*(β+k)+α+β+3k+2)*Nmid1 + ζ*k*(k-1)*(3k+α+β+1)*Nmid2 + ζ*k*(k-1)*(k-2)*Nlo, Nhi, Nmid1, Nmid2
         Dhi, Dmid1, Dmid2, Dlo = (ζ*(k+2)*(α+k+1)*(β+k+1)-1)*Dhi + ζ*k*((k+1)*(α+β+2k)+(α+k)*(β+k)+α+β+3k+2)*Dmid1 + ζ*k*(k-1)*(3k+α+β+1)*Dmid2 + ζ*k*(k-1)*(k-2)*Dlo, Dhi, Dmid1, Dmid2
         Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
@@ -231,10 +231,10 @@ function drummond0F2(α::T1, β::T2, z::T3) where {T1, T2, T3}
 end
 
 # ₂F₁(α,β,γ;z)
-function drummond2F1(α::T1, β::T2, γ::T3, z::T4) where {T1, T2, T3, T4}
+function drummond2F1(α::T1, β::T2, γ::T3, z::T4; kmax::Int = 10_000) where {T1, T2, T3, T4}
     T = promote_type(T1, T2, T3, T4)
-    absα = T(abs(α))
-    absβ = T(abs(β))
+    absα = abs(T(α))
+    absβ = abs(T(β))
     if norm(z) < eps(real(T)) || norm(α*β) < eps(absα*absβ)
         return one(T)
     end
@@ -268,7 +268,7 @@ function drummond2F1(α::T1, β::T2, γ::T3, z::T4) where {T1, T2, T3, T4}
     Nhi /= (α+k+1)*(β+k+1)
     Dhi /= (α+k+1)*(β+k+1)
     k += 1
-    while abs(Thi-Tmid) > 10*abs(Thi)*eps(real(T)) && abs(Tmid-Tlo) > 10*abs(Tmid)*eps(real(T)) && k < 10_000
+    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
         Nhi, Nmid, Nlo = ((k+2)*(γ+k+1)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Nhi + k*((γ+2k+2)*ζ-(α+β+3k))*Nmid + k*(k-1)*(ζ-1)*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((k+2)*(γ+k+1)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Dhi + k*((γ+2k+2)*ζ-(α+β+3k))*Dmid + k*(k-1)*(ζ-1)*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -283,9 +283,9 @@ function drummond2F1(α::T1, β::T2, γ::T3, z::T4) where {T1, T2, T3, T4}
 end
 
 # ₘFₙ(α;β;z)
-function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where {T1, T2, T3}
+function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
     T = promote_type(T1, T2, T3)
-    absα = T.(abs.(α))
+    absα = abs.(T.(α))
     if norm(z) < eps(real(T)) || norm(prod(α)) < eps(prod(absα))
         return one(T)
     end
@@ -295,13 +295,15 @@ function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) wher
     r = max(p+1, q+2)
     C = zeros(T, r)
     C[1] = one(T)
+    Ĉ = zeros(T, r)
+    Ĉ[1] = one(T)
     P = zeros(T, p+1)
     t = one(T)
     for j in 1:p
         t *= α[j]+1
     end
     P[1] = t
-    err = one(T)
+    err = one(real(T))
     for j in 1:p
         err *= absα[j]+1
     end
@@ -318,7 +320,7 @@ function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) wher
     D[r+1] = prod(β)*ζ/prod(α)
     R[r+1] = N[r+1]/D[r+1]
     k = 0
-    while (abs(R[r+1]-R[r]) > 10*abs(R[r+1])*eps(real(T)) && k < 10_000) || k < r
+    while k < r || (k < kmax && errcheck(R[r], R[r+1], 10eps(real(T))))
         for j in 1:r
             N[j] = N[j+1]
             D[j] = D[j+1]
@@ -326,25 +328,29 @@ function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) wher
         end
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += C[j+1]*Q[j+1]*N[r-j]
+            t1 += Ĉ[j+1]*Q[j+1]*N[r-j]
         end
         if k ≤ q+1
-            t1 += Q[k+1]
+            if p > q
+                t1 += Q[k+1]
+            else
+                t1 += Q[k+1] / T(factorial(k+1))
+            end
         end
         t2 = zero(T)
-        t2 += P[1]*N[r]
+        t2 += Ĉ[1]*P[1]*N[r]
         for j in 1:min(k, p)
-            t2 += C[j+1]*P[j+1]*(N[r-j+1]+N[r-j])
+            t2 += P[j+1]*(C[j+1]*N[r-j+1] + Ĉ[j+1]*N[r-j])
         end
         N[r+1] = ζ*t1-t2
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += C[j+1]*Q[j+1]*D[r-j]
+            t1 += Ĉ[j+1]*Q[j+1]*D[r-j]
         end
         t2 = zero(T)
-        t2 += P[1]*D[r]
+        t2 += Ĉ[1]*P[1]*D[r]
         for j in 1:min(k, p)
-            t2 += C[j+1]*P[j+1]*(D[r-j+1]+D[r-j])
+            t2 += P[j+1]*(C[j+1]*D[r-j+1] + Ĉ[j+1]*D[r-j])
         end
         D[r+1] = ζ*t1-t2
         R[r+1] = N[r+1]/D[r+1]
@@ -354,14 +360,23 @@ function drummondpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) wher
         N[r+1] /= P[1]
         D[r+1] /= P[1]
         k += 1
-        for j in min(k, max(p, q+1)):-1:1
-            C[j+1] += C[j]
+        if p > q
+            for j in min(k, max(p, q+1)):-1:1
+                C[j+1] += C[j]
+                Ĉ[j+1] += Ĉ[j]
+            end
+        else
+            for j in min(k, max(p, q+1)):-1:1
+                C[j+1] = (C[j+1]*(k+1-j) + C[j])/(k+1)
+                Ĉ[j+1] = (Ĉ[j+1]*(k-j) + Ĉ[j])/(k+1)
+            end
+            Ĉ[1] = Ĉ[1]*k/(k+1)
         end
         t = one(T)
         for j in 1:p
             t *= α[j]+k+1
         end
-        err = one(T)
+        err = one(real(T))
         for j in 1:p
             err *= absα[j]+k+1
         end
