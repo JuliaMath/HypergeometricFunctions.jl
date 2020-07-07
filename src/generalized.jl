@@ -9,13 +9,13 @@ function pFq(α::AbstractVector, β::AbstractVector, z; kwds...)
     if length(α) == length(β) == 0
         return exp(z)
     elseif length(α) == 1 && length(β) == 0
-        return (1-z)^-α[1]
+        return exp(-α[1]*log1p(-z))
     elseif length(α) == 2 && length(β) == 1
-        return _₂F₁(α[1], α[2], β[1], z)
+        return _₂F₁(α[1], α[2], β[1], float(z))
     elseif abs(z) ≤ ρ || length(α) ≤ length(β)
-        return pFqmaclaurin(α, β, z; kwds...)
+        return pFqmaclaurin(α, β, float(z); kwds...)
     else
-        return pFqweniger(α, β, z; kwds...)
+        return pFqweniger(α, β, float(z); kwds...)
     end
 end
 
@@ -36,9 +36,9 @@ Compute the generalized hypergeometric function `₃F₂(a₁, a₂, a₃, b₁,
 """
 function _₃F₂(a₁, a₂, a₃, b₁, b₂, z; kwds...)
     if abs(z) ≤ ρ
-        _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z; kwds...)
+        _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, float(z); kwds...)
     else
-        pFqweniger([a₁, a₂, a₃], [b₁, b₂], z; kwds...)
+        pFqweniger([a₁, a₂, a₃], [b₁, b₂], float(z); kwds...)
     end
 end
 _₃F₂(a₁, b₁, z; kwds...) = _₃F₂(1, 1, a₁, 2, b₁, z; kwds...)
