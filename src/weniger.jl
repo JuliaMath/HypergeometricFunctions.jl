@@ -3,9 +3,9 @@
 
 # ₘFₙ(α;β;z)
 # γ ∉ ℕ
-function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where {T1, T2, T3}
+function pFqweniger(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
     T = promote_type(T1, T2, T3)
-    absα = T.(abs.(α))
+    absα = abs.(T.(α))
     if norm(z) < eps(real(T)) || norm(prod(α)) < eps(prod(absα))
         return one(T)
     end
@@ -57,7 +57,7 @@ function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where
     ΔD[r] = D[r+1]/pochhammer(γ-ρ-1, ρ)
     R[r+1] = N[r+1]/D[r+1]
     k = 0
-    while (abs(R[r+1]-R[r]) > 10*abs(R[r+1])*eps(real(T)) && k < 10_000) || k < r
+    while k < r || (k < kmax && errcheck(R[r], R[r+1], 10eps(real(T))))
         for j in 1:r
             N[j] = N[j+1]
             D[j] = D[j+1]
@@ -79,13 +79,13 @@ function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where
         end
         t2 = zero(T)
         s2 = zero(T)
-        for s in max(0,ρ+1-k):ρ
+        for s in max(0, ρ+1-k):ρ
             s2 += Cρ[s+1]*C1[s+1]*(N[r-ρ+s]+(γ+k-ρ+s-2)*N[r-ρ+s-1])
         end
         s2 += (γ+k-1)*N[r]/pochhammer(γ+2k-ρ-1, ρ+2)
         t2 += P[1]*s2
         s2 = zero(T)
-        for s in max(0,ρ+1-k):ρ+1
+        for s in max(0, ρ+1-k):ρ+1
             s2 += Cρ[s+1]*C2[s+1]*(γ+2k-2ρ+2s-3)*N[r-ρ+s-1]
         end
         ΔNold[r+1] = s2
@@ -120,12 +120,12 @@ function wenigerpFq(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3) where
         D[r+1] /= P[1]/pochhammer(γ+2k-ρ-1, ρ+2)
         R[r+1] = N[r+1]/D[r+1]
         s1 = zero(T)
-        for s in max(0,ρ-k):ρ+1
+        for s in max(0, ρ-k):ρ+1
             s1 += Cρ[s+1]*C3[s+1]*(γ+2k-2ρ+2s-1)*N[r-ρ+s]
         end
         ΔN[r+1] = s1
         s1 = zero(T)
-        for s in max(0,ρ-k):ρ+1
+        for s in max(0, ρ-k):ρ+1
             s1 += Cρ[s+1]*C3[s+1]*(γ+2k-2ρ+2s-1)*D[r-ρ+s]
         end
         ΔD[r+1] = s1
