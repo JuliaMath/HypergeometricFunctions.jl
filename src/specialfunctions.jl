@@ -1,4 +1,7 @@
-@inline errcheck(x, y, tol) = isfinite(x) && isfinite(y) && (norm(x-y) > max(norm(x), norm(y))*tol)
+@inline norm2(x) = norm(x)
+@inline norm2(x::Dual) = hypot(x.value, x.epsilon)
+
+@inline errcheck(x, y, tol) = isfinite(x) && isfinite(y) && (norm2(x-y) > max(norm2(x), norm2(y))*tol)
 
 # Same as in FastTransforms.jl
 """
