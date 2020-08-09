@@ -141,15 +141,13 @@ const libm = Base.libm_name
 
 unsafe_gamma(x::Float64) = ccall((:tgamma, libm),  Float64, (Float64, ), x)
 unsafe_gamma(x::Float32) = ccall((:tgammaf, libm),  Float32, (Float32, ), x)
-unsafe_gamma(x::Real) = unsafe_gamma(float(x))
 function unsafe_gamma(x::BigFloat)
     z = BigFloat()
     ccall((:mpfr_gamma, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Int32), z, x, Base.MPFR.ROUNDING_MODE[])
     return z
 end
-unsafe_gamma(z::Complex) = gamma(z)
 unsafe_gamma(z::Dual) = (r = realpart(z);w = unsafe_gamma(r); dual(w, w*digamma(r)*dualpart(z)))
-
+unsafe_gamma(z) = gamma(z) 
 """
     @lanczosratio(z, ϵ, c₀, c...)
 
