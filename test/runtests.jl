@@ -424,4 +424,8 @@ end
             @test pFqweniger(S[α, β], S[γ], z) ≈ CS(pFq(T[α, β], T[γ], CT(z))) atol=atol rtol=rtol
         end
     end
+
+    @testset "Integer arguments" begin
+        @test _₂F₁(1, 0, 3, -1) ≡ _₂F₁(1.0, 0, 3, -1) ≡ 1.0
+    end
 end
