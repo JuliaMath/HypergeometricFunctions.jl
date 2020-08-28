@@ -347,7 +347,7 @@ end
 
 
 function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
-    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
+    T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
     S₀, S₁, j = one(T), one(T)+a*b*z/c, 1
     while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
         rⱼ = (a+j)/(j+1)*(b+j)/(c+j)
@@ -358,7 +358,7 @@ function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
 end
 
 function _₂F₁maclaurinalt(a::Number, b::Number, c::Number, z::Number)
-    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
+    T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
     C, S, j = one(T), one(T), 0
     while abs(C) > 10abs(S)*eps(real(T)) || j ≤ 1
         C *= (a+j)/(j+1)*(b+j)/(c+j)*z
@@ -369,7 +369,7 @@ function _₂F₁maclaurinalt(a::Number, b::Number, c::Number, z::Number)
 end
 
 function _₂F₁continuation(s::Number, t::Number, c::Number, z₀::Number, z::Number)
-    T = promote_type(typeof(s), typeof(t), typeof(c), typeof(z₀), typeof(z))
+    T = float(promote_type(typeof(s), typeof(t), typeof(c), typeof(z₀), typeof(z)))
     izz₀, d0, d1 = inv(z-z₀), one(T), s/(2s-t+one(T))*((s+1)*(1-2z₀)+(t+1)*z₀-c)
     S₀, S₁, izz₀j, j = one(T), one(T)+d1*izz₀, izz₀, 2
     while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 2
@@ -381,7 +381,7 @@ function _₂F₁continuation(s::Number, t::Number, c::Number, z₀::Number, z::
 end
 
 function _₂F₁continuationalt(a::Number, c::Number, z₀::Number, z::Number)
-    T = promote_type(typeof(a), typeof(c), typeof(z₀), typeof(z))
+    T = float(promote_type(typeof(a), typeof(c), typeof(z₀), typeof(z)))
     izz₀ = inv(z-z₀)
     e0, e1 = one(T), (a+one(T))*(one(T)-2z₀)+(2a+one(T))*z₀-c
     f0, f1 = zero(T), one(T)-2z₀
@@ -402,7 +402,7 @@ function _₂F₁continuationalt(a::Number, c::Number, z₀::Number, z::Number)
 end
 
 function _₂F₁logsum(a::Number, b::Number, z::Number, w::Number, s::Int)
-    T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
+    T = float(promote_type(typeof(a), typeof(b), typeof(z), typeof(w)))
     cⱼ = 2digamma(one(T))-digamma(a)-digamma(b)+s*log1p(-z)
     C, S, j = one(T), cⱼ, 0
     while abs(C) > 10abs(S)*eps(real(T)) || j ≤ 1
@@ -415,7 +415,7 @@ function _₂F₁logsum(a::Number, b::Number, z::Number, w::Number, s::Int)
 end
 
 function _₂F₁logsumalt(a::Number, b::Number, z::Number, w::Number)
-    T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
+    T = float(promote_type(typeof(a), typeof(b), typeof(z), typeof(w)))
     d, cⱼ = one(T)-b, 2digamma(one(T))-digamma(a)-digamma(b)-log(-w)
     C, S, j = one(T), cⱼ, 0
     while abs(C) > 10abs(S)*eps(real(T)) || j ≤ 1
@@ -428,7 +428,7 @@ function _₂F₁logsumalt(a::Number, b::Number, z::Number, w::Number)
 end
 
 function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
-    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
+    T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
     z₀ = abs(z) < 1 ? ρϵ*sign(z) : sign(z)/ρϵ
     q₀, q₁ = _₂F₁(a, b, c, z₀), a*b/c*_₂F₁(a+1, b+1, c+1, z₀)
     S₀, zz₀ = q₀, z-z₀
@@ -443,7 +443,7 @@ function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
 end
 
 function _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
-    T = promote_type(typeof(a₁), typeof(a₂), typeof(a₃), typeof(b₁), typeof(b₂), typeof(z))
+    T = float(promote_type(typeof(a₁), typeof(a₂), typeof(a₃), typeof(b₁), typeof(b₂), typeof(z)))
     S₀, S₁, j = one(T), one(T)+(a₁*a₂*a₃*z)/(b₁*b₂), 1
     while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
         rⱼ = ((a₁+j)*(a₂+j)*(a₃+j))/((b₁+j)*(b₂+j)*(j+1))
@@ -454,7 +454,7 @@ function _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
 end
 
 function pFqmaclaurin(a::AbstractVector{S}, b::AbstractVector{U}, z::V) where {S, U, V}
-    T = promote_type(S, U, V)
+    T = float(promote_type(S, U, V))
     S₀, S₁, j = one(T), one(T)+prod(a)*z/prod(b), 1
     while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
         rⱼ = inv(j+one(T))
