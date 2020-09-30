@@ -77,6 +77,14 @@ const NumberType = Float64
     @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
     (a, b, c, result) = NumberType.([-1.30148]), NumberType.([-0.0397773, 0.452281]), NumberType(2.9085746526416285), 134.70529132344416
     @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
+    (a, b, c, result) = NumberType.([1/2]), NumberType.([1, 3/2]), NumberType(-10.0), 0.1215046687753564
+    @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
+    (a, b, c, result) = NumberType.([1/2]), NumberType.([1, 3/2]), NumberType(-100.0), 0.05291894107105639
+    @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
+    (a, b, c, result) = NumberType.([1/2]), NumberType.([1, 3/2]), NumberType(-1000.0), 0.015220788412455796
+    @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
+    (a, b, c, result) = NumberType.([1/2]), NumberType.([1, 3/2]), NumberType(-10000.0), 0.004728870002692929
+    @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
     (a, b, c, result) = NumberType.([1.79664]), NumberType.([2.5454, -2.0446, -1.84776]), NumberType(-1.5647341841975129), 10.224086634371103
     @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
     (a, b, c, result) = NumberType.([-1.08954]), NumberType.([-1.09992, -0.0898055, -1.21452]), NumberType(2.911146030454528), -281.8950930467646

@@ -12,7 +12,7 @@ function pFq(α::AbstractVector, β::AbstractVector, z; kwds...)
         return exp(-α[1]*log1p(-z))
     elseif length(α) == 2 && length(β) == 1
         return _₂F₁(α[1], α[2], β[1], float(z))
-    elseif abs(z) ≤ ρ || length(α) ≤ length(β)
+    elseif abs(z) ≤ ρ
         return pFqmaclaurin(α, β, float(z); kwds...)
     else
         return pFqweniger(α, β, float(z); kwds...)
