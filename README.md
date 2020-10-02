@@ -1,4 +1,4 @@
-[![Travis](https://travis-ci.org/JuliaMath/HypergeometricFunctions.jl.svg?branch=master)](https://travis-ci.org/JuliaMath/HypergeometricFunctions.jl)
+[![Travis](https://travis-ci.com/JuliaMath/HypergeometricFunctions.jl.svg?branch=master)](https://travis-ci.com/JuliaMath/HypergeometricFunctions.jl)
 [![codecov](https://codecov.io/gh/JuliaMath/HypergeometricFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaMath/HypergeometricFunctions.jl)
 
 
