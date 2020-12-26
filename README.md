@@ -1,6 +1,6 @@
 # HypergeometricFunctions.jl
 
-[![Travis](https://travis-ci.com/JuliaMath/HypergeometricFunctions.jl.svg?branch=master)](https://travis-ci.com/JuliaMath/HypergeometricFunctions.jl) [![codecov](https://codecov.io/gh/JuliaMath/HypergeometricFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaMath/HypergeometricFunctions.jl)
+[![Build Status](https://github.com/JuliaMath/HypergeometricFunctions.jl/workflows/CI/badge.svg)](https://github.com/JuliaMath/HypergeometricFunctions.jl/actions?query=workflow%3ACI) [![codecov](https://codecov.io/gh/JuliaMath/HypergeometricFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaMath/HypergeometricFunctions.jl)
 
 A Julia package for calculating hypergeometric functions
 
