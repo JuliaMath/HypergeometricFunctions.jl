@@ -220,8 +220,8 @@ function G(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Flo
     end
 end
 
-G(z::Number, ϵ::Number) = ϵ == 0 ? digamma(z)/unsafe_gamma(z) : (inv(unsafe_gamma(z))-inv(unsafe_gamma(z+ϵ)))/ϵ
-
+G(z::T, ϵ::T) where {T<:Number} = ϵ == 0 ? digamma(z)/unsafe_gamma(z) : (inv(unsafe_gamma(z))-inv(unsafe_gamma(z+ϵ)))/ϵ
+G(z::Number, ϵ::Number) = G(promote(z, ϵ)...)
 
 """
 Compute the function ((z+ϵ)ₘ-(z)ₘ)/ϵ
@@ -271,9 +271,35 @@ G(z::AbstractVector{BigFloat}, ϵ::BigFloat) = BigFloat[G(zi, ϵ) for zi in z]
 
 # Transformation formula w = 1-z
 
-reconeα₀(a, b, c, m::Int, ϵ) = ϵ == 0 ? (-1)^m*gamma(m)*gamma(c)/(gamma(a+m)*gamma(b+m)) : gamma(c)/(ϵ*gamma(1-m-ϵ)*gamma(a+m+ϵ)*gamma(b+m+ϵ))
-reconeβ₀(a, b, c, w, m::Int, ϵ) = abs(ϵ) > 0.1 ? ( pochhammer(float(a), m)*pochhammer(b, m)/(gamma(1-ϵ)*gamma(a+m+ϵ)*gamma(b+m+ϵ)*gamma(m+1)) - w^ϵ/(gamma(a)*gamma(b)*gamma(m+1+ϵ)) )*gamma(c)*w^m/ϵ : ( (G(1.0, -ϵ)/gamma(m+1)+G(m+1.0, ϵ))/(gamma(a+m+ϵ)*gamma(b+m+ϵ)) - (G(float(a)+m, ϵ)/gamma(b+m+ϵ)+G(float(b)+m, ϵ)/gamma(a+m))/gamma(m+1+ϵ) - E(log(w), ϵ)/(gamma(a+m)*gamma(b+m)*gamma(m+1+ϵ)) )*gamma(c)*pochhammer(float(a), m)*pochhammer(b, m)*w^m
-reconeγ₀(a, b, c, w, m::Int, ϵ) = gamma(c)*pochhammer(float(a), m)*pochhammer(b, m)*w^m/(gamma(a+m+ϵ)*gamma(b+m+ϵ)*gamma(m+1)*gamma(1-ϵ))
+function reconeα₀(a, b, c, m::Int, ϵ)
+    _a, _b, _c, _ϵ = promote(a, b, c, ϵ)
+    return _reconeα₀(_a, _b, _c, m, _ϵ)
+end
+function _reconeα₀(a::T, b::T, c::T, m::Int, ϵ::T) where {T}
+    if ϵ == 0
+        return (-1)^m*gamma(real(T)(m))*gamma(c)/(gamma(a+m)*gamma(b+m))
+    else
+        return gamma(c)/(ϵ*gamma(1-m-ϵ)*gamma(a+m+ϵ)*gamma(b+m+ϵ))
+    end
+end
+function reconeβ₀(a, b, c, w, m::Int, ϵ)
+    _a, _b, _c, _, _ϵ = promote(a, b, c, real(w), ϵ)
+    _w, _ = promote(w, zero(_a))
+    return _reconeβ₀(_a, _b, _c, _w, m, _ϵ)
+end
+function _reconeβ₀(a::T, b::T, c::T, w::Number, m::Int, ϵ::T) where {T}
+    if abs(ϵ) > 0.1
+        return ( pochhammer(a, m)*pochhammer(b, m)/(gamma(1-ϵ)*gamma(a+m+ϵ)*gamma(b+m+ϵ)*gamma(real(T)(m)+1)) - w^ϵ/(gamma(a)*gamma(b)*gamma(m+1+ϵ)) )*gamma(c)*w^m/ϵ
+    else
+        return ( (G(1, -ϵ)/gamma(real(T)(m)+1)+G(m+1, ϵ))/(gamma(a+m+ϵ)*gamma(b+m+ϵ)) - (G(a+m, ϵ)/gamma(b+m+ϵ)+G(float(b)+m, ϵ)/gamma(a+m))/gamma(m+1+ϵ) - E(log(w), ϵ)/(gamma(a+m)*gamma(b+m)*gamma(m+1+ϵ)) )*gamma(c)*pochhammer(a, m)*pochhammer(b, m)*w^m
+    end
+end
+function reconeγ₀(a, b, c, w, m::Int, ϵ)
+    _a, _b, _c, _, _ϵ = promote(a, b, c, real(w), ϵ)
+    _w, _ = promote(w, zero(_a))
+    return _reconeγ₀(_a, _b, _c, _w, m, _ϵ)
+end
+_reconeγ₀(a::T, b::T, c::T, w::Number, m::Int, ϵ::T) where {T} = gamma(c)*pochhammer(a, m)*pochhammer(b, m)*w^m/(gamma(a+m+ϵ)*gamma(b+m+ϵ)*gamma(real(T)(m)+1)*gamma(1-ϵ))
 
 function Aone(a, b, c, w, m::Int, ϵ)
     αₙ = reconeα₀(a, b, c, m, ϵ)*one(w)
@@ -306,14 +332,38 @@ end
 
 # Transformation formula w = 1/z
 
-recInfα₀(a, b, c, m::Int, ϵ) = ϵ == 0 ? (-1)^m*gamma(m)*gamma(c)/(gamma(a+m)*gamma(c-a)) : gamma(c)/(ϵ*gamma(1-m-ϵ)*gamma(a+m+ϵ)*gamma(c-a))
-recInfβ₀(a, b, c, w, m::Int, ϵ) = abs(ϵ) > 0.1 ?
-( pochhammer(float(a), m)*pochhammer(float(1-c+a), m)/(gamma(1-ϵ)*gamma(a+m+ϵ)*gamma(c-a)*gamma(m+1)) -
- (-w)^ϵ*pochhammer(float(1-c+a)+ϵ, m)/(gamma(a)*gamma(c-a-ϵ)*gamma(m+1+ϵ)) )*gamma(c)*w^m/ϵ :
-( (pochhammer(float(1-c+a)+ϵ, m)*G(1.0, -ϵ)-P(1-c+a, ϵ, m)/gamma(1-ϵ))/(gamma(c-a)*gamma(a+m+ϵ)*gamma(m+1)) +
- pochhammer(float(1-c+a)+ϵ, m)*( (G(m+1.0, ϵ)/gamma(a+m+ϵ) - G(float(a)+m, ϵ)/gamma(m+1+ϵ))/gamma(c-a) -
-(G(float(c-a), -ϵ) - E(-log(-w), -ϵ)/gamma(c-a-ϵ))/(gamma(m+1+ϵ)*gamma(a+m)) ) )*gamma(c)*pochhammer(float(a), m)*w^m
-recInfγ₀(a, b, c, w, m::Int, ϵ) = gamma(c)*pochhammer(float(a), m)*pochhammer(float(1-c+a), m)*w^m/(gamma(a+m+ϵ)*gamma(c-a)*gamma(m+1)*gamma(1-ϵ))
+function recInfα₀(a, b, c, m::Int, ϵ)
+    _a, _b, _c, _ϵ = promote(a, b, c, ϵ)
+    return _recInfα₀(_a, _b, _c, m, _ϵ)
+end
+function _recInfα₀(a::T, b::T, c::T, m::Int, ϵ::T) where {T}
+    if ϵ == 0
+        return (-1)^m*gamma(real(T)(m))*gamma(c)/(gamma(a+m)*gamma(c-a))
+    else
+        return gamma(c)/(ϵ*gamma(1-m-ϵ)*gamma(a+m+ϵ)*gamma(c-a))
+    end
+end
+function recInfβ₀(a, b, c, w, m::Int, ϵ)
+    _a, _b, _c, _, _ϵ = promote(a, b, c, real(w), ϵ)
+    _w, _ = promote(w, zero(_a))
+    return _recInfβ₀(_a, _b, _c, _w, m, _ϵ)
+end
+function _recInfβ₀(a::T, b::T, c::T, w::Number, m::Int, ϵ::T) where {T}
+    if abs(ϵ) > 0.1
+        return ( pochhammer(a, m)*pochhammer(1-c+a, m)/(gamma(1-ϵ)*gamma(a+m+ϵ)*gamma(c-a)*gamma(real(T)(m)+1)) -
+            (-w)^ϵ*pochhammer(1-c+a+ϵ, m)/(gamma(a)*gamma(c-a-ϵ)*gamma(m+1+ϵ)) )*gamma(c)*w^m/ϵ
+    else
+        return ( (pochhammer(1-c+a+ϵ, m)*G(1, -ϵ)-P(1-c+a, ϵ, m)/gamma(1-ϵ))/(gamma(c-a)*gamma(a+m+ϵ)*gamma(real(T)(m)+1)) +
+            pochhammer(1-c+a+ϵ, m)*( (G(m+1, ϵ)/gamma(a+m+ϵ) - G(a+m, ϵ)/gamma(m+1+ϵ))/gamma(c-a) -
+            (G(c-a, -ϵ) - E(-log(-w), -ϵ)/gamma(c-a-ϵ))/(gamma(m+1+ϵ)*gamma(a+m)) ) )*gamma(c)*pochhammer(a, m)*w^m
+    end
+end
+function recInfγ₀(a, b, c, w, m::Int, ϵ)
+    _a, _b, _c, _, _ϵ = promote(a, b, c, real(w), ϵ)
+    _w, _ = promote(w, zero(_a))
+    return _recInfγ₀(_a, _b, _c, _w, m, _ϵ)
+end
+_recInfγ₀(a::T, b::T, c::T, w::Number, m::Int, ϵ::T) where {T} = gamma(c)*pochhammer(a, m)*pochhammer(1-c+a, m)*w^m/(gamma(a+m+ϵ)*gamma(c-a)*gamma(real(T)(m)+1)*gamma(1-ϵ))
 
 function AInf(a, b, c, w, m::Int, ϵ)
     αₙ = recInfα₀(a, b, c, m, ϵ)*one(w)

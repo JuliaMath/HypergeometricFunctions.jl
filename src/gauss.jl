@@ -14,7 +14,7 @@ function _₂F₁(a, b, c, z)
         if isequal(a+b, 0) # 31. 15.4.11 & 15.4.12
             return cosnasinsqrt(2b, z)
         elseif isequal(a+b, 1) # 32. 15.4.13 & 15.4.14
-            return cosnasinsqrt(1-2b, z)*exp(-0.5log1p(-z))
+            return cosnasinsqrt(1-2b, z)*exp(-log1p(-z)/2)
         elseif isequal(b-a, 0.5) # 15.4.7 & 15.4.8
             return expnlog1pcoshatanhsqrt(-2a, z)
         end
@@ -22,13 +22,13 @@ function _₂F₁(a, b, c, z)
         if abeqcd(a, b, 0.5) # 13. 15.4.4 & 15.4.5
             return sqrtasinsqrt(z)
         elseif abeqcd(a, b, 1) # 14.
-            return sqrtasinsqrt(z)*exp(-0.5log1p(-z))
+            return sqrtasinsqrt(z)*exp(-log1p(-z)/2)
         elseif abeqcd(a, b, 0.5, 1) # 15. 15.4.2 & 15.4.3
             return sqrtatanhsqrt(z)
         elseif isequal(a+b, 1) # 29. 15.4.15 & 15.4.16
             return sinnasinsqrt(1-2b, z)
         elseif isequal(a+b, 2) # 30.
-            return sinnasinsqrt(2-2b, z)*exp(-0.5log1p(-z))
+            return sinnasinsqrt(2-2b, z)*exp(-log1p(-z)/2)
         elseif isequal(b-a, 0.5) # 4. 15.4.9 & 15.4.10
             return expnlog1psinhatanhsqrt(1-2a, z)
         end
