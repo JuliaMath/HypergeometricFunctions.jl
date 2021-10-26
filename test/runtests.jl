@@ -34,7 +34,7 @@ const NumberType = Float64
       end
     end
     @testset "Test that _₂F₁ is inferred for Float32 arguments" begin
-      @inferred(_₂F₁(0.3f0, 0.7f0, 1.3f0, 0.1f0)) ≈ Float32(_₂F₁(0.3, 0.7, 1.3, 0.1))
+      @test @inferred(_₂F₁(0.3f0, 0.7f0, 1.3f0, 0.1f0)) ≈ Float32(_₂F₁(0.3, 0.7, 1.3, 0.1))
     end
   end
 
