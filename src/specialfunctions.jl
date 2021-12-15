@@ -147,7 +147,7 @@ function unsafe_gamma(x::BigFloat)
     return z
 end
 unsafe_gamma(z::Dual) = (r = realpart(z);w = unsafe_gamma(r); dual(w, w*digamma(r)*dualpart(z)))
-unsafe_gamma(z) = gamma(z) 
+unsafe_gamma(z) = gamma(z)
 """
     @lanczosratio(z, ϵ, c₀, c...)
 
@@ -487,6 +487,17 @@ function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
         q₀, q₁ = q₁, ((j*(2z₀-one(T))-c+(a+b+one(T))*z₀)*q₁ + (a+j)*(b+j)/(j+one(T))*q₀)/(z₀*(one(T)-z₀)*(j+2))
         zz₀j *= zz₀
         S₀, S₁ = S₁, S₁+q₁*zz₀j
+        j += 1
+    end
+    return S₁
+end
+
+function _₁F₁maclaurin(a::Number, b::Number, z::Number)
+    T = float(promote_type(typeof(a), typeof(b), typeof(z)))
+    S₀, S₁, j = one(T), one(T)+a*z/b, 1
+    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
+        rⱼ = (a+j)/((b+j)*(j+1))
+        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
         j += 1
     end
     return S₁

@@ -10,6 +10,8 @@ function pFq(α::AbstractVector, β::AbstractVector, z; kwds...)
         return exp(z)
     elseif length(α) == 1 && length(β) == 0
         return exp(-α[1]*log1p(-z))
+    elseif length(α) == 1 && length(β) == 1
+        return _₁F₁(α[1], β[1], float(z))
     elseif length(α) == 2 && length(β) == 1
         return _₂F₁(α[1], α[2], β[1], float(z))
     elseif abs(z) ≤ ρ

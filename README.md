@@ -4,4 +4,4 @@
 
 A Julia package for calculating hypergeometric functions
 
-This package implements the generalized hypergeometric function `pFq([a1,…,am], [b1,…,bn], z)`. In particular, the Gauss hypergeometric function is available as `_₂F₁(a, b, c, z)`, and also `_₃F₂([a1, a2, a3], [b1, b2], z)`.
+This package implements the generalized hypergeometric function `pFq([a1,…,am], [b1,…,bn], z)`. In particular, the Gauss hypergeometric function is available as `_₂F₁(a, b, c, z)`, Kummer's confluent hypergeometric function is available as `_₁F₁(a, b, z)` and `HypergeometricFunctions.M(a, b, z)`, as well as `_₃F₂([a1, a2, a3], [b1, b2], z)`.
