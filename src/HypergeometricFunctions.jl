@@ -11,7 +11,7 @@ export _₁F₁, _₂F₁, _₃F₂, pFq
 
 include("specialfunctions.jl")
 include("gauss.jl")
-include("kummer.jl")
+include("confluent.jl")
 include("generalized.jl")
 include("drummond.jl")
 include("weniger.jl")
