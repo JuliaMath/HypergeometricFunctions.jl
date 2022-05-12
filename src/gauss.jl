@@ -65,6 +65,14 @@ function mxa_₂F₁(a, b, c, z)
 end
 
 """
+Compute the Gauss hypergeometric function `₂F₁(a, b; c; z)` with positive parameters a, b, and c and non-negative argument z. Useful for statisticians.
+"""
+function positive₂F₁(a, b, c, z)
+    @assert a > 0 && b > 0 && c > 0 && 0 ≤ z ≤ 1
+    return _₂F₁maclaurin(a, b, c, z)
+end
+
+"""
 Compute the Gauss hypergeometric function `₂F₁(a, b; c; z)` with general parameters a, b, and c.
 This polyalgorithm is designed based on the paper
 
