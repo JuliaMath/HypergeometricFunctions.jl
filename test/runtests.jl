@@ -38,6 +38,14 @@ const NumberType = Float64
     end
   end
 
+  @testset "positive₂F₁" begin
+      for (a, b, c, z) in ((1, 2, 3, 0.5), (3, 5, 7, 0.75), (1, 8537, 6042, 0.25))
+          positivetwoFone = positive₂F₁(a, b, c, z)
+          twoFone = Float64(pFqweniger(BigFloat[a, b], BigFloat[c], big(z)))
+          @test positivetwoFone > 0
+          @test positivetwoFone ≈ twoFone
+      end
+  end       
 
   @testset "pFq vs mpmath" begin
     (a, b, c, result) = NumberType.([-1.138]), NumberType.([-1.17865]), NumberType(0.29524203533943405), 1.3211939223293958
