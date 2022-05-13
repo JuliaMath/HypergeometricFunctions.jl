@@ -11,9 +11,9 @@ function pFq(α::AbstractVector, β::AbstractVector, z; kwds...)
     elseif length(α) == 1 && length(β) == 0
         return exp(-α[1]*log1p(-z))
     elseif length(α) == 1 && length(β) == 1
-        return _₁F₁(α[1], β[1], float(z))
+        return _₁F₁(α[1], β[1], float(z); kwds...)
     elseif length(α) == 2 && length(β) == 1
-        return _₂F₁(α[1], α[2], β[1], float(z))
+        return _₂F₁(α[1], α[2], β[1], float(z); kwds...)
     elseif length(α) ≤ length(β)
         if real(z) ≥ 0
             return pFqmaclaurin(α, β, float(z); kwds...)

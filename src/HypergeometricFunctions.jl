@@ -7,7 +7,7 @@ module HypergeometricFunctions
 
 using DualNumbers, LinearAlgebra, SpecialFunctions
 
-export _₁F₁, _₂F₁, _₃F₂, pFq, positive₂F₁
+export _₁F₁, _₂F₁, _₃F₂, pFq
 
 include("specialfunctions.jl")
 include("gauss.jl")

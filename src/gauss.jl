@@ -3,9 +3,9 @@
 """
 Compute the Gauss hypergeometric function `₂F₁(a, b; c; z)`.
 """
-function _₂F₁(a, b, c, z)
+function _₂F₁(a, b, c, z; method::Symbol = :general)
     if real(b) < real(a)
-        return _₂F₁(b, a, c, z) # ensure a ≤ b
+        return _₂F₁(b, a, c, z; method = method) # ensure a ≤ b
     elseif isequal(a, c) # 1. 15.4.6
         return exp(-b*log1p(-z))
     elseif isequal(b, c) # 1. 15.4.6
@@ -47,29 +47,23 @@ function _₂F₁(a, b, c, z)
     elseif isequal(c, 2.5) && abeqcd(a, b, 1, 1.5)
         return speciallog(z)
     end
-    return _₂F₁general(a, b, c, z) # catch-all
-end
-
-# Special case of (-x)^a*_₂F₁ to handle LogNumber correctly in RiemannHilbert.jl
-function mxa_₂F₁(a, b, c, z)
-    if isequal(c, 2)
-        if abeqcd(a, b, 1) # 6. 15.4.1
-            return log1p(-z)
-        end
-    elseif isequal(c, 4)
-        if abeqcd(a, b, 2)
-            return 6*(-2 + (1-2/z)*log1p(-z))
-        end
+    if method == :positive
+        return _₂F₁positive(a, b, c, z)
+    else#if method == :general
+        return _₂F₁general(a, b, c, z) # catch-all
     end
-    return (-z)^a*_₂F₁(a, b, c, z)
 end
 
 """
-Compute the Gauss hypergeometric function `₂F₁(a, b; c; z)` with positive parameters a, b, and c and non-negative argument z. Useful for statisticians.
+Compute the Gauss hypergeometric function `₂F₁(a, b; c; z)` with positive parameters a, b, and c and argument 0 ≤ z ≤ 1. Useful for statisticians.
 """
-function positive₂F₁(a, b, c, z)
+function _₂F₁positive(a, b, c, z)
     @assert a > 0 && b > 0 && c > 0 && 0 ≤ z ≤ 1
-    return _₂F₁maclaurin(a, b, c, z)
+    if z == 1
+        return _₂F₁argument_unity(a, b, c, float(z))
+    else
+        return _₂F₁maclaurin(a, b, c, z)
+    end
 end
 
 """
@@ -79,12 +73,13 @@ This polyalgorithm is designed based on the paper
 N. Michel and M. V. Stoitsov, Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions, Comp. Phys. Commun., 178:535–551, 2008.
 """
 function _₂F₁general(a, b, c, z)
-    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
-
-    real(b) < real(a) && return _₂F₁general(b, a, c, z)
-    real(c) < real(a) + real(b) && return exp((c-a-b)*log1p(-z))*_₂F₁general(c-a, c-b, c, z)
-
-    if abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
+    if z == 1
+        return _₂F₁argument_unity(a, b, c, float(z))
+    elseif real(b) < real(a)
+        return _₂F₁general(b, a, c, z)
+    elseif !isalmostwellpoised(a, b, c)
+        return exp((c-a-b)*log1p(-z))*_₂F₁general(c-a, c-b, c, z)
+    elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
         return _₂F₁maclaurin(a, b, c, z)
     elseif abs(z/(z-1)) ≤ ρ
         return exp(-a*log1p(-z))_₂F₁maclaurin(a, c-b, c, z/(z-1))
@@ -109,7 +104,13 @@ J. W. Pearson, S. Olver and M. A. Porter, Numerical methos for the computation o
 """
 function _₂F₁general2(a, b, c, z)
     T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
-    if abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
+    if z == 1
+        return _₂F₁argument_unity(a, b, c, float(z))
+    elseif real(b) < real(a)
+        return _₂F₁general(b, a, c, z)
+    elseif !isalmostwellpoised(a, b, c)
+        return exp((c-a-b)*log1p(-z))*_₂F₁general2(c-a, c-b, c, z)
+    elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
         return _₂F₁maclaurin(a, b, c, z)
     elseif abs(z / (z - 1)) ≤ ρ && absarg(1 - z) < convert(real(T), π) # 15.8.1
         w = z/(z-1)
@@ -150,4 +151,44 @@ function _₂F₁general2(a, b, c, z)
         end
     end
     return pFqweniger([a, b], [c], z)
+end
+
+# Special case of (-x)^a*_₂F₁ to handle LogNumber correctly in RiemannHilbert.jl
+function mxa_₂F₁(a, b, c, z)
+    if isequal(c, 2)
+        if abeqcd(a, b, 1) # 6. 15.4.1
+            return log1p(-z)
+        end
+    elseif isequal(c, 4)
+        if abeqcd(a, b, 2)
+            return 6*(-2 + (1-2/z)*log1p(-z))
+        end
+    end
+    return (-z)^a*_₂F₁(a, b, c, z)
+end
+
+function _₂F₁argument_unity(a, b, c, z)
+    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
+    a, b, c = T(a), T(b), T(c)
+    if iswellpoised(a, b, c)
+        return exp(loggamma(c)-loggamma(c-a)+loggamma(c-a-b)-loggamma(c-b))
+    elseif isalmostwellpoised(a, b, c)
+        if a + b == c
+            f = loggamma(c)-loggamma(a)-loggamma(b)
+            if isreal(f)
+                return T(Inf)
+            else
+                return T(Inf)*sign(exp(f))
+            end
+        else
+            return T(NaN)
+        end
+    else # !isalmostwellpoised(a, b, c)
+        f = loggamma(c)-loggamma(a)+gamma(a+b-c)-loggamma(b)
+        if isreal(f)
+            return T(Inf)
+        else
+            return T(Inf)*sign(exp(f))
+        end
+    end
 end

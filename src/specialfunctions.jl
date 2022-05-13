@@ -80,6 +80,9 @@ Base.in(n::Dual, ::Type{ℤ}) = dualpart(n) == 0 && realpart(n) ∈ ℤ
 abeqcd(a, b, cd) = isequal(a, b) && isequal(b, cd)
 abeqcd(a, b, c, d) = isequal(a, c) && isequal(b, d)
 
+iswellpoised(a, b, c) = real(c - a - b) > 0
+isalmostwellpoised(a, b, c) = real(c - a - b) ≥ 0
+
 absarg(z) = abs(angle(z))
 
 sqrtatanhsqrt(x) = x == 0 ? one(x) : (s = sqrt(-x); atan(s)/s)
