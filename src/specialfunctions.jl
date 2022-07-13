@@ -1,3 +1,5 @@
+using OpenLibm_jll
+
 @inline norm2(x) = norm(x)
 @inline norm2(x::Dual) = hypot(x.value, x.epsilon)
 
@@ -140,7 +142,7 @@ speciallogseries(x::Union{ComplexF64, DualComplex256}) = @evalpoly(x, 1.00000000
 
 tanpi(z) = sinpi(z)/cospi(z)
 
-const libm = Base.libm_name
+const libm = OpenLibm_jll.libopenlibm
 
 unsafe_gamma(x::Float64) = ccall((:tgamma, libm),  Float64, (Float64, ), x)
 unsafe_gamma(x::Float32) = ccall((:tgammaf, libm),  Float32, (Float32, ), x)
