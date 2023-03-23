@@ -5,7 +5,7 @@ This module calculates (generalized) hypergeometric functions:
 """
 module HypergeometricFunctions
 
-using DualNumbers, LinearAlgebra, SpecialFunctions
+using LinearAlgebra, SpecialFunctions
 
 export _₁F₁, _₂F₁, _₃F₂, pFq
 

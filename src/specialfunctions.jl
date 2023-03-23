@@ -1,9 +1,6 @@
 using OpenLibm_jll
 
-@inline norm2(x) = norm(x)
-@inline norm2(x::Dual) = hypot(x.value, x.epsilon)
-
-@inline errcheck(x, y, tol) = isfinite(x) && isfinite(y) && (norm2(x-y) > max(norm2(x), norm2(y))*tol)
+@inline errcheck(x, y, tol) = isfinite(x) && isfinite(y) && (norm(x-y) > max(norm(x), norm(y))*tol)
 
 # Same as in FastTransforms.jl
 """
@@ -63,21 +60,18 @@ struct ℕ end
 Base.in(n::Integer, ::Type{ℕ}) = n > 0
 Base.in(n::Real, ::Type{ℕ}) = (ν = round(Int, n); n == ν && ν ∈ ℕ)
 Base.in(n::Complex, ::Type{ℕ}) = imag(n) == 0 && real(n) ∈ ℕ
-Base.in(n::Dual, ::Type{ℕ}) = dualpart(n) == 0 && realpart(n) ∈ ℕ
 
 struct ℕ₀ end
 
 Base.in(n::Integer, ::Type{ℕ₀}) = n ≥ 0
 Base.in(n::Real, ::Type{ℕ₀}) = (ν = round(Int, n); n == ν && ν ∈ ℕ₀)
 Base.in(n::Complex, ::Type{ℕ₀}) = imag(n) == 0 && real(n) ∈ ℕ₀
-Base.in(n::Dual, ::Type{ℕ₀}) = dualpart(n) == 0 && realpart(n) ∈ ℕ₀
 
 struct ℤ end
 
 Base.in(n::Integer, ::Type{ℤ}) = true
 Base.in(n::Real, ::Type{ℤ}) = n == round(Int, n)
 Base.in(n::Complex, ::Type{ℤ}) = imag(n) == 0 && real(n) ∈ ℤ
-Base.in(n::Dual, ::Type{ℤ}) = dualpart(n) == 0 && realpart(n) ∈ ℤ
 
 abeqcd(a, b, cd) = isequal(a, b) && isequal(b, cd)
 abeqcd(a, b, c, d) = isequal(a, c) && isequal(b, d)
@@ -94,12 +88,12 @@ cosnasinsqrt(n, x) = cos(n*asin(sqrt(x)))
 expnlog1pcoshatanhsqrt(n, x) = x == 0 ? one(x) : (s = sqrt(x); (exp(n*log1p(s))+exp(n*log1p(-s)))/2)
 expnlog1psinhatanhsqrt(n, x) = x == 0 ? one(x) : (s = sqrt(x); (exp(n*log1p(s))-exp(n*log1p(-s)))/(2n*s))
 
-sqrtatanhsqrt(x::Union{T, Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); atanh(s)/s) : (s = sqrt(-x); atan(s)/s)
-sqrtasinsqrt(x::Union{T, Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); asin(s)/s) : (s = sqrt(-x); asinh(s)/s)
-sinnasinsqrt(n, x::Union{T, Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); sin(n*asin(s))/(n*s)) : (s = sqrt(-x); sinh(n*asinh(s))/(n*s))
-cosnasinsqrt(n, x::Union{T, Dual{T}}) where {T<:Real} = x > 0 ? cos(n*asin(sqrt(x))) : cosh(n*asinh(sqrt(-x)))
-expnlog1pcoshatanhsqrt(n, x::Union{T, Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? exp(n/2*log1p(-x))*cosh(n*atanh(sqrt(x))) : exp(n/2*log1p(-x))*cos(n*atan(sqrt(-x)))
-expnlog1psinhatanhsqrt(n, x::Union{T, Dual{T}}) where {T<:Real} = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); exp(n/2*log1p(-x))*sinh(n*atanh(s))/(n*s)) : (s = sqrt(-x); exp(n/2*log1p(-x))*sin(n*atan(s))/(n*s))
+sqrtatanhsqrt(x::Real) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); atanh(s)/s) : (s = sqrt(-x); atan(s)/s)
+sqrtasinsqrt(x::Real) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); asin(s)/s) : (s = sqrt(-x); asinh(s)/s)
+sinnasinsqrt(n, x::Real) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); sin(n*asin(s))/(n*s)) : (s = sqrt(-x); sinh(n*asinh(s))/(n*s))
+cosnasinsqrt(n, x::Real) = x > 0 ? cos(n*asin(sqrt(x))) : cosh(n*asinh(sqrt(-x)))
+expnlog1pcoshatanhsqrt(n, x::Real) = x == 0 ? one(x) : x > 0 ? exp(n/2*log1p(-x))*cosh(n*atanh(sqrt(x))) : exp(n/2*log1p(-x))*cos(n*atan(sqrt(-x)))
+expnlog1psinhatanhsqrt(n, x::Real) = x == 0 ? one(x) : x > 0 ? (s = sqrt(x); exp(n/2*log1p(-x))*sinh(n*atanh(s))/(n*s)) : (s = sqrt(-x); exp(n/2*log1p(-x))*sin(n*atan(s))/(n*s))
 
 expm1nlog1p(n, x) = x == 0 ? one(x) : expm1(n*log1p(x))/(n*x)
 
@@ -113,7 +107,7 @@ function logandpoly(x::Union{Float64, ComplexF64})
     end
 end
 
-logandpolyseries(x::Union{Float64, Dual128, ComplexF64, DualComplex256}) = @evalpoly(x, 1.0, 1.0, 0.9, 0.8, 0.7142857142857143, 0.6428571428571429, 0.5833333333333334, 0.5333333333333333, 0.4909090909090909, 0.45454545454545453, 0.4230769230769231, 0.3956043956043956, 0.37142857142857144, 0.35, 0.33088235294117646, 0.3137254901960784, 0.2982456140350877, 0.28421052631578947, 0.2714285714285714, 0.2597402597402597)
+logandpolyseries(x::Union{Float64, ComplexF64}) = @evalpoly(x, 1.0, 1.0, 0.9, 0.8, 0.7142857142857143, 0.6428571428571429, 0.5833333333333334, 0.5333333333333333, 0.4909090909090909, 0.45454545454545453, 0.4230769230769231, 0.3956043956043956, 0.37142857142857144, 0.35, 0.33088235294117646, 0.3137254901960784, 0.2982456140350877, 0.28421052631578947, 0.2714285714285714, 0.2597402597402597)
 
 speciallog(x::Real) = iszero(x) ? one(x) : (x > 0 ? (s = sqrt(x); 3(atanh(s)-s)/s^3) : (s = sqrt(-x); 3(s-atan(s))/s^3))
 speciallog(x) = iszero(x) ? one(x) : (s = sqrt(-x); 3(s-atan(s))/s^3)
@@ -137,8 +131,8 @@ function speciallog(x::ComplexF64)
     end
 end
 # The Maclaurin series fails to be accurate to 1e-15 near x ≈ ±0.2. So we use a highly accurate Chebyshev expansion.
-speciallogseries(x::Union{Float64, Dual128}) = @clenshaw(5.0x, 1.0087391788544393911192, 1.220474262857857637288e-01, 8.7957928919918696061703e-03, 6.9050958578444820505037e-04, 5.7037120050065804396306e-05, 4.8731405131379353370205e-06, 4.2648797509486828820613e-07, 3.800372208946157617901e-08, 3.434168059359993493634e-09, 3.1381484326392473547608e-10, 2.8939845618385022798906e-11, 2.6892186934806386106143e-12, 2.5150879096374730760324e-13, 2.3652490233687788117887e-14, 2.2349973917002118259929e-15, 2.120769988408948118084e-16)
-speciallogseries(x::Union{ComplexF64, DualComplex256}) = @evalpoly(x, 1.0000000000000000000000, 5.9999999999999999999966e-01, 4.2857142857142857142869e-01, 3.3333333333333333333347e-01, 2.7272727272727272727292e-01, 2.3076923076923076923072e-01, 1.9999999999999999999996e-01, 1.7647058823529411764702e-01, 1.5789473684210526315786e-01, 1.4285714285714285714283e-01, 1.3043478260869565217384e-01, 1.2000000000000000000000e-01, 1.1111111111111111111109e-01, 1.0344827586206896551722e-01, 9.6774193548387096774217e-02, 9.0909090909090909090938e-02, 8.5714285714285714285696e-02, 8.1081081081081081081064e-02, 7.6923076923076923076907e-02, 7.3170731707317073170688e-02)
+speciallogseries(x::Float64) = @clenshaw(5.0x, 1.0087391788544393911192, 1.220474262857857637288e-01, 8.7957928919918696061703e-03, 6.9050958578444820505037e-04, 5.7037120050065804396306e-05, 4.8731405131379353370205e-06, 4.2648797509486828820613e-07, 3.800372208946157617901e-08, 3.434168059359993493634e-09, 3.1381484326392473547608e-10, 2.8939845618385022798906e-11, 2.6892186934806386106143e-12, 2.5150879096374730760324e-13, 2.3652490233687788117887e-14, 2.2349973917002118259929e-15, 2.120769988408948118084e-16)
+speciallogseries(x::ComplexF64) = @evalpoly(x, 1.0000000000000000000000, 5.9999999999999999999966e-01, 4.2857142857142857142869e-01, 3.3333333333333333333347e-01, 2.7272727272727272727292e-01, 2.3076923076923076923072e-01, 1.9999999999999999999996e-01, 1.7647058823529411764702e-01, 1.5789473684210526315786e-01, 1.4285714285714285714283e-01, 1.3043478260869565217384e-01, 1.2000000000000000000000e-01, 1.1111111111111111111109e-01, 1.0344827586206896551722e-01, 9.6774193548387096774217e-02, 9.0909090909090909090938e-02, 8.5714285714285714285696e-02, 8.1081081081081081081064e-02, 7.6923076923076923076907e-02, 7.3170731707317073170688e-02)
 
 tanpi(z) = sinpi(z)/cospi(z)
 
@@ -151,7 +145,6 @@ function unsafe_gamma(x::BigFloat)
     ccall((:mpfr_gamma, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Int32), z, x, Base.MPFR.ROUNDING_MODE[])
     return z
 end
-unsafe_gamma(z::Dual) = (r = realpart(z);w = unsafe_gamma(r); dual(w, w*digamma(r)*dualpart(z)))
 unsafe_gamma(z) = gamma(z)
 """
     @lanczosratio(z, ϵ, c₀, c...)
@@ -170,15 +163,15 @@ macro lanczosratio(z, ϵ, c₀, c...)
     Expr(:block, :(zm1 = $(esc(z))), :(zm1pϵ = $(esc(z))+$(esc(ϵ))), ex)
 end
 
-lanczosratio(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Float64, ComplexF64, Dual128, DualComplex256}) = @lanczosratio(z, ϵ, 0.99999999999999709182, 57.156235665862923517, -59.597960355475491248, 14.136097974741747174, -0.49191381609762019978, 0.33994649984811888699E-4, 0.46523628927048575665E-4, -0.98374475304879564677E-4, 0.15808870322491248884E-3, -0.21026444172410488319E-3, 0.21743961811521264320E-3, -0.16431810653676389022E-3, 0.84418223983852743293E-4, -0.26190838401581408670E-4, 0.36899182659531622704E-5)
+lanczosratio(z::Union{Float64, ComplexF64}, ϵ::Union{Float64, ComplexF64}) = @lanczosratio(z, ϵ, 0.99999999999999709182, 57.156235665862923517, -59.597960355475491248, 14.136097974741747174, -0.49191381609762019978, 0.33994649984811888699E-4, 0.46523628927048575665E-4, -0.98374475304879564677E-4, 0.15808870322491248884E-3, -0.21026444172410488319E-3, 0.21743961811521264320E-3, -0.16431810653676389022E-3, 0.84418223983852743293E-4, -0.26190838401581408670E-4, 0.36899182659531622704E-5)
 
-function lanczosapprox(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Float64, ComplexF64, Dual128, DualComplex256})
+function lanczosapprox(z::Union{Float64, ComplexF64}, ϵ::Union{Float64, ComplexF64})
     zm0p5 = z-0.5
     zpgm0p5 = zm0p5+4.7421875
     return zm0p5*log1p(ϵ/zpgm0p5) + ϵ*log(zpgm0p5+ϵ) - ϵ + log1p(-ϵ*lanczosratio(z, ϵ))
 end
 
-function H(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Float64, ComplexF64, Dual128, DualComplex256})
+function H(z::Union{Float64, ComplexF64}, ϵ::Union{Float64, ComplexF64})
     zm0p5 = z-0.5
     zpgm0p5 = zm0p5+4.7421875
     if real(z) ≥ 1/2
@@ -201,7 +194,7 @@ end
 """
 Compute the function (1/Γ(z)-1/Γ(z+ϵ))/ϵ
 """
-function G(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Float64, ComplexF64, Dual128, DualComplex256})
+function G(z::Union{Float64, ComplexF64}, ϵ::Union{Float64, ComplexF64})
     n, zpϵ = round(Int, real(z)), z+ϵ
     if abs(ϵ) > 0.1
         (inv(unsafe_gamma(z))-inv(unsafe_gamma(zpϵ)))/ϵ
