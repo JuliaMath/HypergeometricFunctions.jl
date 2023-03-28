@@ -1,6 +1,6 @@
 using HypergeometricFunctions, Test
 import LinearAlgebra: norm
-import HypergeometricFunctions: _₂F₁general, iswellpoised # not exported
+import HypergeometricFunctions: _₂F₁general, iswellpoised, U
 
 import HypergeometricFunctions: drummond0F0, drummond1F0, drummond0F1,
                                 drummond2F0, drummond1F1, drummond0F2,
@@ -460,5 +460,17 @@ end
 
     @testset "Integer arguments" begin
         @test _₂F₁(1, 0, 3, -1) ≡ _₂F₁(1.0, 0, 3, -1) ≡ 1.0
+    end
+end
+
+@testset "U" begin
+    # From #55
+    for (S, T) in ((Float64, BigFloat),)
+        b = 0
+        z = T(1)/3
+        x = S(z)
+        for a in S(1):S(0.5):S(7)
+            @test U(a,b,x) ≈ S(U(a,b,z))
+        end
     end
 end

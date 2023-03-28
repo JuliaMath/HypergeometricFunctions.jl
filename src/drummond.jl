@@ -129,7 +129,7 @@ function drummond2F0(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T
     Nhi /= (α+2)*(β+2)
     Dhi /= (α+2)*(β+2)
     k = 2
-    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
+    while k < 3 || (k < kmax && errcheck(Tmid, Thi, 10eps(real(T))))
         Nhi, Nmid, Nlo = ((k+2)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Nhi - k*(α+β+3k-ζ)*Nmid - k*(k-1)*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((k+2)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Dhi - k*(α+β+3k-ζ)*Dmid - k*(k-1)*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -293,20 +293,16 @@ function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax
     p = length(α)
     q = length(β)
     r = max(p+1, q+2)
-    C = zeros(T, r)
-    C[1] = one(T)
-    Ĉ = zeros(T, r)
-    Ĉ[1] = one(T)
+    err = one(real(T))
+    for j in 1:p
+        err *= absα[j]+1
+    end
     P = zeros(T, p+1)
     t = one(T)
     for j in 1:p
         t *= α[j]+1
     end
     P[1] = t
-    err = one(real(T))
-    for j in 1:p
-        err *= absα[j]+1
-    end
     Q = zeros(T, q+2)
     t = one(T)
     for j in 1:q
@@ -328,29 +324,25 @@ function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax
         end
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += Ĉ[j+1]*Q[j+1]*N[r-j]
+            t1 += Q[j+1]*N[r-j]
         end
         if k ≤ q+1
-            if p > q
-                t1 += Q[k+1]
-            else
-                t1 += Q[k+1] / T(factorial(k+1))
-            end
+            t1 += Q[k+1]
         end
         t2 = zero(T)
-        t2 += Ĉ[1]*P[1]*N[r]
+        t2 += P[1]*N[r]
         for j in 1:min(k, p)
-            t2 += P[j+1]*(C[j+1]*N[r-j+1] + Ĉ[j+1]*N[r-j])
+            t2 += P[j+1]*(N[r-j+1] + N[r-j])
         end
         N[r+1] = ζ*t1-t2
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += Ĉ[j+1]*Q[j+1]*D[r-j]
+            t1 += Q[j+1]*D[r-j]
         end
         t2 = zero(T)
-        t2 += Ĉ[1]*P[1]*D[r]
+        t2 += P[1]*D[r]
         for j in 1:min(k, p)
-            t2 += P[j+1]*(C[j+1]*D[r-j+1] + Ĉ[j+1]*D[r-j])
+            t2 += P[j+1]*(D[r-j+1] + D[r-j])
         end
         D[r+1] = ζ*t1-t2
         R[r+1] = N[r+1]/D[r+1]
@@ -360,29 +352,17 @@ function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax
         N[r+1] /= P[1]
         D[r+1] /= P[1]
         k += 1
-        if p > q
-            for j in min(k, max(p, q+1)):-1:1
-                C[j+1] += C[j]
-                Ĉ[j+1] += Ĉ[j]
-            end
-        else
-            for j in min(k, max(p, q+1)):-1:1
-                C[j+1] = (C[j+1]*(k+1-j) + C[j])/(k+1)
-                Ĉ[j+1] = (Ĉ[j+1]*(k-j) + Ĉ[j])/(k+1)
-            end
-            Ĉ[1] = Ĉ[1]*k/(k+1)
+        err = one(real(T))
+        for j in 1:p
+            err *= absα[j]+k+1
         end
         t = one(T)
         for j in 1:p
             t *= α[j]+k+1
         end
-        err = one(real(T))
         for j in 1:p
-            err *= absα[j]+k+1
-        end
-        for j in 2:p+1
-            s = t - P[j-1]
-            P[j-1] = t
+            s = ((k-j+1)*t - k*P[j])/j
+            P[j] = t
             t = s
         end
         P[p+1] = t
@@ -391,9 +371,9 @@ function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax
             t *= β[j]+k+1
         end
         t *= k+2
-        for j in 2:q+2
-            s = t - Q[j-1]
-            Q[j-1] = t
+        for j in 1:q+1
+            s = ((k-j+1)*t - k*Q[j])/j
+            Q[j] = t
             t = s
         end
         Q[q+2] = t

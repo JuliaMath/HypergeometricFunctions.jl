@@ -17,6 +17,6 @@ const M = _₁F₁
 """
 Compute Tricomi's confluent hypergeometric function `U(a, b, z) ∼ z⁻ᵃ ₂F₀([a, a-b+1]; []; -z⁻¹)`.
 """
-function U(a, b, z)
-    return z^-a*pFq([a, a-b+1], typeof(z)[], -inv(z))
+function U(a, b, z; kwds...)
+    return z^-a*drummond2F0(a, a-b+1, -inv(z); kwds...)
 end
