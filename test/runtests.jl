@@ -1,6 +1,6 @@
 using HypergeometricFunctions, Test
 import LinearAlgebra: norm
-import HypergeometricFunctions: _₂F₁general, iswellpoised, U
+import HypergeometricFunctions: _₂F₁general, iswellpoised, M, U
 
 import HypergeometricFunctions: drummond0F0, drummond1F0, drummond0F1,
                                 drummond2F0, drummond1F1, drummond0F2,
@@ -460,6 +460,23 @@ end
 
     @testset "Integer arguments" begin
         @test _₂F₁(1, 0, 3, -1) ≡ _₂F₁(1.0, 0, 3, -1) ≡ 1.0
+    end
+end
+
+@testset "M" begin
+    @test M(-3, -3, 0.5) ≡ exp(0.5)
+    @test M(0, -1, 10) ≡ 1.0
+    @test_throws DomainError M(1, -2, 0.5)
+    @test_throws DomainError M(-3, -2, 0.5)
+    @test M(-2, -3, 0.5) ≡ 1.375
+    @test M(0.5, 1.5, -1000) ≈ 0.028024956081989644 # From #46
+    for (S, T) in ((Float64, BigFloat),)
+        b = 1
+        z = T(1)/3
+        x = S(z)
+        for a in S(1):S(0.5):S(7)
+            @test M(a,b,x) ≈ S(M(a,b,z))
+        end
     end
 end
 

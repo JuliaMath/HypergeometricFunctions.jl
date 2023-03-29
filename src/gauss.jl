@@ -77,10 +77,10 @@ function _₂F₁general(a, b, c, z)
         return _₂F₁argument_unity(a, b, c, float(z))
     elseif real(b) < real(a)
         return _₂F₁general(b, a, c, z)
-    elseif !isalmostwellpoised(a, b, c)
-        return exp((c-a-b)*log1p(-z))*_₂F₁general(c-a, c-b, c, z)
     elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
         return _₂F₁maclaurin(a, b, c, z)
+    elseif !isalmostwellpoised(a, b, c)
+        return exp((c-a-b)*log1p(-z))*_₂F₁general(c-a, c-b, c, z)
     elseif abs(z/(z-1)) ≤ ρ
         return exp(-a*log1p(-z))_₂F₁maclaurin(a, c-b, c, z/(z-1))
     elseif abs(inv(z)) ≤ ρ
@@ -108,10 +108,10 @@ function _₂F₁general2(a, b, c, z)
         return _₂F₁argument_unity(a, b, c, float(z))
     elseif real(b) < real(a)
         return _₂F₁general(b, a, c, z)
-    elseif !isalmostwellpoised(a, b, c)
-        return exp((c-a-b)*log1p(-z))*_₂F₁general2(c-a, c-b, c, z)
     elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
         return _₂F₁maclaurin(a, b, c, z)
+    elseif !isalmostwellpoised(a, b, c)
+        return exp((c-a-b)*log1p(-z))*_₂F₁general2(c-a, c-b, c, z)
     elseif abs(z / (z - 1)) ≤ ρ && absarg(1 - z) < convert(real(T), π) # 15.8.1
         w = z/(z-1)
         return _₂F₁maclaurin(a, c-b, c, w)*exp(-a*log1p(-z))

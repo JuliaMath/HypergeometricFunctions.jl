@@ -140,12 +140,11 @@ end
 speciallogseries(x::Union{Float64, Dual128}) = @clenshaw(5.0x, 1.0087391788544393911192, 1.220474262857857637288e-01, 8.7957928919918696061703e-03, 6.9050958578444820505037e-04, 5.7037120050065804396306e-05, 4.8731405131379353370205e-06, 4.2648797509486828820613e-07, 3.800372208946157617901e-08, 3.434168059359993493634e-09, 3.1381484326392473547608e-10, 2.8939845618385022798906e-11, 2.6892186934806386106143e-12, 2.5150879096374730760324e-13, 2.3652490233687788117887e-14, 2.2349973917002118259929e-15, 2.120769988408948118084e-16)
 speciallogseries(x::Union{ComplexF64, DualComplex256}) = @evalpoly(x, 1.0000000000000000000000, 5.9999999999999999999966e-01, 4.2857142857142857142869e-01, 3.3333333333333333333347e-01, 2.7272727272727272727292e-01, 2.3076923076923076923072e-01, 1.9999999999999999999996e-01, 1.7647058823529411764702e-01, 1.5789473684210526315786e-01, 1.4285714285714285714283e-01, 1.3043478260869565217384e-01, 1.2000000000000000000000e-01, 1.1111111111111111111109e-01, 1.0344827586206896551722e-01, 9.6774193548387096774217e-02, 9.0909090909090909090938e-02, 8.5714285714285714285696e-02, 8.1081081081081081081064e-02, 7.6923076923076923076907e-02, 7.3170731707317073170688e-02)
 
-tanpi(z) = sinpi(z)/cospi(z)
 
 const libm = OpenLibm_jll.libopenlibm
 
-unsafe_gamma(x::Float64) = ccall((:tgamma, libm),  Float64, (Float64, ), x)
-unsafe_gamma(x::Float32) = ccall((:tgammaf, libm),  Float32, (Float32, ), x)
+unsafe_gamma(x::Float64) = ccall((:tgamma , libm), Float64, (Float64, ), x)
+unsafe_gamma(x::Float32) = ccall((:tgammaf, libm), Float32, (Float32, ), x)
 function unsafe_gamma(x::BigFloat)
     z = BigFloat()
     ccall((:mpfr_gamma, :libmpfr), Int32, (Ref{BigFloat}, Ref{BigFloat}, Int32), z, x, Base.MPFR.ROUNDING_MODE[])
@@ -188,7 +187,7 @@ function H(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Flo
             expm1( zm0p5*log1p(ϵ/zpgm0p5) + ϵ*log(zpgm0p5+ϵ) - ϵ + log1p(-ϵ*lanczosratio(z, ϵ)) )/ϵ
         end
     else
-        tpz = tanpi(z)
+        tpz = sinpi(z)/cospi(z)
         if z == z+ϵ # ϵ is numerical 0
             H(1-z, ϵ) - π/tpz
         else
@@ -270,7 +269,7 @@ function P(z::Number, ϵ::Number, m::Int)
     end
 end
 
-E(z::Number, ϵ::Number) = ϵ == 0 ? z : expm1(ϵ*z)/ϵ
+E(z::Number, ϵ::Number) = iszero(ϵ) ? z : expm1(ϵ*z)/ϵ
 
 G(z::AbstractVector{BigFloat}, ϵ::BigFloat) = BigFloat[G(zi, ϵ) for zi in z]
 
@@ -404,7 +403,7 @@ end
 function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
     S₀, S₁, j = one(T), one(T)+a*b*z/c, 1
-    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
+    while errcheck(S₀, S₁, 10eps(real(T)))
         rⱼ = (a+j)/(j+1)*(b+j)/(c+j)
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
         j += 1
@@ -500,7 +499,7 @@ end
 function _₁F₁maclaurin(a::Number, b::Number, z::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(z)))
     S₀, S₁, j = one(T), one(T)+a*z/b, 1
-    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
+    while errcheck(S₀, S₁, 10eps(real(T)))
         rⱼ = (a+j)/((b+j)*(j+1))
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
         j += 1
@@ -511,7 +510,7 @@ end
 function _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
     T = float(promote_type(typeof(a₁), typeof(a₂), typeof(a₃), typeof(b₁), typeof(b₂), typeof(z)))
     S₀, S₁, j = one(T), one(T)+(a₁*a₂*a₃*z)/(b₁*b₂), 1
-    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
+    while errcheck(S₀, S₁, 10eps(real(T)))
         rⱼ = ((a₁+j)*(a₂+j)*(a₃+j))/((b₁+j)*(b₂+j)*(j+1))
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
         j += 1
@@ -522,7 +521,7 @@ end
 function pFqmaclaurin(a::AbstractVector{S}, b::AbstractVector{U}, z::V) where {S, U, V}
     T = float(promote_type(S, U, V))
     S₀, S₁, j = one(T), one(T)+prod(a)*z/prod(b), 1
-    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
+    while errcheck(S₀, S₁, 10eps(real(T)))
         rⱼ = inv(j+one(T))
         for i=1:length(a) rⱼ *= a[i]+j end
         for i=1:length(b) rⱼ /= b[i]+j end
