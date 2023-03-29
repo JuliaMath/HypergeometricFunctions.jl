@@ -6,11 +6,11 @@ Compute Kummer's confluent hypergeometric function `M(a, b, z) = ₁F₁(a; b; z
 function _₁F₁(a, b, z; kwds...)
     if isequal(a, b) # 13.6.1
         return exp(z)
-    elseif -b ∈ ℕ₀
+    elseif -b ∈ ℕ
         if -a ∈ ℕ₀ && real(a) ≥ real(b)
             return _₁F₁maclaurin(a, b, z; kwds...)
         else
-            return throw(DomainError(b, "M(a, b, z) = ₁F₁(a; b; z) is not defined for nonpositive integer b unless a is also a nonpositive integer and a ≥ b."))
+            return throw(DomainError(b, "M(a, b, z) = ₁F₁(a; b; z) is not defined for negative integer b unless a is a nonpositive integer and a ≥ b."))
         end
     elseif -a ∈ ℕ₀
         return _₁F₁maclaurin(a, b, z; kwds...)

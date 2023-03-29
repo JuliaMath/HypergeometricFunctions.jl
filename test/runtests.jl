@@ -466,6 +466,8 @@ end
 @testset "M" begin
     @test M(-3, -3, 0.5) ≡ exp(0.5)
     @test M(0, -1, 10) ≡ 1.0
+    @test M(1.2,  0.0, 0.1) ==  Inf # Mimick gamma( 0.0) =  Inf
+    @test M(1.2, -0.0, 0.1) == -Inf # and    gamma(-0.0) = -Inf
     @test_throws DomainError M(1, -2, 0.5)
     @test_throws DomainError M(-3, -2, 0.5)
     @test M(-2, -3, 0.5) ≡ 1.375
