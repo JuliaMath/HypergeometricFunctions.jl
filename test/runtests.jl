@@ -305,15 +305,15 @@ end
         CT = Complex{T}
         atol = rtol = 1000eps(S)
         for z in S(-4):S(0.25):S(1)
-            @test pFqdrummond((), (), z) ≈ S(pFq(T[], T[], T(z))) atol=atol rtol=rtol
-            @test pFqweniger((), (), z) ≈ S(pFq(T[], T[], T(z))) atol=atol rtol=rtol
+            @test pFqdrummond((), (), z) ≈ S(pFq((), (), T(z))) atol=atol rtol=rtol
+            @test pFqweniger((), (), z) ≈ S(pFq((), (), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
         for x in S(-4):S(0.25):S(1), y in S(-4):S(0.25):S(1)
             z = complex(x, y)
-            @test pFqdrummond((), (), z) ≈ CS(pFq(T[], T[], CT(z))) atol=atol rtol=rtol
-            @test pFqweniger((), (), z) ≈ CS(pFq(T[], T[], CT(z))) atol=atol rtol=rtol
+            @test pFqdrummond((), (), z) ≈ CS(pFq((), (), CT(z))) atol=atol rtol=rtol
+            @test pFqweniger((), (), z) ≈ CS(pFq((), (), CT(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -326,15 +326,15 @@ end
         CT = Complex{T}
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(0.5):S(1.5), z in S(-0.75):S(0.25):S(0.25)
-            @test pFqdrummond((α, ), (), z) ≈ S(pFq(T[α], T[], T(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, ), (), z) ≈ S(pFq(T[α], T[], T(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, ), (), z) ≈ S(pFq((T(α), ), (), T(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, ), (), z) ≈ S(pFq((T(α), ), (), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
         for α in S(-1.5):S(0.5):S(1.5), x in S(-0.75):S(0.25):S(0.25), y in S(-0.75):S(0.25):S(0.25)
             z = complex(x, y)
-            @test pFqdrummond((α, ), (), z) ≈ CS(pFq(T[α], T[], CT(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, ), (), z) ≈ CS(pFq(T[α], T[], CT(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, ), (), z) ≈ CS(pFq((T(α), ), (), CT(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, ), (), z) ≈ CS(pFq((T(α), ), (), CT(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -347,15 +347,15 @@ end
         CT = Complex{T}
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
-            @test pFqdrummond((), (α, ), z) ≈ S(pFq(T[], T[α], T(z))) atol=atol rtol=rtol
-            @test pFqweniger((), (α, ), z) ≈ S(pFq(T[], T[α], T(z))) atol=atol rtol=rtol
+            @test pFqdrummond((), (α, ), z) ≈ S(pFq((), (T(α), ), T(z))) atol=atol rtol=rtol
+            @test pFqweniger((), (α, ), z) ≈ S(pFq((), (T(α), ), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
         for α in S(-1.5):S(1.0):S(1.5), x in S(-0.75):S(0.25):S(0.75), y in S(-0.75):S(0.25):S(0.75)
             z = complex(x, y)
-            @test pFqdrummond((), (α, ), z) ≈ CS(pFq(T[], T[α], CT(z))) atol=atol rtol=rtol
-            @test pFqweniger((), (α, ), z) ≈ CS(pFq(T[], T[α], CT(z))) atol=atol rtol=rtol
+            @test pFqdrummond((), (α, ), z) ≈ CS(pFq((), (T(α), ), CT(z))) atol=atol rtol=rtol
+            @test pFqweniger((), (α, ), z) ≈ CS(pFq((), (T(α), ), CT(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -387,15 +387,15 @@ end
         CT = Complex{T}
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
-            @test pFqdrummond((α, ), (β, ), z) ≈ S(pFq(T[α], T[β], T(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, ), (β, ), z) ≈ S(pFq(T[α], T[β], T(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, ), (β, ), z) ≈ S(pFq((T(α), ), (T(β), ), T(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, ), (β, ), z) ≈ S(pFq((T(α), ), (T(β), ), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
         for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(1.0):S(1.5), x in S(-0.75):S(0.25):S(0.75), y in S(-0.75):S(0.25):S(0.75)
             z = complex(x, y)
-            @test pFqdrummond((α, ), (β, ), z) ≈ CS(pFq(T[α], T[β], CT(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, ), (β, ), z) ≈ CS(pFq(T[α], T[β], CT(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, ), (β, ), z) ≈ CS(pFq((T(α), ), (T(β), ), CT(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, ), (β, ), z) ≈ CS(pFq((T(α), ), (T(β), ), CT(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -408,15 +408,15 @@ end
         CT = Complex{T}
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-0.75):S(0.25):S(0.75)
-            @test pFqdrummond((), (α, β), z) ≈ S(pFq(T[], T[α, β], T(z))) atol=atol rtol=rtol
-            @test pFqweniger((), (α, β), z) ≈ S(pFq(T[], T[α, β], T(z))) atol=atol rtol=rtol
+            @test pFqdrummond((), (α, β), z) ≈ S(pFq((), (T(α), T(β)), T(z))) atol=atol rtol=rtol
+            @test pFqweniger((), (α, β), z) ≈ S(pFq((), (T(α), T(β)), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), x in S(-0.75):S(0.25):S(0.75), y in S(-0.75):S(0.25):S(0.75)
             z = complex(x, y)
-            @test pFqdrummond((), (α, β), z) ≈ CS(pFq(T[], T[α, β], CT(z))) atol=atol rtol=rtol
-            @test pFqweniger((), (α, β), z) ≈ CS(pFq(T[], T[α, β], CT(z))) atol=atol rtol=rtol
+            @test pFqdrummond((), (α, β), z) ≈ CS(pFq((), (T(α), T(β)), CT(z))) atol=atol rtol=rtol
+            @test pFqweniger((), (α, β), z) ≈ CS(pFq((), (T(α), T(β)), CT(z))) atol=atol rtol=rtol
         end
     end
 end
@@ -429,15 +429,15 @@ end
         CT = Complex{T}
         atol = rtol = 1000eps(S)
         for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(0.5):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.625):S(0.25):S(0.125)
-            @test pFqdrummond((α, β), (γ, ), z) ≈ S(pFq(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, β), (γ, ), z) ≈ S(pFq(T[α, β], T[γ], T(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
         for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(0.5):S(1.5), γ in S(-1.5):S(1.0):S(1.5), x in S(-0.375):S(0.25):S(0.125), y in S(-0.375):S(0.25):S(0.125)
             z = complex(x, y)
-            @test pFqdrummond((α, β), (γ, ), z) ≈ CS(pFq(T[α, β], T[γ], CT(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, β), (γ, ), z) ≈ CS(pFq(T[α, β], T[γ], CT(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
         end
     end
 

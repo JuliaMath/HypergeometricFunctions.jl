@@ -5,22 +5,21 @@ Compute the generalized hypergeometric function, defined by
 \operatorname{pFq}(α, β; z) = \sum_{k=0}^\infty \dfrac{(\alpha_1)_k\cdots(\alpha_p)_k}{(\beta_1)_k\cdots(\beta_q)_k}\dfrac{z^k}{k!}.
 ```
 """
-function pFq(α::AbstractVector, β::AbstractVector, z; kwds...)
-    if length(α) == length(β) == 0
-        return exp(z)
-    elseif length(α) == 1 && length(β) == 0
-        return exp(-α[1]*log1p(-z))
-    elseif length(α) == 1 && length(β) == 1
-        return _₁F₁(α[1], β[1], float(z); kwds...)
-    elseif length(α) == 2 && length(β) == 1
-        return _₂F₁(α[1], α[2], β[1], float(z); kwds...)
-    elseif length(α) ≤ length(β)
+pFq
+
+pFq(::Tuple{}, ::Tuple{}, z; kwds...) = exp(z)
+pFq(α::NTuple{1}, ::Tuple{}, z; kwds...) = exp(-α[1]*log1p(-z))
+pFq(α::NTuple{1}, β::NTuple{1}, z; kwds...) = _₁F₁(α[1], β[1], float(z); kwds...)
+pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1], float(z); kwds...)
+
+function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
+    if p ≤ q
         if real(z) ≥ 0
             return pFqmaclaurin(α, β, float(z); kwds...)
         else
             return pFqweniger(α, β, float(z); kwds...)
         end
-    elseif length(α) == length(β) + 1
+    elseif p == q + 1
         if abs(z) ≤ ρ
             return pFqmaclaurin(α, β, float(z); kwds...)
         else
@@ -30,6 +29,8 @@ function pFq(α::AbstractVector, β::AbstractVector, z; kwds...)
         return pFqweniger(α, β, float(z); kwds...)
     end
 end
+
+pFq(α::AbstractVector, β::AbstractVector, z; kwds...) = pFq(Tuple(α), Tuple(β), z; kwds...)
 
 """
 Compute the generalized hypergeometric function `pFq(α, β; z)` by continued fraction.
@@ -46,11 +47,5 @@ end
 """
 Compute the generalized hypergeometric function `₃F₂(a₁, a₂, a₃, b₁, b₂; z)`.
 """
-function _₃F₂(a₁, a₂, a₃, b₁, b₂, z; kwds...)
-    if abs(z) ≤ ρ
-        _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, float(z); kwds...)
-    else
-        pFqweniger((a₁, a₂, a₃), (b₁, b₂), float(z); kwds...)
-    end
-end
-_₃F₂(a₁, b₁, z; kwds...) = _₃F₂(1, 1, a₁, 2, b₁, z; kwds...)
+_₃F₂(a₁, a₂, a₃, b₁, b₂, z; kwds...) = pFq((a₁, a₂, a₃), (b₁, b₂), z; kwds...)
+_₃F₂(a₁, b₁, z; kwds...) = _₃F₂(a₁, 1, 1, b₁, 2, z; kwds...)

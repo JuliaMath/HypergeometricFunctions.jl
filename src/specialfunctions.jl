@@ -507,24 +507,19 @@ function _₁F₁maclaurin(a::Number, b::Number, z::Number)
     return S₁
 end
 
-function _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, z)
-    T = float(promote_type(typeof(a₁), typeof(a₂), typeof(a₃), typeof(b₁), typeof(b₂), typeof(z)))
-    S₀, S₁, j = one(T), one(T)+(a₁*a₂*a₃*z)/(b₁*b₂), 1
-    while errcheck(S₀, S₁, 10eps(real(T)))
-        rⱼ = ((a₁+j)*(a₂+j)*(a₃+j))/((b₁+j)*(b₂+j)*(j+1))
-        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
-        j += 1
-    end
-    return S₁
+function pFqmaclaurin(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
+    T1 = mapreduce(typeof, promote_type, α)
+    T2 = mapreduce(typeof, promote_type, β)
+    pFqmaclaurin(T1.(α), T2.(β), z; kwds...)
 end
 
-function pFqmaclaurin(a::AbstractVector{S}, b::AbstractVector{U}, z::V) where {S, U, V}
-    T = float(promote_type(S, U, V))
+function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V) where {p, q, S, U, V}
+    T = float(promote_type(eltype(a), eltype(b), V))
     S₀, S₁, j = one(T), one(T)+prod(a)*z/prod(b), 1
     while errcheck(S₀, S₁, 10eps(real(T)))
         rⱼ = inv(j+one(T))
-        for i=1:length(a) rⱼ *= a[i]+j end
-        for i=1:length(b) rⱼ /= b[i]+j end
+        for i=1:p rⱼ *= a[i]+j end
+        for i=1:q rⱼ /= b[i]+j end
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
         j += 1
     end
