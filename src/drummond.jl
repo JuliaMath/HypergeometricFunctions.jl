@@ -2,7 +2,7 @@
 # using Drummond's sequence transformation
 
 # ₀F₀(;z)
-function drummond0F0(z::T; kmax::Int = 10_000) where T
+function pFqdrummond(::Tuple{}, ::Tuple{}, z::T; kmax::Int = 10_000) where T
     if norm(z) < eps(real(T))
         return one(T)
     end
@@ -28,7 +28,8 @@ function drummond0F0(z::T; kmax::Int = 10_000) where T
 end
 
 # ₁F₀(α;z)
-function drummond1F0(α::T1, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqdrummond(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+    α = α[1]
     T = promote_type(T1, T2)
     absα = abs(T(α))
     if norm(z) < eps(real(T)) || norm(α) < eps(absα)
@@ -71,7 +72,8 @@ function drummond1F0(α::T1, z::T2; kmax::Int = 10_000) where {T1, T2}
 end
 
 # ₀F₁(β;z)
-function drummond0F1(β::T1, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqdrummond(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = 10_000) where {T1, T2}
+    β = β[1]
     T = promote_type(T1, T2)
     if norm(z) < eps(real(T))
         return one(T)
@@ -101,8 +103,9 @@ function drummond0F1(β::T1, z::T2; kmax::Int = 10_000) where {T1, T2}
 end
 
 # ₂F₀(α,β;z)
-function drummond2F0(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
-    T = promote_type(T1, T2, T3)
+function pFqdrummond(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+    (α, β) = α
+    T = promote_type(T1, T2)
     absα = abs(T(α))
     absβ = abs(T(β))
     if norm(z) < eps(real(T)) || norm(α*β) < eps(absα*absβ)
@@ -144,7 +147,9 @@ function drummond2F0(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T
 end
 
 # ₁F₁(α,β;z)
-function drummond1F1(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
+function pFqdrummond(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
+    α = α[1]
+    β = β[1]
     T = promote_type(T1, T2, T3)
     absα = abs(T(α))
     if norm(z) < eps(real(T)) || norm(α) < eps(absα)
@@ -195,8 +200,9 @@ function drummond1F1(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T
 end
 
 # ₀F₂(α,β;z)
-function drummond0F2(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
-    T = promote_type(T1, T2, T3)
+function pFqdrummond(::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = 10_000) where {T1, T2}
+    (α, β) = β
+    T = promote_type(T1, T2)
     if norm(z) < eps(real(T)) || norm(α) < eps(real(T)) || norm(β) < eps(real(T))
         return one(T)
     end
@@ -231,8 +237,10 @@ function drummond0F2(α::T1, β::T2, z::T3; kmax::Int = 10_000) where {T1, T2, T
 end
 
 # ₂F₁(α,β,γ;z)
-function drummond2F1(α::T1, β::T2, γ::T3, z::T4; kmax::Int = 10_000) where {T1, T2, T3, T4}
-    T = promote_type(T1, T2, T3, T4)
+function pFqdrummond(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
+    γ = β[1]
+    (α, β) = α
+    T = promote_type(T1, T2, T3)
     absα = abs(T(α))
     absβ = abs(T(β))
     if norm(z) < eps(real(T)) || norm(α*β) < eps(absα*absβ)
@@ -283,15 +291,21 @@ function drummond2F1(α::T1, β::T2, γ::T3, z::T4; kmax::Int = 10_000) where {T
 end
 
 # ₘFₙ(α;β;z)
-function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
-    T = promote_type(T1, T2, T3)
+function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kwds...) where {T1, T2, T3}
+    pFqdrummond(Tuple(α), Tuple(β), z; kwds...)
+end
+function pFqdrummond(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
+    T1 = mapreduce(typeof, promote_type, α)
+    T2 = mapreduce(typeof, promote_type, β)
+    pFqdrummond(T1.(α), T2.(β), z; kwds...)
+end
+function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_000) where {p, q, T1, T2, T3}
+    T = promote_type(eltype(α), eltype(β), T3)
     absα = abs.(T.(α))
     if norm(z) < eps(real(T)) || norm(prod(α)) < eps(prod(absα))
         return one(T)
     end
     ζ = inv(z)
-    p = length(α)
-    q = length(β)
     r = max(p+1, q+2)
     err = one(real(T))
     for j in 1:p
@@ -380,3 +394,11 @@ function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax
     end
     return isfinite(R[r+1]) ? R[r+1] : R[r]
 end
+
+@deprecate drummond0F0(x; kwds...) pFqdrummond((), (), x; kwds...) false
+@deprecate drummond1F0(α, x; kwds...) pFqdrummond((α, ), (), x; kwds...) false
+@deprecate drummond0F1(β, x; kwds...) pFqdrummond((), (β, ), x; kwds...) false
+@deprecate drummond2F0(α, β, x; kwds...) pFqdrummond((α, β), (), x; kwds...) false
+@deprecate drummond1F1(α, β, x; kwds...) pFqdrummond((α, ), (β, ), x; kwds...) false
+@deprecate drummond0F2(α, β, x; kwds...) pFqdrummond((), (α, β), x; kwds...) false
+@deprecate drummond2F1(α, β, γ, x; kwds...) pFqdrummond((α, β), (γ, ), x; kwds...) false

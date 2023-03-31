@@ -23,15 +23,15 @@ function _₁F₁(a, b, z; kwds...)
 end
 
 function _₁F₁general(a, b, z; kwds...)
-    if abs(z) > 10 # TODO: check this algorithmic parameter cutoff
+    if abs(z) > 10 # TODO: check this algorithmic parameter cutoff, determine when to use rational algorithms
         if isreal(z)
             if real(z) ≥ 0 # 13.7.1
-                return gamma(b)/gamma(a)*exp(z)*z^(a-b)*drummond2F0(1-a, b-a, inv(z); kwds...)
+                return gamma(b)/gamma(a)*exp(z)*z^(a-b)*pFqdrummond((1-a, b-a), (), inv(z); kwds...)
             else # 13.7.1 + 13.2.39
-                return gamma(b)/gamma(b-a)*(-z)^-a*drummond2F0(a, a-b+1, -inv(z); kwds...)
+                return gamma(b)/gamma(b-a)*(-z)^-a*pFqdrummond((a, a-b+1), (), -inv(z); kwds...)
             end
         else # 13.7.2
-            return gamma(b)/gamma(a)*exp(z)*z^(a-b)*drummond2F0(1-a, b-a, inv(z); kwds...) + gamma(b)/gamma(b-a)*(-z)^-a*drummond2F0(a, a-b+1, -inv(z); kwds...)
+            return gamma(b)/gamma(a)*exp(z)*z^(a-b)*pFqdrummond((1-a, b-a), (), inv(z); kwds...) + gamma(b)/gamma(b-a)*(-z)^-a*pFqdrummond((a, a-b+1), (), -inv(z); kwds...)
         end
     elseif real(z) ≥ 0
         return _₁F₁maclaurin(a, b, z; kwds...)
@@ -49,5 +49,5 @@ const M = _₁F₁
 Compute Tricomi's confluent hypergeometric function `U(a, b, z) ∼ z⁻ᵃ ₂F₀([a, a-b+1]; []; -z⁻¹)`.
 """
 function U(a, b, z; kwds...)
-    return z^-a*drummond2F0(a, a-b+1, -inv(z); kwds...)
+    return z^-a*pFqdrummond((a, a-b+1), (), -inv(z); kwds...)
 end

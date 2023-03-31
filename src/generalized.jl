@@ -50,7 +50,7 @@ function _₃F₂(a₁, a₂, a₃, b₁, b₂, z; kwds...)
     if abs(z) ≤ ρ
         _₃F₂maclaurin(a₁, a₂, a₃, b₁, b₂, float(z); kwds...)
     else
-        pFqweniger([a₁, a₂, a₃], [b₁, b₂], float(z); kwds...)
+        pFqweniger((a₁, a₂, a₃), (b₁, b₂), float(z); kwds...)
     end
 end
 _₃F₂(a₁, b₁, z; kwds...) = _₃F₂(1, 1, a₁, 2, b₁, z; kwds...)

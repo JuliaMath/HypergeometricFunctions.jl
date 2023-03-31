@@ -3,16 +3,22 @@
 
 # ₘFₙ(α;β;z)
 # γ ∉ ℕ
-function pFqweniger(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
-    T = promote_type(T1, T2, T3)
+function pFqweniger(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kwds...) where {T1, T2, T3}
+    pFqweniger(Tuple(α), Tuple(β), z; kwds...)
+end
+function pFqweniger(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
+    T1 = mapreduce(typeof, promote_type, α)
+    T2 = mapreduce(typeof, promote_type, β)
+    pFqweniger(T1.(α), T2.(β), z; kwds...)
+end
+function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_000) where {p, q, T1, T2, T3}
+    T = promote_type(eltype(α), eltype(β), T3)
     absα = abs.(T.(α))
-    if norm(z) < eps(real(T)) || norm(prod(α)) < eps(prod(absα))
+    if norm(z) < eps(real(T)) || norm(prod(α)) < eps(real(T)(prod(absα)))
         return one(T)
     end
     γ = T(3)/2
     ζ = inv(z)
-    p = length(α)
-    q = length(β)
     r = max(p, q)+3
     ρ = max(p, q)+1
     C = zeros(T, r)
