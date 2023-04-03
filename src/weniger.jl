@@ -1,6 +1,63 @@
 # Rational approximations to generalized hypergeometric functions
 # using Weniger's sequence transformation
 
+# ₀F₀(;z), γ = 2.
+function pFqweniger(::Tuple{}, ::Tuple{}, z::T; kmax::Int = 10_000) where T
+    if norm(z) < eps(real(T))
+        return one(T)
+    end
+    ζ = inv(z)
+    Nlo = ζ
+    Dlo = ζ
+    Tlo = Nlo/Dlo
+    Nhi = (2ζ - 1)*Nlo + 2ζ
+    Dhi = (2ζ - 1)*Dlo
+    Thi = Nhi/Dhi
+    k = 1
+    while k < kmax && errcheck(Tlo, Thi, 10eps(real(T)))
+        Nhi, Nlo = (4k+2)*ζ*Nhi + Nlo, Nhi
+        Dhi, Dlo = (4k+2)*ζ*Dhi + Dlo, Dhi
+        Thi, Tlo = Nhi/Dhi, Thi
+        k += 1
+    end
+    return isfinite(Thi) ? Thi : Tlo
+end
+
+# ₁F₀(α;z), γ = 2.
+function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+    α = α[1]
+    T = promote_type(T1, T2)
+    absα = abs(T(α))
+    if norm(z) < eps(real(T)) || norm(α) < eps(absα)
+        return one(T)
+    end
+    ζ = inv(z)
+    Nlo = ζ/α
+    Dlo = ζ/α
+    Tlo = Nlo/Dlo
+    Nhi = (2ζ - (α+1))*Nlo + 2ζ
+    Dhi = (2ζ - (α+1))*Dlo
+    Thi = Nhi/Dhi
+    if norm(α+1) < eps(absα+1)
+        return Thi
+    end
+    Nhi /= α+1
+    Dhi /= α+1
+    k = 1
+    while k < kmax && errcheck(Tlo, Thi, 10eps(real(T)))
+        Nhi, Nlo = (2k+1)*(2ζ-1)*Nhi - (k-α)*Nlo, Nhi
+        Dhi, Dlo = (2k+1)*(2ζ-1)*Dhi - (k-α)*Dlo, Dhi
+        Thi, Tlo = Nhi/Dhi, Thi
+        if norm(α+k+1) < eps(absα+k+1)
+            return Thi
+        end
+        Nhi /= α+k+1
+        Dhi /= α+k+1
+        k += 1
+    end
+    return isfinite(Thi) ? Thi : Tlo
+end
+
 # ₘFₙ(α;β;z)
 # γ ∉ ℕ
 function pFqweniger(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kwds...) where {T1, T2, T3}
