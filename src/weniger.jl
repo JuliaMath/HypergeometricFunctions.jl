@@ -58,14 +58,122 @@ function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {
     return isfinite(Thi) ? Thi : Tlo
 end
 
+# ₂F₀(α,β;z), algorithm γ = 2.
+function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+    (α, β) = α
+    T = promote_type(T1, T2)
+    absα = abs(T(α))
+    absβ = abs(T(β))
+    if norm(z) < eps(real(T)) || norm(α*β) < eps(absα*absβ)
+        return one(T)
+    end
+    ζ = inv(z)
+    Nlo = ζ/(α*β)
+    Dlo = ζ/(α*β)
+    Tlo = Nlo/Dlo
+    a0 = (α+1)*(β+1)
+    Nmid = (2ζ-a0)*Nlo + 2ζ
+    Dmid = (2ζ-a0)*Dlo
+    Tmid = Nmid/Dmid
+    if norm(a0) < eps((absα+1)*(absβ+1))
+        return Tmid
+    end
+    Nmid /= a0
+    Dmid /= a0
+    k = 1
+    a0 = (α+2)*(β+2)
+    a1 = 2*(2-(2*α*β+α+β+1))
+    Nhi = -a0*Nmid - a1*(Nmid+Nlo) + 6ζ*(Nmid - Nlo) - 6ζ
+    Dhi = -a0*Dmid - a1*(Dmid+Dlo) + 6ζ*(Dmid - Dlo)
+    Thi = Nhi/Dhi
+    if norm(a0) < eps((absα+2)*(absβ+2))
+        return Thi
+    end
+    Nhi /= a0
+    Dhi /= a0
+    k = 2
+    while k < 3 || (k < kmax && errcheck(Tmid, Thi, 10eps(real(T))))
+        a0 = (α+k+1)*(β+k+1)
+        a1 = T(2*k*(2*k*k-(2*α*β+α+β+1)))/(2*k-1)
+        a2 = T((α+1-k)*(β+1-k)*(2*k+1))/(2*k-1)
+        Nhi, Nmid, Nlo = -a0*Nhi - a1*(Nhi+Nmid) - a2*(Nmid+Nlo) + (4k+2)*ζ*(Nhi-Nmid), Nhi, Nmid
+        Dhi, Dmid, Dlo = -a0*Dhi - a1*(Dhi+Dmid) - a2*(Dmid+Dlo) + (4k+2)*ζ*(Dhi-Dmid), Dhi, Dmid
+        Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
+        if norm(a0) < eps((absα+k+1)*(absβ+k+1))
+            return Thi
+        end
+        Nhi /= a0
+        Dhi /= a0
+        k += 1
+    end
+    return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
+end
+
+# ₂F₁(α,β,γ;z), algorithm γ = 2.
+function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
+    γ = β[1]
+    (α, β) = α
+    T = promote_type(T1, T2, T3)
+    absα = abs(T(α))
+    absβ = abs(T(β))
+    if norm(z) < eps(real(T)) || norm(α*β) < eps(absα*absβ)
+        return one(T)
+    end
+    ζ = inv(z)
+    Nlo = γ*ζ/(α*β)
+    Dlo = γ*ζ/(α*β)
+    Tlo = Nlo/Dlo
+    a0 = (α+1)*(β+1)
+    b0 = 2*(γ+1)
+    Nmid = (b0*ζ-a0)*Nlo + b0*ζ
+    Dmid = (b0*ζ-a0)*Dlo
+    Tmid = Nmid/Dmid
+    if norm(a0) < eps((absα+1)*(absβ+1))
+        return Tmid
+    end
+    Nmid /= a0
+    Dmid /= a0
+    k = 1
+    a0 = (α+2)*(β+2)
+    a1 = 2*(2-(2*α*β+α+β+1))
+    b0 = 6*(γ+2)
+    b1 = -6*γ
+    Nhi = -a0*Nmid - a1*(Nmid+Nlo) + ζ*(b0*Nmid + b1*Nlo) + b1*ζ
+    Dhi = -a0*Dmid - a1*(Dmid+Dlo) + ζ*(b0*Dmid + b1*Dlo)
+    Thi = Nhi/Dhi
+    if norm(a0) < eps((absα+2)*(absβ+2))
+        return Thi
+    end
+    Nhi /= a0
+    Dhi /= a0
+    k = 2
+    while k < 3 || (k < kmax && errcheck(Tmid, Thi, 10eps(real(T))))
+        a0 = (α+k+1)*(β+k+1)
+        a1 = T(2*k*(2*k*k-(2*α*β+α+β+1)))/(2*k-1)
+        a2 = T((α+1-k)*(β+1-k)*(2*k+1))/(2*k-1)
+        b0 = (4k+2)*(γ+k+1)
+        b1 = (4k+2)*(k-γ-1)
+        Nhi, Nmid, Nlo = -a0*Nhi - a1*(Nhi+Nmid) - a2*(Nmid+Nlo) + ζ*(b0*Nhi + b1*Nmid), Nhi, Nmid
+        Dhi, Dmid, Dlo = -a0*Dhi - a1*(Dhi+Dmid) - a2*(Dmid+Dlo) + ζ*(b0*Dhi + b1*Dmid), Dhi, Dmid
+        Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
+        if norm(a0) < eps((absα+k+1)*(absβ+k+1))
+            return Thi
+        end
+        Nhi /= a0
+        Dhi /= a0
+        k += 1
+    end
+    return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
+end
+
 # ₘFₙ(α;β;z)
 # γ ∉ ℕ
 function pFqweniger(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kwds...) where {T1, T2, T3}
     pFqweniger(Tuple(α), Tuple(β), z; kwds...)
 end
 function pFqweniger(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
-    T1 = mapreduce(typeof, promote_type, α)
-    T2 = mapreduce(typeof, promote_type, β)
+    T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
+    T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
     pFqweniger(T1.(α), T2.(β), z; kwds...)
 end
 function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_000) where {p, q, T1, T2, T3}
@@ -82,7 +190,7 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_
     C[1] = one(T)
     Cρ = zeros(T, ρ+2)
     Cρ[ρ+2] = one(T)
-    for s in ρ:-1:0
+    @inbounds for s in ρ:-1:0
         Cρ[s+1] = -(s+1)*Cρ[s+2]/(ρ+1-s)
     end
     C1 = zeros(T, ρ+1)
@@ -93,17 +201,17 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_
     C3[ρ+2] = one(T)/pochhammer(γ-ρ, ρ+2)
     P = zeros(T, p+2)
     t = γ
-    for j in 1:p
+    @inbounds for j in 1:p
         t *= α[j]+1
     end
     P[1] = t
     err = abs(γ)
-    for j in 1:p
+    @inbounds for j in 1:p
         err *= absα[j]+1
     end
     Q = zeros(T, q+2)
     t = one(T)
-    for j in 1:q
+    @inbounds for j in 1:q
         t *= β[j]+1
     end
     Q[1] = 2t
@@ -120,7 +228,7 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_
     ΔD[r] = D[r+1]/pochhammer(γ-ρ-1, ρ)
     R[r+1] = N[r+1]/D[r+1]
     k = 0
-    while k < r || (k < kmax && errcheck(R[r], R[r+1], 10eps(real(T))))
+    @inbounds while k < r || (k < kmax && errcheck(R[r], R[r+1], 10eps(real(T))))
         for j in 1:r
             N[j] = N[j+1]
             D[j] = D[j+1]

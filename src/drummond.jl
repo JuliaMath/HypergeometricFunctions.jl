@@ -295,8 +295,8 @@ function pFqdrummond(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3; kwds
     pFqdrummond(Tuple(α), Tuple(β), z; kwds...)
 end
 function pFqdrummond(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
-    T1 = mapreduce(typeof, promote_type, α)
-    T2 = mapreduce(typeof, promote_type, β)
+    T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
+    T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
     pFqdrummond(T1.(α), T2.(β), z; kwds...)
 end
 function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_000) where {p, q, T1, T2, T3}
@@ -307,30 +307,22 @@ function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10
     end
     ζ = inv(z)
     r = max(p+1, q+2)
-    err = one(real(T))
-    for j in 1:p
-        err *= absα[j]+1
-    end
-    P = zeros(T, p+1)
-    t = one(T)
-    for j in 1:p
-        t *= α[j]+1
-    end
-    P[1] = t
-    Q = zeros(T, q+2)
-    t = one(T)
-    for j in 1:q
-        t *= β[j]+1
-    end
-    Q[1] = 2t
     N = zeros(T, r+1)
     D = zeros(T, r+1)
     R = zeros(T, r+1)
     N[r+1] = prod(β)*ζ/prod(α)
     D[r+1] = prod(β)*ζ/prod(α)
     R[r+1] = N[r+1]/D[r+1]
+    absα = absα .+ 1
+    α = α .+ 1
+    β = β .+ 1
+    err = real(T)(prod(absα))
+    P = zeros(T, p+1)
+    P[1] = T(prod(α))
+    Q = zeros(T, q+2)
+    Q[1] = T(2*prod(β))
     k = 0
-    while k < r || (k < kmax && errcheck(R[r], R[r+1], 10eps(real(T))))
+    @inbounds while k < r || (k < kmax && errcheck(R[r], R[r+1], 10eps(real(T))))
         for j in 1:r
             N[j] = N[j+1]
             D[j] = D[j+1]
@@ -366,25 +358,18 @@ function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10
         N[r+1] /= P[1]
         D[r+1] /= P[1]
         k += 1
-        err = one(real(T))
-        for j in 1:p
-            err *= absα[j]+k+1
-        end
-        t = one(T)
-        for j in 1:p
-            t *= α[j]+k+1
-        end
+        absα = absα .+ 1
+        α = α .+ 1
+        β = β .+ 1
+        err = real(T)(prod(absα))
+        t = T(prod(α))
         for j in 1:p
             s = ((k-j+1)*t - k*P[j])/j
             P[j] = t
             t = s
         end
         P[p+1] = t
-        t = one(T)
-        for j in 1:q
-            t *= β[j]+k+1
-        end
-        t *= k+2
+        t = T((k+2)*prod(β))
         for j in 1:q+1
             s = ((k-j+1)*t - k*Q[j])/j
             Q[j] = t
