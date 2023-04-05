@@ -404,8 +404,8 @@ function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
     S₀, S₁, j = one(T), one(T)+a*b*z/c, 1
     while errcheck(S₀, S₁, 10eps(real(T)))
-        rⱼ = (a+j)/(j+1)*(b+j)/(c+j)
-        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
+        rⱼ = (a+j)*z/(j+1)*(b+j)/(c+j)
+        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ
         j += 1
     end
     return S₁
@@ -500,16 +500,16 @@ function _₁F₁maclaurin(a::Number, b::Number, z::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(z)))
     S₀, S₁, j = one(T), one(T)+a*z/b, 1
     while errcheck(S₀, S₁, 10eps(real(T)))
-        rⱼ = (a+j)/((b+j)*(j+1))
-        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
+        rⱼ = (a+j)*z/((b+j)*(j+1))
+        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ
         j += 1
     end
     return S₁
 end
 
 function pFqmaclaurin(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
-    T1 = mapreduce(typeof, promote_type, α)
-    T2 = mapreduce(typeof, promote_type, β)
+    T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
+    T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
     pFqmaclaurin(T1.(α), T2.(β), z; kwds...)
 end
 
@@ -517,10 +517,10 @@ function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V) where {p, q, S, U,
     T = float(promote_type(eltype(a), eltype(b), V))
     S₀, S₁, j = one(T), one(T)+prod(a)*z/prod(b), 1
     while errcheck(S₀, S₁, 10eps(real(T)))
-        rⱼ = inv(j+one(T))
+        rⱼ = z/(j+one(T))
         for i=1:p rⱼ *= a[i]+j end
         for i=1:q rⱼ /= b[i]+j end
-        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ*z
+        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ
         j += 1
     end
     return S₁

@@ -1,7 +1,7 @@
 using HypergeometricFunctions, Test
 import LinearAlgebra: norm
-import HypergeometricFunctions: _₂F₁general, iswellpoised, M, U,
-                                pFqdrummond, pFqweniger
+import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
+                                _₂F₁general, pFqdrummond, pFqweniger
 
 const rtol = 1.0e-3
 const NumberType = Float64
