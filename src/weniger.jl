@@ -71,7 +71,7 @@ function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) whe
     Nlo = ζ/(α*β)
     Dlo = ζ/(α*β)
     Tlo = Nlo/Dlo
-    a0 = (α+1)*(β+1)
+    a0 = T((α+1)*(β+1))
     Nmid = (2ζ-a0)*Nlo + 2ζ
     Dmid = (2ζ-a0)*Dlo
     Tmid = Nmid/Dmid
@@ -81,10 +81,14 @@ function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) whe
     Nmid /= a0
     Dmid /= a0
     k = 1
-    a0 = (α+2)*(β+2)
-    a1 = 2*(2-(2*α*β+α+β+1))
-    Nhi = -a0*Nmid - a1*(Nmid+Nlo) + 6ζ*(Nmid - Nlo) - 6ζ
-    Dhi = -a0*Dmid - a1*(Dmid+Dlo) + 6ζ*(Dmid - Dlo)
+    a0 = T((α+2)*(β+2))
+    #a1 = T(2*(2-(2*α*β+α+β+1)))
+    t0 = 6ζ-6+3*α*β
+    t1 = 6ζ-2*T(2*α*β+α+β-1)
+    Nhi = t0*Nmid - t1*Nlo - 6ζ
+    Dhi = t0*Dmid - t1*Dlo
+    #Nhi = -a0*Nmid - a1*(Nmid+Nlo) + 6ζ*(Nmid - Nlo) - 6ζ
+    #Dhi = -a0*Dmid - a1*(Dmid+Dlo) + 6ζ*(Dmid - Dlo)
     Thi = Nhi/Dhi
     if norm(a0) < eps((absα+2)*(absβ+2))
         return Thi
@@ -93,11 +97,15 @@ function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) whe
     Dhi /= a0
     k = 2
     while k < 3 || (k < kmax && errcheck(Tmid, Thi, 10eps(real(T))))
-        a0 = (α+k+1)*(β+k+1)
-        a1 = T(2*k*(2*k*k-(2*α*β+α+β+1)))/(2*k-1)
-        a2 = T((α+1-k)*(β+1-k)*(2*k+1))/(2*k-1)
-        Nhi, Nmid, Nlo = -a0*Nhi - a1*(Nhi+Nmid) - a2*(Nmid+Nlo) + (4k+2)*ζ*(Nhi-Nmid), Nhi, Nmid
-        Dhi, Dmid, Dlo = -a0*Dhi - a1*(Dhi+Dmid) - a2*(Dmid+Dlo) + (4k+2)*ζ*(Dhi-Dmid), Dhi, Dmid
+        a0 = T((α+k+1)*(β+k+1))
+        #a1 = T((2*k*k-(2*α*β+α+β+1)))*T(2k)/T(2k-1)
+        t0 = (4k+2)*ζ-T((k*(α+β+3k)-(α+1)*(β+1)))*T(2k+1)/T(2k-1)
+        t1 = (4k+2)*ζ+T(k*(3k-α-β)-(α+1)*(β+1))
+        a2 = T((α+1-k)*(β+1-k))*T(2k+1)/T(2k-1)
+        Nhi, Nmid, Nlo = t0*Nhi - t1*Nmid - a2*Nlo, Nhi, Nmid
+        Dhi, Dmid, Dlo = t0*Dhi - t1*Dmid - a2*Dlo, Dhi, Dmid
+        #Nhi, Nmid, Nlo = -a0*Nhi - a1*(Nhi+Nmid) - a2*(Nmid+Nlo) + (4k+2)*ζ*(Nhi-Nmid), Nhi, Nmid
+        #Dhi, Dmid, Dlo = -a0*Dhi - a1*(Dhi+Dmid) - a2*(Dmid+Dlo) + (4k+2)*ζ*(Dhi-Dmid), Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
         if norm(a0) < eps((absα+k+1)*(absβ+k+1))
             return Thi
@@ -123,8 +131,8 @@ function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000)
     Nlo = γ*ζ/(α*β)
     Dlo = γ*ζ/(α*β)
     Tlo = Nlo/Dlo
-    a0 = (α+1)*(β+1)
-    b0 = 2*(γ+1)
+    a0 = T((α+1)*(β+1))
+    b0 = T(2*(γ+1))
     Nmid = (b0*ζ-a0)*Nlo + b0*ζ
     Dmid = (b0*ζ-a0)*Dlo
     Tmid = Nmid/Dmid
@@ -134,12 +142,16 @@ function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000)
     Nmid /= a0
     Dmid /= a0
     k = 1
-    a0 = (α+2)*(β+2)
-    a1 = 2*(2-(2*α*β+α+β+1))
-    b0 = 6*(γ+2)
-    b1 = -6*γ
-    Nhi = -a0*Nmid - a1*(Nmid+Nlo) + ζ*(b0*Nmid + b1*Nlo) + b1*ζ
-    Dhi = -a0*Dmid - a1*(Dmid+Dlo) + ζ*(b0*Dmid + b1*Dlo)
+    a0 = T((α+2)*(β+2))
+    #a1 = T(2*(2-(2*α*β+α+β+1)))
+    b0 = T(6*(γ+2))
+    b1 = T(-6*γ)
+    t0 = b0*ζ-6+3*α*β
+    t1 = b1*ζ+2*T(2*α*β+α+β-1)
+    Nhi = t0*Nmid + t1*Nlo + b1*ζ
+    Dhi = t0*Dmid + t1*Dlo
+    #Nhi = -a0*Nmid - a1*(Nmid+Nlo) + ζ*(b0*Nmid + b1*Nlo) + b1*ζ
+    #Dhi = -a0*Dmid - a1*(Dmid+Dlo) + ζ*(b0*Dmid + b1*Dlo)
     Thi = Nhi/Dhi
     if norm(a0) < eps((absα+2)*(absβ+2))
         return Thi
@@ -148,13 +160,17 @@ function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000)
     Dhi /= a0
     k = 2
     while k < 3 || (k < kmax && errcheck(Tmid, Thi, 10eps(real(T))))
-        a0 = (α+k+1)*(β+k+1)
-        a1 = T(2*k*(2*k*k-(2*α*β+α+β+1)))/(2*k-1)
-        a2 = T((α+1-k)*(β+1-k)*(2*k+1))/(2*k-1)
-        b0 = (4k+2)*(γ+k+1)
-        b1 = (4k+2)*(k-γ-1)
-        Nhi, Nmid, Nlo = -a0*Nhi - a1*(Nhi+Nmid) - a2*(Nmid+Nlo) + ζ*(b0*Nhi + b1*Nmid), Nhi, Nmid
-        Dhi, Dmid, Dlo = -a0*Dhi - a1*(Dhi+Dmid) - a2*(Dmid+Dlo) + ζ*(b0*Dhi + b1*Dmid), Dhi, Dmid
+        a0 = T((α+k+1)*(β+k+1))
+        #a1 = T((2*k*k-(2*α*β+α+β+1)))*T(2k)/T(2k-1)
+        a2 = T((α+1-k)*(β+1-k))*T(2k+1)/T(2k-1)
+        b0 = T(4k+2)*T(γ+k+1)
+        b1 = T(4k+2)*T(k-γ-1)
+        t0 = b0*ζ-T((k*(α+β+3k)-(α+1)*(β+1)))*T(2k+1)/T(2k-1)
+        t1 = b1*ζ-T(k*(3k-α-β)-(α+1)*(β+1))
+        Nhi, Nmid, Nlo = t0*Nhi + t1*Nmid - a2*Nlo, Nhi, Nmid
+        Dhi, Dmid, Dlo = t0*Dhi + t1*Dmid - a2*Dlo, Dhi, Dmid
+        #Nhi, Nmid, Nlo = -a0*Nhi - a1*(Nhi+Nmid) - a2*(Nmid+Nlo) + ζ*(b0*Nhi + b1*Nmid), Nhi, Nmid
+        #Dhi, Dmid, Dlo = -a0*Dhi - a1*(Dhi+Dmid) - a2*(Dmid+Dlo) + ζ*(b0*Dhi + b1*Dmid), Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
         if norm(a0) < eps((absα+k+1)*(absβ+k+1))
             return Thi
