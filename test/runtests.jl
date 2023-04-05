@@ -45,15 +45,26 @@ const NumberType = Float64
     end
 
     @testset "_₂F₁ argument unity" begin
-        for (a, b, c, z) in ((1, 2, 3, 1), (3, 5, 7, 1.0), (1, 8537, 6042, 1.0))
+        for (a, b, c, z) in ((1, 2, 3, 1), (1, 2, 4, 1), (3, 5, 7, 1.0), (1, 8537, 6042, 1.0))
             twoFone = _₂F₁(a, b, c, z)
             twoFonep = _₂F₁(a, b, c, z; method = :positive)
             if iswellpoised(a, b, c)
-                @test isfinite(twoFone) == true
-                @test isfinite(twoFonep) == true
+                @test isfinite(twoFone)
+                @test isfinite(twoFonep)
             else
-                @test isinf(twoFone) == true
-                @test isinf(twoFonep) == true
+                @test isinf(twoFone)
+                @test isinf(twoFonep)
+            end
+        end
+        for (a, b, c, z) in ((1, 2+im, 3, 1), (1, 2+im, 3+im, 1), (1, 2 + 1im, 2, 1))
+            if isalmostwellpoised(a, b, c)
+                if a+b==c
+                    @test isinf(_₂F₁(a, b, c, z))
+                else
+                    @test isnan(_₂F₁(a, b, c, z))
+                end
+            else
+                @test isinf(_₂F₁(a, b, c, z))
             end
         end
     end
@@ -438,6 +449,19 @@ end
             z = complex(x, y)
             @test pFqdrummond((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
             @test pFqweniger((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
+        end
+    end
+
+    @testset "The points exp(±im*π/3)" begin
+        for (S, T) in ((Float32, Float64),
+                       (Float64, BigFloat))
+            zS = exp(im*S(π)/3)
+            zT = exp(im*T(π)/3)
+            @test _₂F₁(1, 2, 3, zS) ≈ _₂F₁(1, 2, 3, zT)
+            @test _₂F₁(1, 2, 3, conj(zS)) ≈ _₂F₁(1, 2, 3, conj(zT))
+            @test _₂F₁(1, 2, 3, zS) == conj(_₂F₁(1, 2, 3, conj(zS)))
+            @test pFq((1, 2+im), (S(3.5), ), zS) ≈ pFq((1, 2+im), (T(3.5), ), zT)
+            @test pFq((1, 2+im), (S(3.5), ), conj(zS)) ≈ pFq((1, 2+im), (T(3.5), ), conj(zT))
         end
     end
 
