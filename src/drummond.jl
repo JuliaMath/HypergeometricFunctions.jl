@@ -2,7 +2,7 @@
 # using Drummond's sequence transformation
 
 # ₀F₀(;z)
-function pFqdrummond(::Tuple{}, ::Tuple{}, z::T; kmax::Int = 10_000) where T
+function pFqdrummond(::Tuple{}, ::Tuple{}, z::T; kmax::Int = KMAX) where T
     if norm(z) < eps(real(T))
         return one(T)
     end
@@ -28,7 +28,7 @@ function pFqdrummond(::Tuple{}, ::Tuple{}, z::T; kmax::Int = 10_000) where T
 end
 
 # ₁F₀(α;z)
-function pFqdrummond(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqdrummond(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1, T2}
     α = α[1]
     T = promote_type(T1, T2)
     absα = abs(T(α))
@@ -72,7 +72,7 @@ function pFqdrummond(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where 
 end
 
 # ₀F₁(β;z)
-function pFqdrummond(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqdrummond(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = KMAX) where {T1, T2}
     β = β[1]
     T = promote_type(T1, T2)
     if norm(z) < eps(real(T))
@@ -103,7 +103,7 @@ function pFqdrummond(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = 10_000) where 
 end
 
 # ₂F₀(α,β;z)
-function pFqdrummond(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqdrummond(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1, T2}
     (α, β) = α
     T = promote_type(T1, T2)
     absα = abs(T(α))
@@ -147,7 +147,7 @@ function pFqdrummond(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) wh
 end
 
 # ₁F₁(α,β;z)
-function pFqdrummond(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
+function pFqdrummond(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) where {T1, T2, T3}
     α = α[1]
     β = β[1]
     T = promote_type(T1, T2, T3)
@@ -200,7 +200,7 @@ function pFqdrummond(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000) wh
 end
 
 # ₀F₂(α,β;z)
-function pFqdrummond(::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqdrummond(::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = KMAX) where {T1, T2}
     (α, β) = β
     T = promote_type(T1, T2)
     if norm(z) < eps(real(T)) || norm(α) < eps(real(T)) || norm(β) < eps(real(T))
@@ -237,7 +237,7 @@ function pFqdrummond(::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = 10_000) wh
 end
 
 # ₂F₁(α,β,γ;z)
-function pFqdrummond(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
+function pFqdrummond(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) where {T1, T2, T3}
     γ = β[1]
     (α, β) = α
     T = promote_type(T1, T2, T3)
@@ -299,7 +299,7 @@ function pFqdrummond(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {
     T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
     pFqdrummond(T1.(α), T2.(β), z; kwds...)
 end
-function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_000) where {p, q, T1, T2, T3}
+function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMAX) where {p, q, T1, T2, T3}
     T = promote_type(eltype(α), eltype(β), T3)
     absα = abs.(T.(α))
     if norm(z) < eps(real(T)) || norm(prod(α)) < eps(prod(absα))

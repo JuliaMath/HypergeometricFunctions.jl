@@ -9,6 +9,8 @@ using DualNumbers, LinearAlgebra, SpecialFunctions
 
 export _₁F₁, _₂F₁, _₃F₂, pFq
 
+const KMAX = 1_000_000
+
 include("specialfunctions.jl")
 include("gauss.jl")
 include("confluent.jl")

@@ -2,7 +2,7 @@
 # using Weniger's sequence transformation
 
 # ₀F₀(;z), γ = 2.
-function pFqweniger(::Tuple{}, ::Tuple{}, z::T; kmax::Int = 10_000) where T
+function pFqweniger(::Tuple{}, ::Tuple{}, z::T; kmax::Int = KMAX) where T
     if norm(z) < eps(real(T))
         return one(T)
     end
@@ -24,7 +24,7 @@ function pFqweniger(::Tuple{}, ::Tuple{}, z::T; kmax::Int = 10_000) where T
 end
 
 # ₁F₀(α;z), γ = 2.
-function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1, T2}
     α = α[1]
     T = promote_type(T1, T2)
     absα = abs(T(α))
@@ -59,7 +59,7 @@ function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {
 end
 
 # ₂F₀(α,β;z), algorithm γ = 2.
-function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) where {T1, T2}
+function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1, T2}
     (α, β) = α
     T = promote_type(T1, T2)
     absα = abs(T(α))
@@ -118,7 +118,7 @@ function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = 10_000) whe
 end
 
 # ₂F₁(α,β,γ;z), algorithm γ = 2.
-function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = 10_000) where {T1, T2, T3}
+function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) where {T1, T2, T3}
     γ = β[1]
     (α, β) = α
     T = promote_type(T1, T2, T3)
@@ -192,7 +192,7 @@ function pFqweniger(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p
     T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
     pFqweniger(T1.(α), T2.(β), z; kwds...)
 end
-function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = 10_000) where {p, q, T1, T2, T3}
+function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMAX) where {p, q, T1, T2, T3}
     T = promote_type(eltype(α), eltype(β), T3)
     absα = abs.(T.(α))
     if norm(z) < eps(real(T)) || norm(prod(α)) < eps(real(T)(prod(absα)))
