@@ -5,6 +5,19 @@ using OpenLibm_jll
 
 @inline errcheck(x, y, tol) = isfinite(x) && isfinite(y) && (norm2(x-y) > max(norm2(x), norm2(y))*tol)
 
+kind2string(::Val{0}) = "₀"
+kind2string(::Val{1}) = "₁"
+kind2string(::Val{2}) = "₂"
+kind2string(::Val{3}) = "₃"
+kind2string(::Val{4}) = "₄"
+kind2string(::Val{5}) = "₅"
+kind2string(::Val{6}) = "₆"
+kind2string(::Val{7}) = "₇"
+kind2string(::Val{8}) = "₈"
+kind2string(::Val{9}) = "₉"
+kind2string(::Val{p}) where p = kind2string(Val{div(p, 10)}())*kind2string(Val{rem(p, 10)}())
+pFq2string(::Val{p}, ::Val{q}) where {p, q} = kind2string(Val{p}())*"F"*kind2string(Val{q}())
+
 # Same as in FastTransforms.jl
 """
 Pochhammer symbol ``(x)_n = \\frac{\\Gamma(x+n)}{\\Gamma(x)}`` for the rising factorial.
@@ -318,7 +331,7 @@ end
 function Bone(a, b, c, w, m::Int, ϵ)
     βₙ, γₙ = reconeβ₀(a, b, c, w, m, ϵ)*one(w), reconeγ₀(a, b, c, w, m, ϵ)*w
     ret, n = βₙ, 0
-    while abs(βₙ) > 10abs(ret)*eps() || n ≤ 0
+    while abs(βₙ) > 8abs(ret)*eps() || n ≤ 0
         βₙ = (a+m+n+ϵ)*(b+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(b+m+n)/(m+n+1) - (a+m+n) - (b+m+n) - ϵ + (a+m+n+ϵ)*(b+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))
         ret += βₙ
         γₙ *= (a+m+n)*(b+m+n)/((m+n+1)*(n+1-ϵ))*w
@@ -383,7 +396,7 @@ function BInf(a, b, c, win, m::Int, ϵ)
     w = win
     βₙ, γₙ = recInfβ₀(a, b, c, win, m, ϵ)*one(w), recInfγ₀(a, b, c, win, m, ϵ)*w
     ret, n = βₙ, 0
-    while abs(βₙ) > 10abs(ret)*eps() || n ≤ 0
+    while abs(βₙ) > 8abs(ret)*eps() || n ≤ 0
         βₙ = (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(1-c+a+m+n)/(m+n+1) - (a+m+n) - (1-c+a+m+n) - ϵ + (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))
         ret += βₙ
         γₙ *= (a+m+n)*(1-c+a+m+n)/((m+n+1)*(n+1-ϵ))*w
@@ -403,7 +416,7 @@ end
 function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
     S₀, S₁, j = one(T), one(T)+a*b*z/c, 1
-    while errcheck(S₀, S₁, 10eps(real(T)))
+    while errcheck(S₀, S₁, 8eps(real(T)))
         rⱼ = (a+j)*z/(j+1)*(b+j)/(c+j)
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ
         j += 1
@@ -414,7 +427,7 @@ end
 function _₂F₁maclaurinalt(a::Number, b::Number, c::Number, z::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
     C, S, j = one(T), one(T), 0
-    while abs(C) > 10abs(S)*eps(real(T)) || j ≤ 1
+    while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
         C *= (a+j)/(j+1)*(b+j)/(c+j)*z
         S += C
         j += 1
@@ -426,7 +439,7 @@ function _₂F₁continuation(s::Number, t::Number, c::Number, z₀::Number, z::
     T = float(promote_type(typeof(s), typeof(t), typeof(c), typeof(z₀), typeof(z)))
     izz₀, d0, d1 = inv(z-z₀), one(T), s/(2s-t+one(T))*((s+1)*(1-2z₀)+(t+1)*z₀-c)
     S₀, S₁, izz₀j, j = one(T), one(T)+d1*izz₀, izz₀, 2
-    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 2
+    while errcheck(S₀, S₁, 8eps(real(T))) || j ≤ 2
         d0, d1, izz₀j = d1, (j+s-one(T))/j/(j+2s-t)*(((j+s)*(1-2z₀)+(t+1)*z₀-c)*d1 + z₀*(1-z₀)*(j+s-2)*d0), izz₀j*izz₀
         S₀, S₁ = S₁, S₁+d1*izz₀j
         j += 1
@@ -444,7 +457,7 @@ function _₂F₁continuationalt(a::Number, c::Number, z₀::Number, z::Number)
     cⱼ += 2/one(T)-one(T)/a
     C = a*izz₀
     S₁, j = S₀+(e1*cⱼ-f1)*C, 2
-    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 2
+    while errcheck(S₀, S₁, 8eps(real(T))) || j ≤ 2
         f0, f1 = f1, (((j+a)*(1-2z₀)+(2a+1)*z₀-c)*f1+z₀*(1-z₀)*(j-1)*f0+(1-2z₀)*e1+2z₀*(1-z₀)*e0)/j
         e0, e1 = e1, (((j+a)*(1-2z₀)+(2a+1)*z₀-c)*e1+z₀*(1-z₀)*(j-1)*e0)/j
         C *= (a+j-1)*izz₀/j
@@ -459,7 +472,7 @@ function _₂F₁logsum(a::Number, b::Number, z::Number, w::Number, s::Int)
     T = float(promote_type(typeof(a), typeof(b), typeof(z), typeof(w)))
     cⱼ = 2digamma(one(T))-digamma(a)-digamma(b)+s*log1p(-z)
     C, S, j = one(T), cⱼ, 0
-    while abs(C) > 10abs(S)*eps(real(T)) || j ≤ 1
+    while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
         C *= (a+j)/(j+1)^2*(b+j)*w
         cⱼ += 2/(j+one(T))-one(T)/(a+j)-one(T)/(b+j)
         S += C*cⱼ
@@ -472,7 +485,7 @@ function _₂F₁logsumalt(a::Number, b::Number, z::Number, w::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(z), typeof(w)))
     d, cⱼ = one(T)-b, 2digamma(one(T))-digamma(a)-digamma(b)-log(-w)
     C, S, j = one(T), cⱼ, 0
-    while abs(C) > 10abs(S)*eps(real(T)) || j ≤ 1
+    while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
         C *= (a+j)/(j+1)^2*(d+j)*w
         cⱼ += 2/(j+one(T))-one(T)/(a+j)+one(T)/(b-(j+one(T)))
         S += C*cⱼ
@@ -487,7 +500,7 @@ function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
     q₀, q₁ = _₂F₁(a, b, c, z₀), a*b/c*_₂F₁(a+1, b+1, c+1, z₀)
     S₀, zz₀ = q₀, z-z₀
     S₁, zz₀j, j = S₀+q₁*zz₀, zz₀, 0
-    while errcheck(S₀, S₁, 10eps(real(T))) || j ≤ 1
+    while errcheck(S₀, S₁, 8eps(real(T))) || j ≤ 1
         q₀, q₁ = q₁, ((j*(2z₀-one(T))-c+(a+b+one(T))*z₀)*q₁ + (a+j)*(b+j)/(j+one(T))*q₀)/(z₀*(one(T)-z₀)*(j+2))
         zz₀j *= zz₀
         S₀, S₁ = S₁, S₁+q₁*zz₀j
@@ -499,7 +512,7 @@ end
 function _₁F₁maclaurin(a::Number, b::Number, z::Number)
     T = float(promote_type(typeof(a), typeof(b), typeof(z)))
     S₀, S₁, j = one(T), one(T)+a*z/b, 1
-    while errcheck(S₀, S₁, 10eps(real(T)))
+    while errcheck(S₀, S₁, 8eps(real(T)))
         rⱼ = (a+j)*z/((b+j)*(j+1))
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ
         j += 1
@@ -513,16 +526,17 @@ function pFqmaclaurin(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where 
     pFqmaclaurin(T1.(α), T2.(β), z; kwds...)
 end
 
-function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V) where {p, q, S, U, V}
+function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V; kmax::Int = KMAX) where {p, q, S, U, V}
     T = float(promote_type(eltype(a), eltype(b), V))
-    S₀, S₁, j = one(T), one(T)+prod(a)*z/prod(b), 1
-    while errcheck(S₀, S₁, 10eps(real(T)))
-        rⱼ = z/(j+one(T))
-        for i=1:p rⱼ *= a[i]+j end
-        for i=1:q rⱼ /= b[i]+j end
-        S₀, S₁ = S₁, S₁+(S₁-S₀)*rⱼ
-        j += 1
+    S₀, S₁, k = one(T), one(T)+prod(a)*z/prod(b), 1
+    while k < kmax && errcheck(S₀, S₁, 8eps(real(T)))
+        rₖ = z/(k+one(T))
+        for i=1:p rₖ *= a[i]+k end
+        for i=1:q rₖ /= b[i]+k end
+        S₀, S₁ = S₁, S₁+(S₁-S₀)*rₖ
+        k += 1
     end
+    k < kmax || @warn "Maclaurin approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum degree of $kmax."
     return S₁
 end
 
