@@ -18,12 +18,13 @@ function pFqdrummond(::Tuple{}, ::Tuple{}, z::T; kmax::Int = KMAX) where T
     Dhi, Dlo = ((k+2)*ζ-1)*Dhi + k*ζ*Dlo, Dhi
     Thi, Tlo = Nhi/Dhi, Thi
     k += 1
-    while k < kmax && errcheck(Tlo, Thi, 10eps(real(T)))
+    while k < kmax && errcheck(Tlo, Thi, 8eps(real(T)))
         Nhi, Nlo = ((k+2)*ζ-1)*Nhi + k*ζ*Nlo, Nhi
         Dhi, Dlo = ((k+2)*ζ-1)*Dhi + k*ζ*Dlo, Dhi
         Thi, Tlo = Nhi/Dhi, Thi
         k += 1
     end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{0}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(Thi) ? Thi : Tlo
 end
 
@@ -57,7 +58,7 @@ function pFqdrummond(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T
     Nhi /= α+k+1
     Dhi /= α+k+1
     k += 1
-    while k < kmax && errcheck(Tlo, Thi, 10eps(real(T)))
+    while k < kmax && errcheck(Tlo, Thi, 8eps(real(T)))
         Nhi, Nlo = ((k+2)*ζ-(α+2k+1))*Nhi + k*(ζ-1)*Nlo, Nhi
         Dhi, Dlo = ((k+2)*ζ-(α+2k+1))*Dhi + k*(ζ-1)*Dlo, Dhi
         Thi, Tlo = Nhi/Dhi, Thi
@@ -68,6 +69,7 @@ function pFqdrummond(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T
         Dhi /= α+k+1
         k += 1
     end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{1}(), Val{0}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(Thi) ? Thi : Tlo
 end
 
@@ -93,12 +95,13 @@ function pFqdrummond(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = KMAX) where {T
     Dhi, Dmid, Dlo = ((β+k+1)*(k+2)*ζ-1)*Dhi + k*(β+2k+2)*ζ*Dmid + k*(k-1)*ζ*Dlo, Dhi, Dmid
     Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
     k += 1
-    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
+    while k < kmax && errcheck(Tmid, Thi, 8eps(real(T)))
         Nhi, Nmid, Nlo = ((β+k+1)*(k+2)*ζ-1)*Nhi + k*(β+2k+2)*ζ*Nmid + k*(k-1)*ζ*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((β+k+1)*(k+2)*ζ-1)*Dhi + k*(β+2k+2)*ζ*Dmid + k*(k-1)*ζ*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
         k += 1
     end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{1}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -132,7 +135,7 @@ function pFqdrummond(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) wher
     Nhi /= (α+2)*(β+2)
     Dhi /= (α+2)*(β+2)
     k = 2
-    while k < 3 || (k < kmax && errcheck(Tmid, Thi, 10eps(real(T))))
+    while k < 3 || (k < kmax && errcheck(Tmid, Thi, 8eps(real(T))))
         Nhi, Nmid, Nlo = ((k+2)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Nhi - k*(α+β+3k-ζ)*Nmid - k*(k-1)*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((k+2)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Dhi - k*(α+β+3k-ζ)*Dmid - k*(k-1)*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -143,6 +146,7 @@ function pFqdrummond(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) wher
         Dhi /= (α+k+1)*(β+k+1)
         k += 1
     end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{2}(), Val{0}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -185,7 +189,7 @@ function pFqdrummond(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) wher
     Nhi /= α+k+1
     Dhi /= α+k+1
     k += 1
-    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
+    while k < kmax && errcheck(Tmid, Thi, 8eps(real(T)))
         Nhi, Nmid, Nlo = ((β+k+1)*(k+2)*ζ-(α+2k+1))*Nhi + k*((β+2k+2)*ζ-1)*Nmid + k*(k-1)*ζ*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((β+k+1)*(k+2)*ζ-(α+2k+1))*Dhi + k*((β+2k+2)*ζ-1)*Dmid + k*(k-1)*ζ*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -196,6 +200,7 @@ function pFqdrummond(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) wher
         Dhi /= α+k+1
         k += 1
     end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{1}(), Val{1}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -227,12 +232,13 @@ function pFqdrummond(::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = KMAX) wher
     Dhi, Dmid1, Dmid2, Dlo = (ζ*(k+2)*(α+k+1)*(β+k+1)-1)*Dhi + ζ*k*((k+1)*(α+β+2k)+(α+k)*(β+k)+α+β+3k+2)*Dmid1 + ζ*k*(k-1)*(3k+α+β+1)*Dmid2 + ζ*k*(k-1)*(k-2)*Dlo, Dhi, Dmid1, Dmid2
     Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
     k += 1
-    while k < kmax && errcheck(Tmid1, Thi, 10eps(real(T)))
+    while k < kmax && errcheck(Tmid1, Thi, 8eps(real(T)))
         Nhi, Nmid1, Nmid2, Nlo = (ζ*(k+2)*(α+k+1)*(β+k+1)-1)*Nhi + ζ*k*((k+1)*(α+β+2k)+(α+k)*(β+k)+α+β+3k+2)*Nmid1 + ζ*k*(k-1)*(3k+α+β+1)*Nmid2 + ζ*k*(k-1)*(k-2)*Nlo, Nhi, Nmid1, Nmid2
         Dhi, Dmid1, Dmid2, Dlo = (ζ*(k+2)*(α+k+1)*(β+k+1)-1)*Dhi + ζ*k*((k+1)*(α+β+2k)+(α+k)*(β+k)+α+β+3k+2)*Dmid1 + ζ*k*(k-1)*(3k+α+β+1)*Dmid2 + ζ*k*(k-1)*(k-2)*Dlo, Dhi, Dmid1, Dmid2
         Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
         k += 1
     end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{2}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(Thi) ? Thi : isfinite(Tmid1) ? Tmid1 : isfinite(Tmid2) ? Tmid2 : Tlo
 end
 
@@ -276,7 +282,7 @@ function pFqdrummond(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) 
     Nhi /= (α+k+1)*(β+k+1)
     Dhi /= (α+k+1)*(β+k+1)
     k += 1
-    while k < kmax && errcheck(Tmid, Thi, 10eps(real(T)))
+    while k < kmax && errcheck(Tmid, Thi, 8eps(real(T)))
         Nhi, Nmid, Nlo = ((k+2)*(γ+k+1)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Nhi + k*((γ+2k+2)*ζ-(α+β+3k))*Nmid + k*(k-1)*(ζ-1)*Nlo, Nhi, Nmid
         Dhi, Dmid, Dlo = ((k+2)*(γ+k+1)*ζ-(α+k+1)*(β+k+1)-k*(α+β+2k+1))*Dhi + k*((γ+2k+2)*ζ-(α+β+3k))*Dmid + k*(k-1)*(ζ-1)*Dlo, Dhi, Dmid
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
@@ -287,6 +293,7 @@ function pFqdrummond(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) 
         Dhi /= (α+k+1)*(β+k+1)
         k += 1
     end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{2}(), Val{1}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -302,17 +309,17 @@ end
 function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMAX) where {p, q, T1, T2, T3}
     T = promote_type(eltype(α), eltype(β), T3)
     absα = abs.(T.(α))
-    if norm(z) < eps(real(T)) || norm(prod(α)) < eps(prod(absα))
+    if norm(z) < eps(real(T)) || norm(prod(α)) < eps(real(T)(prod(absα)))
         return one(T)
     end
     ζ = inv(z)
-    r = max(p+1, q+2)
-    N = zeros(T, r+1)
-    D = zeros(T, r+1)
-    R = zeros(T, r+1)
-    N[r+1] = prod(β)*ζ/prod(α)
-    D[r+1] = prod(β)*ζ/prod(α)
-    R[r+1] = N[r+1]/D[r+1]
+    r = max(p, q+1)
+    N = zeros(T, r+2)
+    D = zeros(T, r+2)
+    R = zeros(T, r+2)
+    N[r+2] = prod(β)*ζ/prod(α)
+    D[r+2] = prod(β)*ζ/prod(α)
+    R[r+2] = N[r+2]/D[r+2]
     absα = absα .+ 1
     α = α .+ 1
     β = β .+ 1
@@ -322,41 +329,41 @@ function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KM
     Q = zeros(T, q+2)
     Q[1] = T(2*prod(β))
     k = 0
-    @inbounds while k < r || (k < kmax && errcheck(R[r], R[r+1], 10eps(real(T))))
-        for j in 1:r
+    @inbounds while k ≤ r || (k < kmax && errcheck(R[r+1], R[r+2], 8eps(real(T))))
+        for j in 1:r+1
             N[j] = N[j+1]
             D[j] = D[j+1]
             R[j] = R[j+1]
         end
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += Q[j+1]*N[r-j]
+            t1 += Q[j+1]*N[r+1-j]
         end
         if k ≤ q+1
             t1 += Q[k+1]
         end
         t2 = zero(T)
-        t2 += P[1]*N[r]
+        t2 += P[1]*N[r+1]
         for j in 1:min(k, p)
-            t2 += P[j+1]*(N[r-j+1] + N[r-j])
+            t2 += P[j+1]*(N[r-j+2] + N[r-j+1])
         end
-        N[r+1] = ζ*t1-t2
+        N[r+2] = ζ*t1-t2
         t1 = zero(T)
         for j in 0:min(k, q+1)
-            t1 += Q[j+1]*D[r-j]
+            t1 += Q[j+1]*D[r-j+1]
         end
         t2 = zero(T)
-        t2 += P[1]*D[r]
+        t2 += P[1]*D[r+1]
         for j in 1:min(k, p)
-            t2 += P[j+1]*(D[r-j+1] + D[r-j])
+            t2 += P[j+1]*(D[r-j+2] + D[r-j+1])
         end
-        D[r+1] = ζ*t1-t2
-        R[r+1] = N[r+1]/D[r+1]
+        D[r+2] = ζ*t1-t2
+        R[r+2] = N[r+2]/D[r+2]
         if norm(P[1]) < eps(err)
-            return R[r+1]
+            return R[r+2]
         end
-        N[r+1] /= P[1]
-        D[r+1] /= P[1]
+        N[r+2] /= P[1]
+        D[r+2] /= P[1]
         k += 1
         absα = absα .+ 1
         α = α .+ 1
@@ -377,7 +384,8 @@ function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KM
         end
         Q[q+2] = t
     end
-    return isfinite(R[r+1]) ? R[r+1] : R[r]
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum type of ($kmax, $kmax)."
+    return isfinite(R[r+2]) ? R[r+2] : R[r+1]
 end
 
 @deprecate drummond0F0(x; kwds...) pFqdrummond((), (), x; kwds...) false
