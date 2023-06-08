@@ -196,13 +196,13 @@ function pFqweniger(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p
     T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
     pFqweniger(T1.(α), T2.(β), z; kwds...)
 end
-function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMAX) where {p, q, T1, T2, T3}
-    T = promote_type(eltype(α), eltype(β), T3)
+function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMAX, γ::T4 = 3//2) where {p, q, T1, T2, T3, T4}
+    T = promote_type(eltype(α), eltype(β), T3, T4)
     absα = abs.(T.(α))
     if norm(z) < eps(real(T)) || norm(prod(α)) < eps(real(T)(prod(absα)))
         return one(T)
     end
-    γ = T(3)/2
+    γ = T(γ)
     ζ = inv(z)
     r = max(p+1, q+1)
     N = zeros(T, r+3)
@@ -211,22 +211,22 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
     N[r+3] = prod(β)*ζ/prod(α)/(γ-1)
     D[r+3] = prod(β)*ζ/prod(α)/(γ-1)
     R[r+3] = N[r+3]/D[r+3]
-    err = abs(γ)
+    err = real(T)(1)
     @inbounds for j in 1:p
         err *= absα[j]+1
     end
     P̂ = zeros(T, r+2)
-    t = γ
+    t = T(1)
     @inbounds for j in 1:p
         t *= α[j]+1
     end
-    P̂[1] = t/pochhammer(γ-r-1, r+2)
+    P̂[1] = t
     Q = zeros(T, r+1)
     t = T(2)
     @inbounds for j in 1:q
         t *= β[j]+1
     end
-    Q[1] = t/pochhammer(γ-r-1, r+1)
+    Q[1] = t
     k = 0
     @inbounds while k ≤ r || (k < kmax && errcheck(R[r+2], R[r+3], 8eps(real(T))))
         for j in 1:r+2
@@ -245,7 +245,7 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
                     t2 *= β[i]+j+1
                 end
                 t2 *= j+2
-                t1 += binomial(k, j)*(-one(T))^(k-j)*pochhammer(j+γ, k-r-1)*t2
+                t1 += binomial(k, j)*(-one(T))^(k-j)*t2
             end
         end
         t2 = zero(T)
@@ -271,38 +271,69 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
         N[r+3] /= P̂[1]
         D[r+3] /= P̂[1]
         k += 1
-        err = abs(γ)+k
+        err = real(T)(1)
         for j in 1:p
             err *= absα[j]+k+1
         end
-        t2 = γ+k
-        for j in 1:p
-            t2 *= α[j]+k+1
+        if k ≤ r+1
+            t2 = T(1)
+            for j in 1:p
+                t2 *= α[j]+k+1
+            end
+            t2 /= pochhammer(γ+k+1, k)
+            t1 = k*((γ+2k)*t2 - P̂[1])
+            for j in 2:r+1
+                s = ((k-j+1)*((γ+2k-j+1)*t1+k*P̂[j-1]) - k*P̂[j])/j
+                P̂[j-1] = t2
+                t2 = t1
+                t1 = s
+            end
+            P̂[r+1] = t2
+            P̂[r+2] = t1
+            t2 = T(k+2)
+            for j in 1:q
+                t2 *= β[j]+k+1
+            end
+            t2 /= pochhammer(γ+k, k)
+            t1 = k*((γ+2k-1)*t2 - Q[1])
+            for j in 2:r
+                s = ((k-j+1)*((γ+2k-j)*t1+k*Q[j-1]) - k*Q[j])/j
+                Q[j-1] = t2
+                t2 = t1
+                t1 = s
+            end
+            Q[r] = t2
+            Q[r+1] = t1
+        else
+            t2 = γ+k
+            for j in 1:p
+                t2 *= α[j]+k+1
+            end
+            t2 /= pochhammer(γ+2k-r-1, r+2)
+            t1 = k*((γ+2k)*t2 - (γ+2k-1-r-2)*P̂[1])
+            for j in 2:r+1
+                s = ((k-j+1)*((γ+2k-j+1)*t1-(r-j+3)*k*P̂[j-1]) - (γ+2k-j-r-2)*k*P̂[j])/j
+                P̂[j-1] = t2
+                t2 = t1
+                t1 = s
+            end
+            P̂[r+1] = t2
+            P̂[r+2] = t1
+            t2 = T(k+2)
+            for j in 1:q
+                t2 *= β[j]+k+1
+            end
+            t2 /= pochhammer(γ+2k-r-1, r+1)
+            t1 = k*((γ+2k-1)*t2 - (γ+2k-1-r-2)*Q[1])
+            for j in 2:r
+                s = ((k-j+1)*((γ+2k-j)*t1-(r-j+2)*k*Q[j-1]) - (γ+2k-j-r-2)*k*Q[j])/j
+                Q[j-1] = t2
+                t2 = t1
+                t1 = s
+            end
+            Q[r] = t2
+            Q[r+1] = t1
         end
-        t2 /= pochhammer(γ+2k-r-1, r+2)
-        t1 = k*((γ+2k)*t2 - (γ+2k-1-r-2)*P̂[1])
-        for j in 2:r+1
-            s = ((k-j+1)*((γ+2k-j+1)*t1-(r-j+3)*k*P̂[j-1]) - (γ+2k-j-r-2)*k*P̂[j])/j
-            P̂[j-1] = t2
-            t2 = t1
-            t1 = s
-        end
-        P̂[r+1] = t2
-        P̂[r+2] = t1
-        t2 = T(k+2)
-        for j in 1:q
-            t2 *= β[j]+k+1
-        end
-        t2 /= pochhammer(γ+2k-r-1, r+1)
-        t1 = k*((γ+2k-1)*t2 - (γ+2k-1-r-2)*Q[1])
-        for j in 2:r
-            s = ((k-j+1)*((γ+2k-j)*t1-(r-j+2)*k*Q[j-1]) - (γ+2k-j-r-2)*k*Q[j])/j
-            Q[j-1] = t2
-            t2 = t1
-            t1 = s
-        end
-        Q[r] = t2
-        Q[r+1] = t1
     end
     k < kmax || @warn "Rational approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum type of ($kmax, $kmax)."
     return isfinite(R[r+3]) ? R[r+3] : R[r+2]
