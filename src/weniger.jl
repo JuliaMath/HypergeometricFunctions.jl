@@ -196,7 +196,7 @@ function pFqweniger(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p
     T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
     pFqweniger(T1.(α), T2.(β), z; kwds...)
 end
-function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMAX, γ::T4 = 3//2) where {p, q, T1, T2, T3, T4}
+function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMAX, γ::T4 = 2) where {p, q, T1, T2, T3, T4}
     T = promote_type(eltype(α), eltype(β), T3, T4)
     absα = abs.(T.(α))
     if norm(z) < eps(real(T)) || norm(prod(α)) < eps(real(T)(prod(absα)))
@@ -227,8 +227,10 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
         t *= β[j]+1
     end
     Q[1] = t
+    P̂R = γ+2
+    QR = T(1)
     k = 0
-    @inbounds while k ≤ r || (k < kmax && errcheck(R[r+2], R[r+3], 8eps(real(T))))
+    @inbounds while k ≤ r+2 || (k < kmax && errcheck(R[r+2], R[r+3], 8eps(real(T))))
         for j in 1:r+2
             N[j] = N[j+1]
             D[j] = D[j+1]
@@ -280,36 +282,39 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
             for j in 1:p
                 t2 *= α[j]+k+1
             end
-            t2 /= pochhammer(γ+k+1, k)
+            t2 /= P̂R
+            P̂R *= ((γ+2k+1)*(γ+2k+2))/(γ+k+1)
             t1 = k*((γ+2k)*t2 - P̂[1])
-            for j in 2:r+1
+            for j in 2:k
                 s = ((k-j+1)*((γ+2k-j+1)*t1+k*P̂[j-1]) - k*P̂[j])/j
                 P̂[j-1] = t2
                 t2 = t1
                 t1 = s
             end
-            P̂[r+1] = t2
-            P̂[r+2] = t1
+            P̂[k] = t2
+            P̂[k+1] = t1
             t2 = T(k+2)
             for j in 1:q
                 t2 *= β[j]+k+1
             end
-            t2 /= pochhammer(γ+k, k)
+            QR *= ((γ+2k-2)*(γ+2k-1))/(γ+k-1)
+            t2 /= QR
             t1 = k*((γ+2k-1)*t2 - Q[1])
-            for j in 2:r
+            for j in 2:min(k, r)
                 s = ((k-j+1)*((γ+2k-j)*t1+k*Q[j-1]) - k*Q[j])/j
                 Q[j-1] = t2
                 t2 = t1
                 t1 = s
             end
-            Q[r] = t2
-            Q[r+1] = t1
+            Q[min(k, r)] = t2
+            Q[min(k, r)+1] = t1
         else
             t2 = γ+k
             for j in 1:p
                 t2 *= α[j]+k+1
             end
-            t2 /= pochhammer(γ+2k-r-1, r+2)
+            t2 /= P̂R
+            P̂R *= ((γ+2k+1)*(γ+2k+2))/((γ+2k-r-1)*(γ+2k-r))
             t1 = k*((γ+2k)*t2 - (γ+2k-1-r-2)*P̂[1])
             for j in 2:r+1
                 s = ((k-j+1)*((γ+2k-j+1)*t1-(r-j+3)*k*P̂[j-1]) - (γ+2k-j-r-2)*k*P̂[j])/j
@@ -323,7 +328,8 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
             for j in 1:q
                 t2 *= β[j]+k+1
             end
-            t2 /= pochhammer(γ+2k-r-1, r+1)
+            QR *= ((γ+2k-2)*(γ+2k-1))/((γ+2k-r-3)*(γ+2k-r-2))
+            t2 /= QR
             t1 = k*((γ+2k-1)*t2 - (γ+2k-1-r-2)*Q[1])
             for j in 2:r
                 s = ((k-j+1)*((γ+2k-j)*t1-(r-j+2)*k*Q[j-1]) - (γ+2k-j-r-2)*k*Q[j])/j
