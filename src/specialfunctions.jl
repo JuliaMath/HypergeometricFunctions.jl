@@ -414,7 +414,7 @@ end
 
 
 function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
-    T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
+    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
     S₀, S₁, j = one(T), one(T)+a*b*z/c, 1
     while errcheck(S₀, S₁, 8eps(real(T)))
         rⱼ = (a+j)*z/(j+1)*(b+j)/(c+j)
@@ -425,7 +425,7 @@ function _₂F₁maclaurin(a::Number, b::Number, c::Number, z::Number)
 end
 
 function _₂F₁maclaurinalt(a::Number, b::Number, c::Number, z::Number)
-    T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
+    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
     C, S, j = one(T), one(T), 0
     while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
         C *= (a+j)/(j+1)*(b+j)/(c+j)*z
@@ -436,7 +436,7 @@ function _₂F₁maclaurinalt(a::Number, b::Number, c::Number, z::Number)
 end
 
 function _₂F₁continuation(s::Number, t::Number, c::Number, z₀::Number, z::Number)
-    T = float(promote_type(typeof(s), typeof(t), typeof(c), typeof(z₀), typeof(z)))
+    T = promote_type(typeof(s), typeof(t), typeof(c), typeof(z₀), typeof(z))
     izz₀, d0, d1 = inv(z-z₀), one(T), s/(2s-t+one(T))*((s+1)*(1-2z₀)+(t+1)*z₀-c)
     S₀, S₁, izz₀j, j = one(T), one(T)+d1*izz₀, izz₀, 2
     while errcheck(S₀, S₁, 8eps(real(T))) || j ≤ 2
@@ -448,7 +448,7 @@ function _₂F₁continuation(s::Number, t::Number, c::Number, z₀::Number, z::
 end
 
 function _₂F₁continuationalt(a::Number, c::Number, z₀::Number, z::Number)
-    T = float(promote_type(typeof(a), typeof(c), typeof(z₀), typeof(z)))
+    T = promote_type(typeof(a), typeof(c), typeof(z₀), typeof(z))
     izz₀ = inv(z-z₀)
     e0, e1 = one(T), (a+one(T))*(one(T)-2z₀)+(2a+one(T))*z₀-c
     f0, f1 = zero(T), one(T)-2z₀
@@ -469,7 +469,7 @@ function _₂F₁continuationalt(a::Number, c::Number, z₀::Number, z::Number)
 end
 
 function _₂F₁logsum(a::Number, b::Number, z::Number, w::Number, s::Int)
-    T = float(promote_type(typeof(a), typeof(b), typeof(z), typeof(w)))
+    T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
     cⱼ = 2digamma(one(T))-digamma(a)-digamma(b)+s*log1p(-z)
     C, S, j = one(T), cⱼ, 0
     while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
@@ -482,7 +482,7 @@ function _₂F₁logsum(a::Number, b::Number, z::Number, w::Number, s::Int)
 end
 
 function _₂F₁logsumalt(a::Number, b::Number, z::Number, w::Number)
-    T = float(promote_type(typeof(a), typeof(b), typeof(z), typeof(w)))
+    T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
     d, cⱼ = one(T)-b, 2digamma(one(T))-digamma(a)-digamma(b)-log(-w)
     C, S, j = one(T), cⱼ, 0
     while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
@@ -495,7 +495,7 @@ function _₂F₁logsumalt(a::Number, b::Number, z::Number, w::Number)
 end
 
 function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
-    T = float(promote_type(typeof(a), typeof(b), typeof(c), typeof(z)))
+    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
     z₀ = abs(z) < 1 ? ρϵ*sign(z) : sign(z)/ρϵ
     q₀, q₁ = _₂F₁(a, b, c, z₀), a*b/c*_₂F₁(a+1, b+1, c+1, z₀)
     S₀, zz₀ = q₀, z-z₀
@@ -510,7 +510,7 @@ function _₂F₁taylor(a::Number, b::Number, c::Number, z::Number)
 end
 
 function _₁F₁maclaurin(a::Number, b::Number, z::Number)
-    T = float(promote_type(typeof(a), typeof(b), typeof(z)))
+    T = promote_type(typeof(a), typeof(b), typeof(z))
     S₀, S₁, j = one(T), one(T)+a*z/b, 1
     while errcheck(S₀, S₁, 8eps(real(T)))
         rⱼ = (a+j)*z/((b+j)*(j+1))
@@ -527,7 +527,7 @@ function pFqmaclaurin(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where 
 end
 
 function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V; kmax::Int = KMAX) where {p, q, S, U, V}
-    T = float(promote_type(eltype(a), eltype(b), V))
+    T = promote_type(eltype(a), eltype(b), V)
     S₀, S₁, k = one(T), one(T)+prod(a)*z/prod(b), 1
     while k < kmax && errcheck(S₀, S₁, 8eps(real(T)))
         rₖ = z/(k+one(T))
@@ -536,7 +536,7 @@ function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V; kmax::Int = KMAX) 
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rₖ
         k += 1
     end
-    k < kmax || @warn "Maclaurin approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum degree of $kmax."
+    k < kmax || @warn "Maclaurin approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum degree of "*string(kmax)*"."
     return S₁
 end
 

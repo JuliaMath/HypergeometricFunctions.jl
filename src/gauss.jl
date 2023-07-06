@@ -4,6 +4,7 @@
 Compute the Gauss hypergeometric function `₂F₁(a, b; c; z)`.
 """
 function _₂F₁(a, b, c, z; method::Symbol = :general, kwds...)
+    z = float(z)
     if real(b) < real(a)
         return _₂F₁(b, a, c, z; method = method, kwds...) # ensure a ≤ b
     elseif isequal(a, c) # 1. 15.4.6
@@ -60,7 +61,7 @@ Compute the Gauss hypergeometric function `₂F₁(a, b; c; z)` with positive pa
 function _₂F₁positive(a, b, c, z; kwds...)
     @assert a > 0 && b > 0 && c > 0 && 0 ≤ z ≤ 1
     if z == 1
-        return _₂F₁argument_unity(a, b, c, float(z); kwds...)
+        return _₂F₁argument_unity(a, b, c, z; kwds...)
     else
         return _₂F₁maclaurin(a, b, c, z; kwds...)
     end
@@ -74,7 +75,7 @@ N. Michel and M. V. Stoitsov, Fast computation of the Gauss hypergeometric funct
 """
 function _₂F₁general(a, b, c, z; kwds...)
     if z == 1
-        return _₂F₁argument_unity(a, b, c, float(z); kwds...)
+        return _₂F₁argument_unity(a, b, c, z; kwds...)
     elseif real(b) < real(a)
         return _₂F₁general(b, a, c, z; kwds...)
     elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
@@ -105,7 +106,7 @@ J. W. Pearson, S. Olver and M. A. Porter, Numerical methos for the computation o
 function _₂F₁general2(a, b, c, z)
     T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
     if z == 1
-        return _₂F₁argument_unity(a, b, c, float(z))
+        return _₂F₁argument_unity(a, b, c, z)
     elseif real(b) < real(a)
         return _₂F₁general2(b, a, c, z)
     elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀

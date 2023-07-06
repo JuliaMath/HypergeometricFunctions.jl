@@ -9,24 +9,25 @@ pFq
 
 pFq(::Tuple{}, ::Tuple{}, z; kwds...) = exp(z)
 pFq(α::NTuple{1}, ::Tuple{}, z; kwds...) = exp(-α[1]*log1p(-z))
-pFq(α::NTuple{1}, β::NTuple{1}, z; kwds...) = _₁F₁(α[1], β[1], float(z); kwds...)
-pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1], float(z); kwds...)
+pFq(α::NTuple{1}, β::NTuple{1}, z; kwds...) = _₁F₁(α[1], β[1], z; kwds...)
+pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1], z; kwds...)
 
 function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
+    z = float(z)
     if p ≤ q
         if real(z) ≥ 0
-            return pFqmaclaurin(α, β, float(z); kwds...)
+            return pFqmaclaurin(α, β, z; kwds...)
         else
-            return pFqweniger(α, β, float(z); kwds...)
+            return pFqweniger(α, β, z; kwds...)
         end
     elseif p == q + 1
         if abs(z) ≤ ρ
-            return pFqmaclaurin(α, β, float(z); kwds...)
+            return pFqmaclaurin(α, β, z; kwds...)
         else
-            return pFqweniger(α, β, float(z); kwds...)
+            return pFqweniger(α, β, z; kwds...)
         end
     else
-        return pFqweniger(α, β, float(z); kwds...)
+        return pFqweniger(α, β, z; kwds...)
     end
 end
 

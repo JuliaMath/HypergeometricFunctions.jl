@@ -9,7 +9,7 @@ using DualNumbers, LinearAlgebra, SpecialFunctions
 
 export _₁F₁, _₂F₁, _₃F₂, pFq
 
-const KMAX = 1_000_000
+const KMAX = 1_048_576
 
 include("specialfunctions.jl")
 include("gauss.jl")

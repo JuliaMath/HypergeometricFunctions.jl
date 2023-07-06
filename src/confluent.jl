@@ -4,6 +4,7 @@
 Compute Kummer's confluent hypergeometric function `M(a, b, z) = ₁F₁(a; b; z)`.
 """
 function _₁F₁(a, b, z; kwds...)
+    z = float(z)
     if isequal(a, b) # 13.6.1
         return exp(z)
     elseif -b ∈ ℕ

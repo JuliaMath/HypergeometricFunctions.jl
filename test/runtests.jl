@@ -379,13 +379,13 @@ end
         CT = Complex{T}
         atol = rtol = sqrt(eps(S))
         for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-1.0):S(0.25):S(0.0)
-            @test pFqdrummond((α, β), (), z) ≈ S(pFqdrummond((T(α), T(β)), (), T(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, β), (), z) ≈ S(pFqweniger((T(α), T(β)), (), T(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, β), (), z) ≈ S(pFq((T(α), T(β)), (), T(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, β), (), z) ≈ S(pFq((T(α), T(β)), (), T(z))) atol=atol rtol=rtol
         end
         for α in S(-0.5):S(1.0):S(0.5), β in S(-0.5):S(1.0):S(0.5), x in S(-0.5):S(0.25):S(0.0), y in S(-0.5):S(0.25):S(0.0)
             z = complex(x, y)
-            @test pFqdrummond((α, β), (), z) ≈ CS(pFqdrummond((T(α), T(β)), (), CT(z))) atol=atol rtol=rtol
-            @test pFqweniger((α, β), (), z) ≈ CS(pFqweniger((T(α), T(β)), (), CT(z))) atol=atol rtol=rtol
+            @test pFqdrummond((α, β), (), z) ≈ CS(pFq((T(α), T(β)), (), CT(z))) atol=atol rtol=rtol
+            @test pFqweniger((α, β), (), z) ≈ CS(pFq((T(α), T(β)), (), CT(z))) atol=atol rtol=rtol
         end
     end
 end
