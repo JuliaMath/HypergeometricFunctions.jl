@@ -15,7 +15,7 @@ pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1
 function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
     z = float(z)
     if p ≤ q
-        if real(z) ≥ 0
+        if real(z) > 0
             return pFqmaclaurin(α, β, z; kwds...)
         else
             return pFqweniger(α, β, z; kwds...)
@@ -46,7 +46,10 @@ function pFqcontinuedfraction(α::AbstractVector{S}, β::AbstractVector{U}, z::V
 end
 
 """
+Compute the generalized hypergeometric function `₃F₂(a₁, 1, 1, b₁, 2; z)`.
+"""
+_₃F₂(a₁, b₁, z; kwds...) = _₃F₂(a₁, 1, 1, b₁, 2, z; kwds...)
+"""
 Compute the generalized hypergeometric function `₃F₂(a₁, a₂, a₃, b₁, b₂; z)`.
 """
 _₃F₂(a₁, a₂, a₃, b₁, b₂, z; kwds...) = pFq((a₁, a₂, a₃), (b₁, b₂), z; kwds...)
-_₃F₂(a₁, b₁, z; kwds...) = _₃F₂(a₁, 1, 1, b₁, 2, z; kwds...)

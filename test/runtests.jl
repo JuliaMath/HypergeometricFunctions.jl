@@ -480,23 +480,32 @@ end
     @test M(-2, -3, 0.5) ≡ 1.375
     @test M(0.5, 1.5, -1000) ≈ 0.028024956081989644 # From #46
     for (S, T) in ((Float64, BigFloat),)
+        a = T(8.9)
+        b = T(0.5)
+        for x in T(-36):T(2):T(70)
+            @test M(S(a), S(b), S(x)) ≈ S(M(a, b, x)) # From #45
+        end
+        a = T(5)/6
+        b = T(1)/2
+        for x in T(-5):T(0.25):T(5)
+            @test M(S(a), S(b), -S(x)^2) ≈ S(M(a, b, -x^2)) # From #66
+        end
         b = 1
-        z = T(1)/3
-        x = S(z)
+        x = T(1)/3
         for a in S(1):S(0.5):S(7)
-            @test M(a, b, x) ≈ S(M(a, b, z))
+            @test M(a, b, S(x)) ≈ S(M(a, b, x))
         end
     end
 end
 
 @testset "U" begin
-    # From #55
+    @test U(1, 1, 1.f0) ≈ 0.5963473623231942 # the Euler series
+    @test U(1, 1, 1) == 0.5963473623231942
     for (S, T) in ((Float64, BigFloat),)
         b = 0
-        z = T(1)/3
-        x = S(z)
+        x = T(1)/3
         for a in S(1):S(0.5):S(7)
-            @test U(a, b, x) ≈ S(U(a, b, z))
+            @test U(a, b, S(x)) ≈ S(U(a, b, x)) # From #55
         end
     end
 end
