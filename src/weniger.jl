@@ -52,7 +52,52 @@ function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1
     return isfinite(Rhi) ? Rhi : Rlo
 end
 
-# ₂F₀(α,β;z), algorithm γ = 2.
+# ₀F₁(β;z), γ = 2.
+function pFqweniger(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = KMAX) where {T1, T2}
+    β = β[1]
+    T = promote_type(T1, T2)
+    if norm(z) < eps(real(T))
+        return one(T)
+    end
+    ζ = inv(z)
+    Nlo = β*ζ
+    Dlo = β*ζ
+    Tlo = Nlo/Dlo
+    b0 = T(2*(β+1))
+    Nmid = (b0*ζ-1)*Nlo + b0*ζ
+    Dmid = (b0*ζ-1)*Dlo
+    Tmid = Nmid/Dmid
+    k = 1
+    #a1 = T(-4)
+    b0 = T(6*(β+2))
+    b1 = T(-6*β)
+    t0 = b0*ζ+3
+    t1 = b1*ζ+4
+    Nhi = t0*Nmid + t1*Nlo + b1*ζ
+    Dhi = t0*Dmid + t1*Dlo
+    #Nhi = -Nmid - a1*(Nmid+Nlo) + ζ*(b0*Nmid + b1*Nlo) + b1*ζ
+    #Dhi = -Dmid - a1*(Dmid+Dlo) + ζ*(b0*Dmid + b1*Dlo)
+    Thi = Nhi/Dhi
+    k = 2
+    while k < 4 || (k < kmax && errcheck(Tmid, Thi, 8eps(real(T))))
+        #a1 = T(-4k)/T(2k-1)
+        a2 = T(2k+1)/T(2k-1)
+        b0 = T(4k+2)*T(β+k+1)
+        b1 = T(4k+2)*T(k-β-1)
+        t0 = b0*ζ+a2
+        t1 = b1*ζ+1
+        Nhi, Nmid, Nlo = t0*Nhi + t1*Nmid - a2*Nlo, Nhi, Nmid
+        Dhi, Dmid, Dlo = t0*Dhi + t1*Dmid - a2*Dlo, Dhi, Dmid
+        #Nhi, Nmid, Nlo = -Nhi - a1*(Nhi+Nmid) - a2*(Nmid+Nlo) + ζ*(b0*Nhi + b1*Nmid), Nhi, Nmid
+        #Dhi, Dmid, Dlo = -Dhi - a1*(Dhi+Dmid) - a2*(Dmid+Dlo) + ζ*(b0*Dhi + b1*Dmid), Dhi, Dmid
+        Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
+        k += 1
+    end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{1}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
+end
+
+# ₂F₀(α,β;z), γ = 2.
 function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1, T2}
     (α, β) = α
     T = promote_type(T1, T2)
@@ -99,7 +144,7 @@ function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where
     return isfinite(Rhi) ? Rhi : isfinite(Rmid) ? Rmid : Rlo
 end
 
-# ₁F₁(α,β;z), algorithm γ = 2.
+# ₁F₁(α,β;z), γ = 2.
 function pFqweniger(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) where {T1, T2, T3}
     α = α[1]
     β = β[1]
