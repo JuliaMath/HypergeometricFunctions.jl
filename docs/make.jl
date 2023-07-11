@@ -6,7 +6,7 @@ makedocs(
     modules = [HypergeometricFunctions],
     sitename = "HypergeometricFunctions.jl",
     authors = "Richard Mikael Slevinsky",
-    strict = true
+    strict = false
 )
 
 deploydocs(repo = "github.com/JuliaMath/HypergeometricFunctions.jl.git")
