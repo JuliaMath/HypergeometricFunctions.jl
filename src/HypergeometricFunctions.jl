@@ -1,8 +1,3 @@
-"""
-This module calculates (generalized) hypergeometric functions:
-
-    pFq(α, β; z) = Σ_{k=0}^∞ (α_1)ₖ ⋯ (α_p)ₖ / (β_1)ₖ ⋯ (β_q)ₖ zᵏ/k!
-"""
 module HypergeometricFunctions
 
 using DualNumbers, LinearAlgebra, SpecialFunctions

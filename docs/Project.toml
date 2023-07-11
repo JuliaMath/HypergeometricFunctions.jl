@@ -1,0 +1,10 @@
+[deps]
+ComplexPhasePortrait = "38ac1a67-8e16-5889-9a62-b2c9995eb50f"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+HypergeometricFunctions = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+
+[compat]
+Documenter = "~0.26"
+ComplexPhasePortrait = "~0.2"
+Images = "~0.25"

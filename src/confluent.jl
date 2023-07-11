@@ -1,7 +1,7 @@
 # The references to special cases are to NIST's DLMF.
 
 """
-Compute Kummer's confluent hypergeometric function `M(a, b, z) = ₁F₁(a, b; z)`.
+Compute Kummer's confluent hypergeometric function `₁F₁(a, b; z)`.
 """
 function _₁F₁(a, b, z; kwds...)
     z = float(z)
