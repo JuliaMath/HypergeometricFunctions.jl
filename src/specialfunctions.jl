@@ -51,19 +51,29 @@ ogamma(x::Number) = (isinteger(x) && x<0) ? zero(float(x)) : inv(gamma(x))
 """
     @clenshaw(x, c...)
 
-Compute `∑_{i=1}^N cᵢ Tᵢ₋₁(x)`.
+Evaluate the Chebyshev polynomial series ``\\sum_{k=1}^N c[k] T_{k-1}(x)`` by the Clenshaw algorithm.
+
+External links: [DLMF](https://dlmf.nist.gov/3.11#ii), [Wikipedia](https://en.wikipedia.org/wiki/Clenshaw_algorithm).
+
+# Examples
+```jldoctest
+julia> HypergeometricFunctions.@clenshaw(1, 1, 2, 3)
+6
+
+julia> HypergeometricFunctions.@clenshaw(0.5, 1, 2, 3)
+0.5
+```
 """
 macro clenshaw(x, c...)
     a, b = :(zero(t)), :(zero(t))
     as = []
-    N = length(c)
-    for k = N:-1:2
+    for k = length(c):-1:2
         ak = Symbol("a", k)
         push!(as, :($ak = $a))
         a = :(muladd(t, $a, $(esc(c[k]))-$b))
         b = :($ak)
     end
-    ex = Expr(:block, as..., :(muladd(t/2, $a, $(esc(c[1]))-$b)))
+    ex = Expr(:block, as..., :(muladd($x, $a, $(esc(c[1]))-$b)))
     Expr(:block, :(t = $(esc(2))*$(esc(x))), ex)
 end
 
@@ -165,21 +175,26 @@ function unsafe_gamma(x::BigFloat)
 end
 unsafe_gamma(z::Dual) = (r = realpart(z);w = unsafe_gamma(r); dual(w, w*digamma(r)*dualpart(z)))
 unsafe_gamma(z) = gamma(z)
+
 """
     @lanczosratio(z, ϵ, c₀, c...)
 
-Compute `∑_{i=1}^N cᵢ/(z-1+i)/(z-1+i+ϵ) / ( c₀ + ∑_{i=1}^N cᵢ/(z-1+i) )`.
+Evaluate ``\\dfrac{\\sum_{k=0}^{N-1} \\frac{c[k+1]}{(z+k)(z+k+ϵ)}}{c₀ + \\sum_{k=0}^{N-1} \\frac{c[k+1]}{z+k}}`.
+
+This ratio is used in the Lanczos approximation of ``\log\\frac{\\Gamma(z+\\epsilon)}{\\Gamma(z)}`` in
+
+> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), Comp. Phys. Commun., 178:535–551, 2008.
 """
 macro lanczosratio(z, ϵ, c₀, c...)
-    ex_num = :(zero(zm1))
+    ex_num = :(zero(z))
     ex_den = esc(c₀)
-    for i = 0:length(c)-1
-        temp = :(inv(zm1+$i))
-        ex_num = :(muladd($(esc(c[i+1])), $temp*inv(zm1pϵ+$i), $ex_num))
-        ex_den = :(muladd($(esc(c[i+1])), $temp, $ex_den))
+    for k = 0:length(c)-1
+        temp = :(inv(z+$k))
+        ex_num = :(muladd($(esc(c[k+1])), $temp/(zpϵ+$k), $ex_num))
+        ex_den = :(muladd($(esc(c[k+1])), $temp, $ex_den))
     end
     ex = :($ex_num/$ex_den)
-    Expr(:block, :(zm1 = $(esc(z))), :(zm1pϵ = $(esc(z))+$(esc(ϵ))), ex)
+    Expr(:block, :(z = $(esc(z))), :(zpϵ = $(esc(z))+$(esc(ϵ))), ex)
 end
 
 lanczosratio(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Float64, ComplexF64, Dual128, DualComplex256}) = @lanczosratio(z, ϵ, 0.99999999999999709182, 57.156235665862923517, -59.597960355475491248, 14.136097974741747174, -0.49191381609762019978, 0.33994649984811888699E-4, 0.46523628927048575665E-4, -0.98374475304879564677E-4, 0.15808870322491248884E-3, -0.21026444172410488319E-3, 0.21743961811521264320E-3, -0.16431810653676389022E-3, 0.84418223983852743293E-4, -0.26190838401581408670E-4, 0.36899182659531622704E-5)
@@ -211,7 +226,9 @@ function H(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Flo
 end
 
 """
-Compute the function (1/Γ(z)-1/Γ(z+ϵ))/ϵ
+Compute the function ``\\dfrac{\\frac{1}{\\Gamma(z)}-\\frac{1}{\\Gamma(z+\\epsilon)}}{\\epsilon}`` by the method dscribed in
+
+> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), Comp. Phys. Commun., 178:535–551, 2008.
 """
 function G(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Float64, ComplexF64, Dual128, DualComplex256})
     n, zpϵ = round(Int, real(z)), z+ϵ
@@ -241,7 +258,9 @@ G(z::T, ϵ::T) where {T<:Number} = ϵ == 0 ? digamma(z)/unsafe_gamma(z) : (inv(u
 G(z::Number, ϵ::Number) = G(promote(z, ϵ)...)
 
 """
-Compute the function ((z+ϵ)ₘ-(z)ₘ)/ϵ
+Compute the function ``\\dfrac{(z+\\epsilon)_m-(z)_m}{\\epsilon}`` by the method dscribed in
+
+> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), Comp. Phys. Commun., 178:535–551, 2008.
 """
 function P(z::Number, ϵ::Number, m::Int)
     n₀ = -round(Int, real(z))
