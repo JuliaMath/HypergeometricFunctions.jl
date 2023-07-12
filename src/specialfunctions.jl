@@ -73,7 +73,7 @@ macro clenshaw(x, c...)
         a = :(muladd(t, $a, $(esc(c[k]))-$b))
         b = :($ak)
     end
-    ex = Expr(:block, as..., :(muladd($x, $a, $(esc(c[1]))-$b)))
+    ex = Expr(:block, as..., :(muladd($(esc(x)), $a, $(esc(c[1]))-$b)))
     Expr(:block, :(t = $(esc(2))*$(esc(x))), ex)
 end
 
