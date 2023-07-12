@@ -179,7 +179,7 @@ unsafe_gamma(z) = gamma(z)
 """
     @lanczosratio(z, ϵ, c₀, c...)
 
-Evaluate ``\\dfrac{\\sum_{k=0}^{N-1} \\frac{c[k+1]}{(z+k)(z+k+\\epsilon)}}{c\_0 + \\sum_{k=0}^{N-1} \\frac{c[k+1]}{z+k}}`.
+Evaluate ``\\dfrac{\\sum_{k=0}^{N-1} \\frac{c[k+1]}{(z+k)(z+k+\\epsilon)}}{c_0 + \\sum_{k=0}^{N-1} \\frac{c[k+1]}{z+k}}`.
 
 This ratio is used in the Lanczos approximation of ``\\log\\frac{\\Gamma(z+\\epsilon)}{\\Gamma(z)}`` in
 
