@@ -233,7 +233,7 @@ const NumberType = Float64
         (a, b, c, result) = NumberType.([-2.80752, 2.7876, -1.37287]), NumberType.([-2.9165, 0.49188]), NumberType(0.39686964583141693), -1.3014023309227971
         @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
         (a, b, c, result) = NumberType.([2.36231, -0.901808, 1.00893]), NumberType.([1.39985, -2.34968]), NumberType(0.970806084927347), 42731.87930657499
-        @test_broken pFq(a, b, c) ≈ result atol=eps() rtol=rtol
+        @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol
         @test HypergeometricFunctions.pFqcontinuedfraction(a, b, c) ≈ result atol=eps() rtol=rtol
         (a, b, c, result) = NumberType.([-0.715302, 2.94101, -0.498188]), NumberType.([-0.393808, -0.0265878]), NumberType(0.4375358657735875), 61.68955383799459
         @test pFq(a, b, c) ≈ result atol=eps() rtol=rtol

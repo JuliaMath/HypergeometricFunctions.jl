@@ -267,6 +267,87 @@ function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) w
     return isfinite(Rhi) ? Rhi : isfinite(Rmid) ? Rmid : Rlo
 end
 
+# ₃F₂(α,β,γ,δ,λ;z), algorithm γ = 2.
+function pFqweniger(α::Tuple{T1, T1, T1}, β::Tuple{T2, T2}, z::T3; kmax::Int = KMAX) where {T1, T2, T3}
+    (δ, λ) = β
+    (α, β, γ) = α
+    T = promote_type(T1, T2, T3)
+    absα = abs(T(α))
+    absβ = abs(T(β))
+    absγ = abs(T(γ))
+    if norm(z) < eps(real(T)) || norm(α*β*γ) < eps(absα*absβ*absγ)
+        return one(T)
+    end
+    ζ = inv(z)
+    Nlo = δ*λ*ζ/(α*β*γ)
+    Dlo = δ*λ*ζ/(α*β*γ)
+    Tlo = Nlo/Dlo
+    a0 = T(α+1)*T(β+1)*T(γ+1)
+    b0 = 2*T(δ+1)*T(λ+1)
+    Nmid2 = (b0*ζ-a0)*Nlo + b0*ζ
+    Dmid2 = (b0*ζ-a0)*Dlo
+    Tmid2 = Nmid2/Dmid2
+    if norm(a0) < eps((absα+1)*(absβ+1)*(absγ+1))
+        return Tmid2
+    end
+    Nmid2 /= a0
+    Dmid2 /= a0
+    k = 1
+    a0 = T(α+2)*T(β+2)*T(γ+2)
+    a1 = (T(1-β)*γ+β+5)*α+T(5+β)*γ+5*T(β)+13
+    b0 = 6*T(δ+2)*T(λ+2)
+    b1 = 6*T(δ+λ+3)
+    t0 = b0*ζ-3*(T(β+γ+3)*α+T(β+3)*γ+3*T(β)+7)
+    t1 = b1*ζ-a1
+    Nmid1 = t0*Nmid2 + t1*Nlo + b1*ζ
+    Dmid1 = t0*Dmid2 + t1*Dlo
+    Tmid1 = Nmid1/Dmid1
+    if norm(a0) < eps((absα+2)*(absβ+2)*(absγ+2))
+        return Tmid1
+    end
+    Nmid1 /= a0
+    Dmid1 /= a0
+    k = 2
+    a0 = T(α+3)*T(β+3)*T(γ+3)
+    a2 = 5*(T(γ-1)*T(β-1)*α+T(1-β)*γ+T(β)+23)/3
+    b0 = 10*T(δ+3)*T(λ+3)
+    b1 = -10*(T(δ-1)*λ-T(δ+11))
+    b2 = T(40)
+    t0 = b0*ζ+5*((T(β-1)*γ-T(β+11))*α-T(β+11)*γ-11*T(β)-49)/3
+    t1 = b1*ζ+(T(3+β)*γ+T(3*β-11))*α+T(3*β-11)*γ-11*T(β)-93
+    t2 = b2*ζ-a2 # ✓
+    Nhi = t0*Nmid1 + t1*Nmid2 + t2*Nlo + b2*ζ
+    Dhi = t0*Dmid1 + t1*Dmid2 + t2*Dlo
+    Thi = Nhi/Dhi
+    if norm(a0) < eps((absα+3)*(absβ+3)*(absγ+3))
+        return Thi
+    end
+    Nhi /= a0
+    Dhi /= a0
+    k = 3
+    while k < 6 || (k < kmax && errcheck(Tmid1, Thi, 8eps(real(T))))
+        a0 = T(α+k+1)*T(β+k+1)*T(γ+k+1)
+        a3 = T(k-α-2)*T(k-β-2)*T(k-γ-2)*k*T(2k+1)/T((k-1)*(2k-3))
+        b0 = T(4k+2)*T(δ+k+1)*T(λ+k+1)
+        b1 = (T(k*(k-1))-T(δ+1)*T(λ+1))*T(2k-1)*T(4k+2)/T(k-1)
+        b2 = T(k-δ-2)*T(k-λ-2)*T(4k+2)*k/T(k-1)
+        t0 = b0*ζ-((T(2k+α+β+γ)*k-T(α+β+γ+2))*k-T(γ+1)*T(α+1)*T(β+1))*T(2k+1)/T(k-1)
+        t1 = b1*ζ-(((T(6k-12)*k+(T(-2β-2γ-3)*α+T(-2β-3)*γ-3β-2))*k+(T(2β+2γ+3)*α+T(2β+3)*γ+3β+8))*k+3*T(γ+1)*T(α+1)*T(β+1))*T(2k-1)/T((k-1)*(2k-3))
+        t2 = b2*ζ-((T(2k-α-β-γ-6)*k+T(α+β+γ+4))*k+T(γ+1)*T(α+1)*T(β+1))*T(2k+1)/T(k-1)
+        Nhi, Nmid1, Nmid2, Nlo = t0*Nhi + t1*Nmid1 + t2*Nmid2 - a3*Nlo, Nhi, Nmid1, Nmid2
+        Dhi, Dmid1, Dmid2, Dlo = t0*Dhi + t1*Dmid1 + t2*Dmid2 - a3*Dlo, Dhi, Dmid1, Dmid2
+        Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
+        if norm(a0) < eps((absα+k+1)*(absβ+k+1)*(absγ+k+1))
+            return Thi
+        end
+        Nhi /= a0
+        Dhi /= a0
+        k += 1
+    end
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{3}(), Val{2}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    return isfinite(Thi) ? Thi : isfinite(Tmid1) ? Tmid1 : isfinite(Tmid2) ? Tmid2 : Tlo
+end
+
 # ₘFₙ(α;β;z)
 # γ ∉ ℕ
 function pFqweniger(α::AbstractVector{T1}, β::AbstractVector{T2}, z::T3, args...; kwds...) where {T1, T2, T3}
