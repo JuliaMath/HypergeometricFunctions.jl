@@ -71,7 +71,7 @@ end
 Compute the Gauss hypergeometric function `₂F₁(a, b, c; z)` with general parameters a, b, and c.
 This polyalgorithm is designed based on the paper
 
-> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), Comp. Phys. Commun., 178:535–551, 2008.
+> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), *Comp. Phys. Commun.*, **178**:535–551, 2008.
 """
 function _₂F₁general(a, b, c, z; kwds...)
     if z == 1
@@ -101,7 +101,7 @@ end
 Compute the Gauss hypergeometric function `₂F₁(a, b, c; z)` with general parameters a, b, and c.
 This polyalgorithm is designed based on the review
 
-> J. W. Pearson, S. Olver and M. A. Porter, [Numerical methos for the computation of the confluent and Gauss hypergeometric functions](https://doi.org/10.1007/s11075-016-0173-0), Numer. Algor., 74:821–866, 2017.
+> J. W. Pearson, S. Olver and M. A. Porter, [Numerical methods for the computation of the confluent and Gauss hypergeometric functions](https://doi.org/10.1007/s11075-016-0173-0), *Numer. Algor.*, **74**:821–866, 2017.
 """
 function _₂F₁general2(a, b, c, z)
     T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))

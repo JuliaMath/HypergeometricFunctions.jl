@@ -51,7 +51,7 @@ ogamma(x::Number) = (isinteger(x) && x<0) ? zero(float(x)) : inv(gamma(x))
 """
     @clenshaw(x, c...)
 
-Evaluate the Chebyshev polynomial series ``\\sum_{k=1}^N c[k] T_{k-1}(x)`` by the Clenshaw algorithm.
+Evaluate the Chebyshev polynomial series ``\\displaystyle \\sum_{k=1}^N c[k] T_{k-1}(x)`` by the Clenshaw algorithm.
 
 External links: [DLMF](https://dlmf.nist.gov/3.11#ii), [Wikipedia](https://en.wikipedia.org/wiki/Clenshaw_algorithm).
 
@@ -179,11 +179,11 @@ unsafe_gamma(z) = gamma(z)
 """
     @lanczosratio(z, ϵ, c₀, c...)
 
-Evaluate ``\\dfrac{\\sum_{k=0}^{N-1} \\frac{c[k+1]}{(z+k)(z+k+\\epsilon)}}{c_0 + \\sum_{k=0}^{N-1} \\frac{c[k+1]}{z+k}}`.
+Evaluate ``\\dfrac{\\displaystyle \\sum_{k=0}^{N-1} \\frac{c[k+1]}{(z+k)(z+k+\\epsilon)}}{\\displaystyle c_0 + \\sum_{k=0}^{N-1} \\frac{c[k+1]}{z+k}}``.
 
 This ratio is used in the Lanczos approximation of ``\\log\\frac{\\Gamma(z+\\epsilon)}{\\Gamma(z)}`` in
 
-> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), Comp. Phys. Commun., 178:535–551, 2008.
+> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), *Comp. Phys. Commun.*, **178**:535–551, 2008.
 """
 macro lanczosratio(z, ϵ, c₀, c...)
     ex_num = :(zero(z))
@@ -228,7 +228,7 @@ end
 """
 Compute the function ``\\dfrac{\\frac{1}{\\Gamma(z)}-\\frac{1}{\\Gamma(z+\\epsilon)}}{\\epsilon}`` by the method dscribed in
 
-> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), Comp. Phys. Commun., 178:535–551, 2008.
+> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), *Comp. Phys. Commun.*, **178**:535–551, 2008.
 """
 function G(z::Union{Float64, ComplexF64, Dual128, DualComplex256}, ϵ::Union{Float64, ComplexF64, Dual128, DualComplex256})
     n, zpϵ = round(Int, real(z)), z+ϵ
@@ -260,7 +260,7 @@ G(z::Number, ϵ::Number) = G(promote(z, ϵ)...)
 """
 Compute the function ``\\dfrac{(z+\\epsilon)_m-(z)_m}{\\epsilon}`` by the method dscribed in
 
-> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), Comp. Phys. Commun., 178:535–551, 2008.
+> N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), *Comp. Phys. Commun.*, **178**:535–551, 2008.
 """
 function P(z::Number, ϵ::Number, m::Int)
     n₀ = -round(Int, real(z))

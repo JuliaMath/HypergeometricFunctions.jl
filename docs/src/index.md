@@ -22,28 +22,17 @@ z = x' .+ im*y
 
 import Logging # To avoid printing warnings
 Logging.with_logger(Logging.SimpleLogger(Logging.Error)) do
-    fz = map(z->pFq((), (), z), z)
-    img = portrait(fz, ctype = "nist")
+    img = portrait(map(z->pFq((), (), z), z), ctype = "nist")
     save("0F0.png", img)
-
-    fz = map(z->pFq((), (1.0, ), z), z)
-    img = portrait(fz, ctype = "nist")
+    img = portrait(map(z->pFq((), (1.0, ), z), z), ctype = "nist")
     save("0F1.png", img)
-
-    fz = map(z->pFq((0.5, ), (0.75, ), z), z)
-    img = portrait(fz, ctype = "nist")
+    img = portrait(map(z->pFq((0.5, ), (0.75, ), z), z), ctype = "nist")
     save("1F1.png", img)
-
-    fz = map(z->pFq((3.5+7.5im, ), (), z), z)
-    img = portrait(fz, ctype = "nist")
+    img = portrait(map(z->pFq((3.5+7.5im, ), (), z), z), ctype = "nist")
     save("1F0.png", img)
-
-    fz = map(z->pFq((1.0, 3.5+7.5im), (0.75, ), z), z)
-    img = portrait(fz, ctype = "nist")
+    img = portrait(map(z->pFq((1.0, 3.5+7.5im), (0.75, ), z), z), ctype = "nist")
     save("2F1.png", img)
-
-    fz = map(z->pFq((1.0, 1.5+7.5im), (), z), z)
-    img = portrait(fz, ctype = "nist")
+    img = portrait(map(z->pFq((1.0, 1.5+7.5im), (), z), z), ctype = "nist")
     save("2F0.png", img)
 end
 nothing # hide
@@ -71,6 +60,8 @@ HypergeometricFunctions.U
 HypergeometricFunctions._₂F₁positive
 HypergeometricFunctions._₂F₁general
 HypergeometricFunctions._₂F₁general2
+HypergeometricFunctions.pFqdrummond
+HypergeometricFunctions.pFqweniger
 HypergeometricFunctions.pFqcontinuedfraction
 HypergeometricFunctions.pochhammer
 HypergeometricFunctions.@clenshaw
