@@ -409,7 +409,7 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
     end
     γ = T(γ)
     ζ = inv(z)
-    r = max(p+1, q+1)
+    r = max(p, q+1)
     N = zeros(T, r+3)
     D = zeros(T, r+3)
     R = zeros(T, r+3)
