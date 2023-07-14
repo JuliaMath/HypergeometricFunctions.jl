@@ -331,74 +331,65 @@ function pFqweniger(α::Tuple{T1, T1, T1}, β::Tuple{T2, T2}, z::T3; kmax::Int =
     if norm(z) < eps(real(T)) || norm(α*β*γ) < eps(absα*absβ*absγ)
         return one(T)
     end
-    ζ = inv(z)
-    Nlo = δ*λ*ζ/(α*β*γ)
-    Dlo = δ*λ*ζ/(α*β*γ)
-    Tlo = Nlo/Dlo
+    μlo = T(α*β*γ)/T(δ*λ)
+    Rlo = one(T)
     a0 = T(α+1)*T(β+1)*T(γ+1)
     b0 = 2*T(δ+1)*T(λ+1)
-    Nmid2 = (b0*ζ-a0)*Nlo + b0*ζ
-    Dmid2 = (b0*ζ-a0)*Dlo
-    Tmid2 = Nmid2/Dmid2
+    μmid2 = inv(b0-a0*z)
+    Rmid2 = Rlo + b0*z*μmid2*μlo
     if norm(a0) < eps((absα+1)*(absβ+1)*(absγ+1))
-        return Tmid2
+        return Rmid2
     end
-    Nmid2 /= a0
-    Dmid2 /= a0
+    μmid2 *= a0
     k = 1
     a0 = T(α+2)*T(β+2)*T(γ+2)
     a1 = (T(1-β)*γ+β+5)*α+T(5+β)*γ+5*T(β)+13
     b0 = 6*T(δ+2)*T(λ+2)
     b1 = 6*T(δ+λ+3)
-    t0 = b0*ζ-3*(T(β+γ+3)*α+T(β+3)*γ+3*T(β)+7)
-    t1 = b1*ζ-a1
-    Nmid1 = t0*Nmid2 + t1*Nlo + b1*ζ
-    Dmid1 = t0*Dmid2 + t1*Dlo
-    Tmid1 = Nmid1/Dmid1
+    t0 = b0-3*(T(β+γ+3)*α+T(β+3)*γ+3*T(β)+7)*z
+    t1 = b1-a1*z
+    μmid1 = inv(t0 + t1*z*μmid2)
+    Rmid1 = (t0*Rmid2 + (t1*Rlo + b1*z*μlo)*z*μmid2)*μmid1
     if norm(a0) < eps((absα+2)*(absβ+2)*(absγ+2))
-        return Tmid1
+        return Rmid1
     end
-    Nmid1 /= a0
-    Dmid1 /= a0
+    μmid1 *= a0
     k = 2
     a0 = T(α+3)*T(β+3)*T(γ+3)
     a2 = 5*(T(γ-1)*T(β-1)*α+T(1-β)*γ+T(β)+23)/3
     b0 = 10*T(δ+3)*T(λ+3)
     b1 = -10*(T(δ-1)*λ-T(δ+11))
     b2 = T(40)
-    t0 = b0*ζ+5*((T(β-1)*γ-T(β+11))*α-T(β+11)*γ-11*T(β)-49)/3
-    t1 = b1*ζ+(T(3+β)*γ+T(3*β-11))*α+T(3*β-11)*γ-11*T(β)-93
-    t2 = b2*ζ-a2
-    Nhi = t0*Nmid1 + t1*Nmid2 + t2*Nlo + b2*ζ
-    Dhi = t0*Dmid1 + t1*Dmid2 + t2*Dlo
-    Thi = Nhi/Dhi
+    t0 = b0+5*((T(β-1)*γ-T(β+11))*α-T(β+11)*γ-11*T(β)-49)/3*z
+    t1 = b1+((T(3+β)*γ+T(3*β-11))*α+T(3*β-11)*γ-11*T(β)-93)*z
+    t2 = b2-a2*z
+    μhi = inv(t0 + (t1 + t2*z*μmid2)*z*μmid1)
+    Rhi = (t0*Rmid1 + (t1*Rmid2 + (t2*Rlo + b2*z*μlo)*z*μmid2)*z*μmid1)*μhi
     if norm(a0) < eps((absα+3)*(absβ+3)*(absγ+3))
-        return Thi
+        return Rhi
     end
-    Nhi /= a0
-    Dhi /= a0
+    μhi *= a0
     k = 3
-    while k < 6 || (k < kmax && errcheck(Tmid1, Thi, 8eps(real(T))))
+    z2 = z*z
+    while k < 6 || (k < kmax && errcheck(Rmid1, Rhi, 8eps(real(T))))
         a0 = T(α+k+1)*T(β+k+1)*T(γ+k+1)
-        a3 = T(k-α-2)*T(k-β-2)*T(k-γ-2)*k*T(2k+1)/T((k-1)*(2k-3))
+        a3 = T(k-α-2)*T(k-β-2)*T(k-γ-2)*k*T(2k+1)/T((k-1)*(2k-3))*z2
         b0 = T(4k+2)*T(δ+k+1)*T(λ+k+1)
         b1 = (T(k*(k-1))-T(δ+1)*T(λ+1))*T(2k-1)*T(4k+2)/T(k-1)
         b2 = T(k-δ-2)*T(k-λ-2)*T(4k+2)*k/T(k-1)
-        t0 = b0*ζ-((T(2k+α+β+γ)*k-T(α+β+γ+2))*k-T(γ+1)*T(α+1)*T(β+1))*T(2k+1)/T(k-1)
-        t1 = b1*ζ-(((T(6k-12)*k+(T(-2β-2γ-3)*α+T(-2β-3)*γ-3β-2))*k+(T(2β+2γ+3)*α+T(2β+3)*γ+3β+8))*k+3*T(γ+1)*T(α+1)*T(β+1))*T(2k-1)/T((k-1)*(2k-3))
-        t2 = b2*ζ-((T(2k-α-β-γ-6)*k+T(α+β+γ+4))*k+T(γ+1)*T(α+1)*T(β+1))*T(2k+1)/T(k-1)
-        Nhi, Nmid1, Nmid2, Nlo = t0*Nhi + t1*Nmid1 + t2*Nmid2 - a3*Nlo, Nhi, Nmid1, Nmid2
-        Dhi, Dmid1, Dmid2, Dlo = t0*Dhi + t1*Dmid1 + t2*Dmid2 - a3*Dlo, Dhi, Dmid1, Dmid2
-        Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
+        t0 = b0-((T(2k+α+β+γ)*k-T(α+β+γ+2))*k-T(γ+1)*T(α+1)*T(β+1))*T(2k+1)/T(k-1)*z
+        t1 = b1-(((T(6k-12)*k+(T(-2β-2γ-3)*α+T(-2β-3)*γ-3β-2))*k+(T(2β+2γ+3)*α+T(2β+3)*γ+3β+8))*k+3*T(γ+1)*T(α+1)*T(β+1))*T(2k-1)/T((k-1)*(2k-3))*z
+        t2 = b2-((T(2k-α-β-γ-6)*k+T(α+β+γ+4))*k+T(γ+1)*T(α+1)*T(β+1))*T(2k+1)/T(k-1)*z
+        μhi, μmid1, μmid2, μlo = inv(t0 + (t1 + (t2 - a3*μmid2)*z*μmid1)*z*μhi), μhi, μmid1, μmid2
+        Rhi, Rmid1, Rmid2, Rlo = (t0*Rhi + (t1*Rmid1 + (t2*Rmid2 - a3*Rlo*μlo)*z*μmid2)*z*μmid1)*μhi, Rhi, Rmid1, Rmid2
         if norm(a0) < eps((absα+k+1)*(absβ+k+1)*(absγ+k+1))
-            return Thi
+            return Rhi
         end
-        Nhi /= a0
-        Dhi /= a0
+        μhi *= a0
         k += 1
     end
     k < kmax || @warn "Rational approximation to "*pFq2string(Val{3}(), Val{2}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
-    return isfinite(Thi) ? Thi : isfinite(Tmid1) ? Tmid1 : isfinite(Tmid2) ? Tmid2 : Tlo
+    return isfinite(Rhi) ? Rhi : isfinite(Rmid1) ? Rmid1 : isfinite(Rmid2) ? Rmid2 : Rlo
 end
 
 # ₘFₙ(α;β;z)
