@@ -199,7 +199,7 @@ end
 function pFqdrummond(::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = KMAX) where {T1, T2}
     (α, β) = β
     T = promote_type(T1, T2)
-    if norm(z) < eps(real(T)) || norm(α) < eps(real(T)) || norm(β) < eps(real(T))
+    if norm(z) < eps(real(T))
         return one(T)
     end
     ζ = inv(z)
