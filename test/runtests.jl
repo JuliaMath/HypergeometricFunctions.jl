@@ -1,6 +1,7 @@
 using HypergeometricFunctions, SpecialFunctions, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
+                                pochhammer,
                                 _₂F₁general, pFqdrummond, pFqweniger, pFq2string
 
 const rtol = 1.0e-3
