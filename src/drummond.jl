@@ -23,7 +23,7 @@ function pFqdrummond(::Tuple{}, ::Tuple{}, z::T; kmax::Int = KMAX) where T
         Thi, Tlo = ((k+2-z)*Thi + k*z*Tlo*μlo)*μhi, Thi
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(0), Val(0))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : Tlo
 end
 
@@ -67,7 +67,7 @@ function pFqdrummond(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T
         Dhi /= α+k+1
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{1}(), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(1), Val(0))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : Tlo
 end
 
@@ -99,7 +99,7 @@ function pFqdrummond(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = KMAX) where {T
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{1}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(0), Val(1))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -137,7 +137,7 @@ function pFqdrummond(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) wher
         μhi *= (α+k+1)*(β+k+1)
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{2}(), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(2), Val(0))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -191,7 +191,7 @@ function pFqdrummond(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) wher
         Dhi /= α+k+1
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{1}(), Val{1}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(1), Val(1))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -229,7 +229,7 @@ function pFqdrummond(::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = KMAX) wher
         Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{2}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(0), Val(2))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid1) ? Tmid1 : isfinite(Tmid2) ? Tmid2 : Tlo
 end
 
@@ -275,7 +275,7 @@ function pFqdrummond(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) 
         μhi *= (α+k+1)*(β+k+1)
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{2}(), Val{1}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(2), Val(1))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -366,7 +366,7 @@ function pFqdrummond(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KM
         end
         Q[q+2] = t
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(p), Val(q))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(R[r+2]) ? R[r+2] : R[r+1]
 end
 

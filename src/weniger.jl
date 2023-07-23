@@ -22,7 +22,7 @@ function pFqweniger(::Tuple{}, ::Tuple{}, z::T; kmax::Int = KMAX) where T
         Rhi, Rlo = ((4k+2)*Rhi + z2*Rlo*μlo)*μhi, Rhi
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(0), Val(0))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Rhi) ? Rhi : Rlo
 end
 
@@ -53,7 +53,7 @@ function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1
         μhi *= α+k+1
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{1}(), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(1), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Rhi) ? Rhi : Rlo
 end
 
@@ -98,7 +98,7 @@ function pFqweniger(::Tuple{}, β::Tuple{T1}, z::T2; kmax::Int = KMAX) where {T1
         Thi, Tmid, Tlo = Nhi/Dhi, Thi, Tmid
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{1}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val(1))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -145,7 +145,7 @@ function pFqweniger(α::Tuple{T1, T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where
         μhi *= a0
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{2}(), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(2), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Rhi) ? Rhi : isfinite(Rmid) ? Rmid : Rlo
 end
 
@@ -210,7 +210,7 @@ function pFqweniger(α::Tuple{T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) where
         Dhi /= a0
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{1}(), Val{1}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(1), Val(1))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid) ? Tmid : Tlo
 end
 
@@ -263,7 +263,7 @@ function pFqweniger(α::Tuple{}, β::Tuple{T1, T1}, z::T2; kmax::Int = KMAX) whe
         Thi, Tmid1, Tmid2, Tlo = Nhi/Dhi, Thi, Tmid1, Tmid2
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val{2}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val{0}(), Val(2))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : isfinite(Tmid1) ? Tmid1 : isfinite(Tmid2) ? Tmid2 : Tlo
 end
 
@@ -316,7 +316,7 @@ function pFqweniger(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3; kmax::Int = KMAX) w
         μhi *= a0
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{2}(), Val{1}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(2), Val(1))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Rhi) ? Rhi : isfinite(Rmid) ? Rmid : Rlo
 end
 
@@ -388,7 +388,7 @@ function pFqweniger(α::Tuple{T1, T1, T1}, β::Tuple{T2, T2}, z::T3; kmax::Int =
         μhi *= a0
         k += 1
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{3}(), Val{2}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(3), Val(2))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Rhi) ? Rhi : isfinite(Rmid1) ? Rmid1 : isfinite(Rmid2) ? Rmid2 : Rlo
 end
 
@@ -546,6 +546,6 @@ function pFqweniger(α::NTuple{p, T1}, β::NTuple{q, T2}, z::T3; kmax::Int = KMA
             Q[r+1] = t1
         end
     end
-    k < kmax || @warn "Rational approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
+    k < kmax || @warn "Rational approximation to "*pFq2string(Val(p), Val(q))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(R[r+3]) ? R[r+3] : R[r+2]
 end

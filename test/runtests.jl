@@ -1,7 +1,7 @@
 using HypergeometricFunctions, SpecialFunctions, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
-                                _₂F₁general, pFqdrummond, pFqweniger
+                                _₂F₁general, pFqdrummond, pFqweniger, pFq2string
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -558,4 +558,8 @@ end
             @test U(a, b, S(x)) ≈ S(U(a, b, x)) # From #55
         end
     end
+end
+
+@testset "Warning symbols" begin
+    @test pFq2string(Val(86420), Val(97531)) == "₈₆₄₂₀F₉₇₅₃₁"
 end

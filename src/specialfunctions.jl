@@ -15,8 +15,8 @@ kind2string(::Val{6}) = "₆"
 kind2string(::Val{7}) = "₇"
 kind2string(::Val{8}) = "₈"
 kind2string(::Val{9}) = "₉"
-kind2string(::Val{p}) where p = kind2string(Val{div(p, 10)}())*kind2string(Val{rem(p, 10)}())
-pFq2string(::Val{p}, ::Val{q}) where {p, q} = kind2string(Val{p}())*"F"*kind2string(Val{q}())
+kind2string(::Val{p}) where p = kind2string(Val(div(p, 10)))*kind2string(Val(rem(p, 10)))
+pFq2string(::Val{p}, ::Val{q}) where {p, q} = kind2string(Val(p))*"F"*kind2string(Val(q))
 
 # Same as in FastTransforms.jl
 """
