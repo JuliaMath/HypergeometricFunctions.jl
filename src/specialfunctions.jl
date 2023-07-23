@@ -126,8 +126,8 @@ expnlog1psinhatanhsqrt(n, x::Union{T, Dual{T}}) where {T<:Real} = x == 0 ? one(x
 
 expm1nlog1p(n, x) = x == 0 ? one(x) : expm1(n*log1p(x))/(n*x)
 
-log1pover(s) = log1p(s)/s
-logandpoly(x) = x == 0 ? one(x) : 6*(-2x+(x-2)*log1p(-x))/x^3
+log1pover(x) = iszero(x) ? one(x) : log1p(x)/x
+logandpoly(x) = iszero(x) ? one(x) : 6*(-2x+(x-2)*log1p(-x))/x^3
 function logandpoly(x::Union{Float64, ComplexF64})
     if abs(x) > 0.2
         6*(-2x+(x-2)*log1p(-x))/x^3
