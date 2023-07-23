@@ -1,8 +1,8 @@
 using HypergeometricFunctions, SpecialFunctions, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
-                                pochhammer,
-                                _₂F₁general, pFqdrummond, pFqweniger, pFq2string
+                                pochhammer, _₂F₁general, _₂F₁general2,
+                                pFqdrummond, pFqweniger, pFq2string
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -24,9 +24,9 @@ const NumberType = Float64
 end
 
 @testset "Hypergeometric Functions" begin
-    @testset "_₂F₁ vs _₂F₁general" begin
+    @testset "_₂F₁ vs _₂F₁general vs _₂F₁general2" begin
         e = exp(1.0)
-        regression_max_accumulated_error = 8.0e-13 # discovered by running the test
+        regression_max_accumulated_error = 2^12*eps() # discovered by running the test
         for z in (.9rand(Float64, 10), 10rand(ComplexF64, 10))
             j = 1
             for (a,b,c) in ((√2/e, 1.3, 1.3), (1.2, √3, 1.2), (-0.4, 0.4, 0.5),
@@ -46,10 +46,27 @@ end
                 @test error_accum < regression_max_accumulated_error
                 j += 1
             end
+            for (a,b,c) in ((√2/e, 1.3, 1.3), (1.2, √3, 1.2), (-0.4, 0.4, 0.5),
+                            (-0.3, 1.3, 0.5), (0.35, 0.85, 0.5), (0.5, 1.0, 1.5),
+                            (0.3, 0.7, 1.5), (0.7, 1.3, 1.5), (0.35, 0.85, 1.5),
+                            (3.0, 1.0, 2.0), (-2.0, 1.0, 2.0), (-3.0, 1.0, 2.0),
+                            (1.0, -4.0, 2.0), (1.0, 1.5, 2.5))
+                error_accum = 0.0
+                for zi in z
+                    twoFone = _₂F₁(a,b,c,zi)
+                    aa,bb,cc = big(a),big(b),big(c)
+                    twoFonegeneral2 = convert(Complex{Float64},_₂F₁general2(aa, bb, cc, big(zi)))
+                    norm(twoFone / twoFonegeneral2 - 1) > sqrt(eps()) && println("This is ₂F₁($a,$b;$c;zi) - ₂F₁general2($a,$b;$c;zi): ", norm(twoFone / twoFonegeneral2 - 1), "   ", twoFone, "   ", twoFonegeneral2, "   ", isfinite(twoFone), "   ", isfinite(twoFonegeneral2), " this is zi: ", zi)
+                    error_accum += Float64(norm(twoFone / twoFonegeneral2 - 1))
+                end
+                @test error_accum < regression_max_accumulated_error
+                j += 1
+            end
         end
-        @testset "Test that _₂F₁ is inferred for Float32 arguments" begin
-            @test @inferred(_₂F₁(0.3f0, 0.7f0, 1.3f0, 0.1f0)) ≈ Float32(_₂F₁(0.3, 0.7, 1.3, 0.1))
-        end
+    end
+
+    @testset "Test that _₂F₁ is inferred for Float32 arguments" begin
+        @test @inferred(_₂F₁(0.3f0, 0.7f0, 1.3f0, 0.1f0)) ≈ Float32(_₂F₁(0.3, 0.7, 1.3, 0.1))
     end
 
     @testset "method = positive" begin

@@ -471,7 +471,7 @@ function _₂F₁continuationalt(a::Number, c::Number, z₀::Number, z::Number)
     izz₀ = inv(z-z₀)
     e0, e1 = one(T), (a+one(T))*(one(T)-2z₀)+(2a+one(T))*z₀-c
     f0, f1 = zero(T), one(T)-2z₀
-    cⱼ = log(z₀-z)+2digamma(one(T))-digamma(a)-digamma(c-a)
+    cⱼ = log(z₀-z)+2digamma(one(real(T)))-digamma(a)-digamma(c-a)
     S₀ = cⱼ
     cⱼ += 2/one(T)-one(T)/a
     C = a*izz₀
@@ -489,7 +489,7 @@ end
 
 function _₂F₁logsum(a::Number, b::Number, z::Number, w::Number, s::Int)
     T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
-    cⱼ = 2digamma(one(T))-digamma(a)-digamma(b)+s*log1p(-z)
+    cⱼ = 2digamma(one(real(T)))-digamma(a)-digamma(b)+s*log1p(-z)
     C, S, j = one(T), cⱼ, 0
     while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
         C *= (a+j)/(j+1)^2*(b+j)*w
@@ -502,7 +502,7 @@ end
 
 function _₂F₁logsumalt(a::Number, b::Number, z::Number, w::Number)
     T = promote_type(typeof(a), typeof(b), typeof(z), typeof(w))
-    d, cⱼ = one(T)-b, 2digamma(one(T))-digamma(a)-digamma(b)-log(-w)
+    d, cⱼ = one(T)-b, 2digamma(one(real(T)))-digamma(a)-digamma(b)-log(-w)
     C, S, j = one(T), cⱼ, 0
     while abs(C) > 8abs(S)*eps(real(T)) || j ≤ 1
         C *= (a+j)/(j+1)^2*(d+j)*w

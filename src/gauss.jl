@@ -50,6 +50,8 @@ function _₂F₁(a, b, c, z; method::Symbol = :general, kwds...)
     end
     if method == :positive
         return _₂F₁positive(a, b, c, z; kwds...)
+    elseif method == :general2
+        return _₂F₁general2(a, b, c, z; kwds...)
     else#if method == :general
         return _₂F₁general(a, b, c, z; kwds...) # catch-all
     end
@@ -103,55 +105,55 @@ This polyalgorithm is designed based on the review
 
 > J. W. Pearson, S. Olver and M. A. Porter, [Numerical methods for the computation of the confluent and Gauss hypergeometric functions](https://doi.org/10.1007/s11075-016-0173-0), *Numer. Algor.*, **74**:821–866, 2017.
 """
-function _₂F₁general2(a, b, c, z)
+function _₂F₁general2(a, b, c, z; kwds...)
     T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
     if z == 1
-        return _₂F₁argument_unity(a, b, c, z)
+        return _₂F₁argument_unity(a, b, c, z; kwds...)
     elseif real(b) < real(a)
-        return _₂F₁general2(b, a, c, z)
+        return _₂F₁general2(b, a, c, z; kwds...)
     elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
-        return _₂F₁maclaurin(a, b, c, z)
+        return _₂F₁maclaurin(a, b, c, z; kwds...)
     elseif !isalmostwellpoised(a, b, c)
-        return exp((c-a-b)*log1p(-z))*_₂F₁general2(c-a, c-b, c, z)
+        return exp((c-a-b)*log1p(-z))*_₂F₁general2(c-a, c-b, c, z; kwds...)
     elseif abs(z / (z - 1)) ≤ ρ && absarg(1 - z) < convert(real(T), π) # 15.8.1
         w = z/(z-1)
-        return _₂F₁maclaurin(a, c-b, c, w)*exp(-a*log1p(-z))
+        return _₂F₁maclaurin(a, c-b, c, w; kwds...)*exp(-a*log1p(-z))
     elseif abs(inv(z)) ≤ ρ && absarg(-z) < convert(real(T), π)
         w = inv(z)
         if isapprox(a, b) # 15.8.8
-            return gamma(c)/gamma(a)/gamma(c-a)*(-w)^a*_₂F₁logsumalt(a, c-a, z, w)
+            return gamma(c)/gamma(a)/gamma(c-a)*(-w)^a*_₂F₁logsumalt(a, c-a, z, w; kwds...)
         elseif a-b ∉ ℤ # 15.8.2
-            return gamma(c)*((-w)^a*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, a-c+1, a-b+1, w)+(-w)^b*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, b-c+1, b-a+1, w))
+            return gamma(c)*((-w)^a*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, a-c+1, a-b+1, w; kwds...)+(-w)^b*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, b-c+1, b-a+1, w; kwds...))
         end # TODO: full 15.8.8
     elseif abs(inv(1-z)) ≤ ρ && absarg(-z) < convert(real(T), π)
         w = inv(1-z)
         if isapprox(a, b) # 15.8.9
-            return gamma(c)*exp(-a*log1p(-z))/gamma(a)/gamma(c-b)*_₂F₁logsum(a, c-a, z, w, 1)
+            return gamma(c)*exp(-a*log1p(-z))/gamma(a)/gamma(c-b)*_₂F₁logsum(a, c-a, z, w, 1; kwds...)
         elseif a-b ∉ ℤ # 15.8.3
-            return gamma(c)*(exp(-a*log1p(-z))*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, c-b, a-b+1, w)+exp(-b*log1p(-z))*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, c-a, b-a+1, w))
+            return gamma(c)*(exp(-a*log1p(-z))*gamma(b-a)/gamma(b)/gamma(c-a)*_₂F₁maclaurin(a, c-b, a-b+1, w; kwds...)+exp(-b*log1p(-z))*gamma(a-b)/gamma(a)/gamma(c-b)*_₂F₁maclaurin(b, c-a, b-a+1, w; kwds...))
         end # TODO: full 15.8.9
     elseif abs(1-z) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
         w = 1-z
         if isapprox(c, a + b) # 15.8.10
-            return gamma(c)/gamma(a)/gamma(b)*_₂F₁logsum(a, b, z, w, -1)
+            return gamma(c)/gamma(a)/gamma(b)*_₂F₁logsum(a, b, z, w, -1; kwds...)
         elseif c - a - b ∉ ℤ # 15.8.4
-            return gamma(c)*(gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, b, a+b-c+1, w)+exp((c-a-b)*log1p(-z))*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, c-b, c-a-b+1, w))
+            return gamma(c)*(gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, b, a+b-c+1, w; kwds...)+exp((c-a-b)*log1p(-z))*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, c-b, c-a-b+1, w; kwds...))
         end # TODO: full 15.8.10
     elseif abs(1-inv(z)) ≤ ρ && absarg(z) < convert(real(T), π) && absarg(1-z) < convert(real(T), π)
         w = 1-inv(z)
         if isapprox(c, a + b) # 15.8.11
-            return gamma(c)*z^(-a)/gamma(a)*_₂F₁logsumalt(a, b, z, w)
+            return gamma(c)*z^(-a)/gamma(a)*_₂F₁logsumalt(a, b, z, w; kwds...)
         elseif c - a - b ∉ ℤ # 15.8.5
-            return gamma(c)*(z^(-a)*gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, a-c+1, a+b-c+1, w)+z^(a-c)*(1-z)^(c-a-b)*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, 1-a, c-a-b+1, w))
+            return gamma(c)*(z^(-a)*gamma(c-a-b)/gamma(c-a)/gamma(c-b)*_₂F₁maclaurin(a, a-c+1, a+b-c+1, w; kwds...)+z^(a-c)*(1-z)^(c-a-b)*gamma(a+b-c)/gamma(a)/gamma(b)*_₂F₁maclaurin(c-a, 1-a, c-a-b+1, w; kwds...))
         end # TODO: full 15.8.11
     elseif abs(z-0.5) > 0.5
         if isapprox(a, b) && !isapprox(c, a+0.5)
-            return gamma(c)/gamma(a)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuationalt(a, c, 0.5, z)
+            return gamma(c)/gamma(a)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuationalt(a, c, 0.5, z; kwds...)
         elseif a-b ∉ ℤ
-            return gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z))
+            return gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z; kwds...) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z; kwds...))
         end
     end
-    return pFqweniger((a, b), (c, ), z)
+    return pFqweniger((a, b), (c, ), z; kwds...) # _₂F₁taylor(a, b, c, z; kwds...)
 end
 
 # Special case of (-x)^a*_₂F₁ to handle LogNumber correctly in RiemannHilbert.jl
