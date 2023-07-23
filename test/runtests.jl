@@ -1,4 +1,4 @@
-using HypergeometricFunctions, Test
+using HypergeometricFunctions, SpecialFunctions, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
                                 _₂F₁general, pFqdrummond, pFqweniger
@@ -6,7 +6,23 @@ import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
 const rtol = 1.0e-3
 const NumberType = Float64
 
-@testset "Hypergeometric Function tests" begin
+@testset "Special function" begin
+    @test pochhammer(2,3) == 24
+    @test pochhammer(0.5,3) == 0.5*1.5*2.5
+    @test pochhammer(0.5,0.5) == 1/sqrt(pi)
+    @test pochhammer(0,1) == 0
+    @test pochhammer(-1,2) == 0
+    @test pochhammer(-5,3) == -60
+    @test pochhammer(-1,-0.5) == 0
+    @test 1.0/pochhammer(-0.5,-0.5) == 0
+    @test pochhammer(-1+0im,-1) == -0.5
+    @test pochhammer(2,1) == pochhammer(2,1.0) == pochhammer(2.0,1) == 2
+    @test pochhammer(1.1,2.2) ≈ gamma(3.3)/gamma(1.1)
+    @test pochhammer(-2,1) == pochhammer(-2,1.0) == pochhammer(-2.0,1) == -2
+    @test pochhammer(3, 1:5) == [3, 12, 60, 360, 2520]
+end
+
+@testset "Hypergeometric Functions" begin
     @testset "_₂F₁ vs _₂F₁general" begin
         e = exp(1.0)
         regression_max_accumulated_error = 8.0e-13 # discovered by running the test
@@ -511,6 +527,8 @@ end
     @test_throws DomainError M(-3, -2, 0.5)
     @test M(-2, -3, 0.5) ≡ 1.375
     @test M(0.5, 1.5, -1000) ≈ 0.028024956081989644 # From #46
+    @test M(1, 2, 0) == 1
+    @test M(1, 2, 0.25) == expm1(0.25)/0.25
     for (S, T) in ((Float64, BigFloat),)
         a = T(8.9)
         b = T(0.5)
