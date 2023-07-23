@@ -303,6 +303,7 @@ const NumberType = Float64
         @test _₃F₂(a..., b..., c) ≈ result atol=eps() rtol=rtol
         (a, b, c, result) = NumberType.([-2.95746, -1.43804, -0.363603]), NumberType.([-1.59028, 1.87905]), NumberType(0.6408597427285083), 1.3015755922356282
         @test _₃F₂(a..., b..., c) ≈ result atol=eps() rtol=rtol
+        @test _₃F₂(2.5, 3.25, 0.125) == _₃F₂(2.5, 1, 1, 3.25, 2, 0.125)
     end
 
 end
@@ -467,6 +468,37 @@ end
 
     @testset "Integer arguments" begin
         @test _₂F₁(1, 0, 3, -1) ≡ _₂F₁(1.0, 0, 3, -1) ≡ 1.0
+    end
+end
+
+@testset "₅F₄" begin # Tests the generic algorithms for pFqdrummond and pFqweniger
+    for (S, T) in ((Float32, Float64),
+                   (Float64, BigFloat),
+                   (BigFloat, BigFloat))
+        atol = rtol = sqrt(eps(S))
+        @testset "Small argument" begin
+            α = (1, 2, 3, 4, 5)
+            β = (6, 7, 8, 9)
+            z = eps(T)^2
+            @test pFqdrummond(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+            @test pFqweniger(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+        end
+        @testset "Terminating hypergeometrics, multiple dispatch" begin
+            α = Real[1//1, 2, 3, 4, -5]
+            β = Real[6//1, 7, 8, 9]
+            for z in T(-5):T(0.5):T(5)
+                @test pFqdrummond(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+                @test pFqweniger(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+            end
+        end
+        @testset "Generic algorithms" begin
+            α = (T(1)/T(6), T(2)/T(6), T(3)/T(6), T(4)/T(6), T(5)/T(6))
+            β = (T(1)/T(7), T(2)/T(7), T(3)/T(7), T(4)/T(7))
+            for z in T(-5):T(0.5):T(0)
+                @test pFqdrummond(S.(α), S.(β), S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+                @test pFqweniger(S.(α), S.(β), S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+            end
+        end
     end
 end
 
