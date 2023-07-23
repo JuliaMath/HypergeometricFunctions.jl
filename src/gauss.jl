@@ -50,8 +50,8 @@ function _₂F₁(a, b, c, z; method::Symbol = :general, kwds...)
     end
     if method == :positive
         return _₂F₁positive(a, b, c, z; kwds...)
-    elseif method == :general2
-        return _₂F₁general2(a, b, c, z; kwds...)
+    #elseif method == :general2
+    #    return _₂F₁general2(a, b, c, z; kwds...)
     else#if method == :general
         return _₂F₁general(a, b, c, z; kwds...) # catch-all
     end
