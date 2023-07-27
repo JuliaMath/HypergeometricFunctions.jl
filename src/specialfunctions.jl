@@ -348,9 +348,10 @@ function Aone(a, b, c, w, m::Int, ϵ)
 end
 
 function Bone(a, b, c, w, m::Int, ϵ)
+    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(w), typeof(m), typeof(ϵ))
     βₙ, γₙ = reconeβ₀(a, b, c, w, m, ϵ)*one(w), reconeγ₀(a, b, c, w, m, ϵ)*w
     ret, n = βₙ, 0
-    while abs(βₙ) > 8abs(ret)*eps() || n ≤ 0
+    while abs(βₙ) > 8abs(ret)*eps(real(T)) || n ≤ 0
         βₙ = (a+m+n+ϵ)*(b+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(b+m+n)/(m+n+1) - (a+m+n) - (b+m+n) - ϵ + (a+m+n+ϵ)*(b+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))
         ret += βₙ
         γₙ *= (a+m+n)*(b+m+n)/((m+n+1)*(n+1-ϵ))*w
@@ -412,10 +413,11 @@ function AInf(a, b, c, w, m::Int, ϵ)
 end
 
 function BInf(a, b, c, win, m::Int, ϵ)
+    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(win), typeof(m), typeof(ϵ))
     w = win
     βₙ, γₙ = recInfβ₀(a, b, c, win, m, ϵ)*one(w), recInfγ₀(a, b, c, win, m, ϵ)*w
     ret, n = βₙ, 0
-    while abs(βₙ) > 8abs(ret)*eps() || n ≤ 0
+    while abs(βₙ) > 8abs(ret)*eps(real(T)) || n ≤ 0
         βₙ = (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(1-c+a+m+n)/(m+n+1) - (a+m+n) - (1-c+a+m+n) - ϵ + (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))
         ret += βₙ
         γₙ *= (a+m+n)*(1-c+a+m+n)/((m+n+1)*(n+1-ϵ))*w
@@ -555,7 +557,7 @@ function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V; kmax::Int = KMAX) 
         S₀, S₁ = S₁, S₁+(S₁-S₀)*rₖ
         k += 1
     end
-    k < kmax || @warn "Maclaurin approximation to "*pFq2string(Val{p}(), Val{q}())*" reached the maximum degree of "*string(kmax)*"."
+    k < kmax || @warn "Maclaurin approximation to "*pFq2string(Val(p), Val(q))*" reached the maximum degree of "*string(kmax)*"."
     return S₁
 end
 

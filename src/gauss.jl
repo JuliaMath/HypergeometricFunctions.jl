@@ -1,7 +1,7 @@
 # The references to special cases are to Table of Integrals, Series, and Products, § 9.121, followed by NIST's DLMF.
 
 """
-Compute the Gauss hypergeometric function `₂F₁(a, b, c; z)`.
+Compute the Gauss hypergeometric function `₂F₁(a, b, c, z)`.
 """
 function _₂F₁(a, b, c, z; method::Symbol = :general, kwds...)
     z = float(z)
@@ -58,7 +58,7 @@ function _₂F₁(a, b, c, z; method::Symbol = :general, kwds...)
 end
 
 """
-Compute the Gauss hypergeometric function `₂F₁(a, b, c; z)` with positive parameters a, b, and c and argument 0 ≤ z ≤ 1. Useful for statisticians.
+Compute the Gauss hypergeometric function `₂F₁(a, b, c, z)` with positive parameters a, b, and c and argument 0 ≤ z ≤ 1. Useful for statisticians.
 """
 function _₂F₁positive(a, b, c, z; kwds...)
     @assert a > 0 && b > 0 && c > 0 && 0 ≤ z ≤ 1
@@ -70,7 +70,7 @@ function _₂F₁positive(a, b, c, z; kwds...)
 end
 
 """
-Compute the Gauss hypergeometric function `₂F₁(a, b, c; z)` with general parameters a, b, and c.
+Compute the Gauss hypergeometric function `₂F₁(a, b, c, z)` with general parameters a, b, and c.
 This polyalgorithm is designed based on the paper
 
 > N. Michel and M. V. Stoitsov, [Fast computation of the Gauss hypergeometric function with all its parameters complex with application to the Pöschl–Teller–Ginocchio potential wave functions](https://doi.org/10.1016/j.cpc.2007.11.007), *Comp. Phys. Commun.*, **178**:535–551, 2008.
@@ -100,7 +100,7 @@ function _₂F₁general(a, b, c, z; kwds...)
 end
 
 """
-Compute the Gauss hypergeometric function `₂F₁(a, b, c; z)` with general parameters a, b, and c.
+Compute the Gauss hypergeometric function `₂F₁(a, b, c, z)` with general parameters a, b, and c.
 This polyalgorithm is designed based on the review
 
 > J. W. Pearson, S. Olver and M. A. Porter, [Numerical methods for the computation of the confluent and Gauss hypergeometric functions](https://doi.org/10.1007/s11075-016-0173-0), *Numer. Algor.*, **74**:821–866, 2017.

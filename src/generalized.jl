@@ -1,8 +1,8 @@
 @doc raw"""
-    pFq(α, β; z)
+    pFq(α, β, z)
 Compute the generalized hypergeometric function, defined by
 ```math
-{}_pF_q(α, β; z) = \sum_{k=0}^\infty \dfrac{(\alpha_1)_k\cdots(\alpha_p)_k}{(\beta_1)_k\cdots(\beta_q)_k}\dfrac{z^k}{k!},
+{}_pF_q(α, β, z) = \sum_{k=0}^\infty \dfrac{(\alpha_1)_k\cdots(\alpha_p)_k}{(\beta_1)_k\cdots(\beta_q)_k}\dfrac{z^k}{k!},
 ```
 where the series converges and elsewhere by analytic continuation.
 
@@ -79,7 +79,7 @@ end
 pFq(α::AbstractVector, β::AbstractVector, z; kwds...) = pFq(Tuple(α), Tuple(β), z; kwds...)
 
 """
-Compute the generalized hypergeometric function `pFq(α, β; z)` by continued fraction.
+Compute the generalized hypergeometric function `pFq(α, β, z)` by continued fraction.
 """
 function pFqcontinuedfraction(α::AbstractVector{S}, β::AbstractVector{U}, z::V) where {S, U, V}
     T = promote_type(S, U, V)
@@ -91,7 +91,7 @@ function pFqcontinuedfraction(α::AbstractVector{S}, β::AbstractVector{U}, z::V
 end
 
 """
-Compute the generalized hypergeometric function `₃F₂(a₁, 1, 1, b₁, 2; z)`.
+Compute the generalized hypergeometric function `₃F₂(a₁, 1, 1, b₁, 2, z)`.
 """
 _₃F₂(a₁, b₁, z; kwds...) = _₃F₂(a₁, 1, 1, b₁, 2, z; kwds...)
 """
