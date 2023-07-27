@@ -149,7 +149,7 @@ function _₂F₁general2(a, b, c, z; kwds...)
     elseif abs(z-0.5) > 0.5
         if isapprox(a, b) && !isapprox(c, a+0.5)
             return gamma(c)/gamma(a)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuationalt(a, c, 0.5, z; kwds...)
-        elseif a-b ∉ ℤ
+        elseif a-b ∉ ℤ && !isapprox(2c, a+b+1)
             return gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z; kwds...) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z; kwds...))
         end
     end

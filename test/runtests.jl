@@ -63,6 +63,7 @@ end
                 j += 1
             end
         end
+        @test _₂F₁general(-0.4, 0.4, 0.5, 0.75+0.75im) ≈ _₂F₁general2(-0.4, 0.4, 0.5, 0.75+0.75im)
     end
 
     @testset "Test that _₂F₁ is inferred for Float32 arguments" begin
