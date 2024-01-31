@@ -11,16 +11,42 @@ function pFqweniger(::Tuple{}, ::Tuple{}, z::T; kmax::Int = KMAX) where T
     if norm(z) < eps(real(T))
         return one(T)
     end
-    μlo = one(T)
-    μhi = inv(2-z)
-    Rlo = one(T)
-    Rhi = Rlo + 2z*μhi
-    k = 1
     z2 = z*z
-    while k < kmax && errcheck(Rlo, Rhi, 8eps(real(T)))
-        μhi, μlo = inv(4k+2 + z2*μhi), μhi
-        Rhi, Rlo = ((4k+2)*Rhi + z2*Rlo*μlo)*μhi, Rhi
+    μlo = one(T)
+    Rlo = one(T)
+    k = 0
+    if iszero(2-z)
+        μhi = inv(2-z)
+        Rhi = Rlo + 2z*μhi
         k += 1
+        μhi, μlo = inv(4k+2 + z2*μhi), μhi
+        Rhi, Rlo = (4k+2)*2/z + Rlo, Rhi
+        k += 1
+        μhi, μlo = inv(4k+2 + z2*μhi), μhi
+        Rhi, Rlo = Rhi + 2z*μhi, Rhi
+        k += 1
+    else
+        μhi = inv(2-z)
+        Rhi = Rlo + 2z*μhi
+        k += 1
+    end
+    while k < kmax && errcheck(Rlo, Rhi, 8eps(real(T)))
+        if iszero(4k+2 + z2*μhi)
+            μhi, μlo = inv(4k+2 + z2*μhi), μhi
+            cst = (4k+2)*Rhi + z2*Rlo*μlo
+            Rhi, Rlo = cst*μhi, Rhi
+            k += 1
+            μhi, μlo = inv(4k+2 + z2*μhi), μhi
+            Rhi, Rlo = (4k+2)*cst/z2 + Rlo, Rhi
+            k += 1
+            μhi, μlo = inv(4k+2 + z2*μhi), μhi
+            Rhi, Rlo = Rhi + cst*μhi, Rhi
+            k += 1
+        else
+            μhi, μlo = inv(4k+2 + z2*μhi), μhi
+            Rhi, Rlo = ((4k+2)*Rhi + z2*Rlo*μlo)*μhi, Rhi
+            k += 1
+        end
     end
     k < kmax || @warn "Rational approximation to "*pFq2string(Val(0), Val(0))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Rhi) ? Rhi : Rlo

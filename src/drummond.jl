@@ -12,16 +12,56 @@ function pFqdrummond(::Tuple{}, ::Tuple{}, z::T; kmax::Int = KMAX) where T
         return one(T)
     end
     μlo = one(z)
-    μhi = inv(2-z)
     Tlo = one(z)
-    Thi = Tlo + 2z*μhi
-    μhi, μlo = inv(3-z + z*μhi), μhi
-    Thi, Tlo = ((3-z)*Thi + z*(Tlo+z)*μlo)*μhi, Thi
-    k = 2
-    while k < kmax && errcheck(Tlo, Thi, 8eps(real(T)))
-        μhi, μlo = inv(k+2-z + k*z*μhi), μhi
-        Thi, Tlo = ((k+2-z)*Thi + k*z*Tlo*μlo)*μhi, Thi
+    k = 0
+    if iszero(2-z)
+        μhi = inv(2-z)
+        Thi = Tlo + 2z*μhi
         k += 1
+        μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+        Thi, Tlo = 6-z + Tlo, Thi
+        k += 1
+        μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+        Thi, Tlo = ((k+2-z)*Thi + k*z*2)*μhi, Thi
+        k += 1
+    else
+        μhi = inv(2-z)
+        Thi = Tlo + 2z*μhi
+        k += 1
+        if iszero(3-z + z*μhi)
+            μhi, μlo = inv(3-z + z*μhi), μhi
+            cst = (3-z)*Thi + z*(Tlo+z)*μlo
+            Thi, Tlo = cst*μhi, Thi
+            k += 1
+            μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+            Thi, Tlo = (k+2-z)*cst/(k*z) + Tlo, Thi
+            k += 1
+            μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+            Thi, Tlo = Thi + (k*cst/T(k-1))*μhi, Thi
+            k += 1
+        else
+            μhi, μlo = inv(3-z + z*μhi), μhi
+            Thi, Tlo = ((3-z)*Thi + z*(Tlo+z)*μlo)*μhi, Thi
+            k += 1
+        end
+    end
+    while k < kmax && errcheck(Tlo, Thi, 8eps(real(T)))
+        if iszero(k+2-z + k*z*μhi)
+            μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+            cst = ((k+2-z)*Thi + k*z*Tlo*μlo)
+            Thi, Tlo = cst*μhi, Thi
+            k += 1
+            μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+            Thi, Tlo = (k+2-z)*cst/(k*z) + Tlo, Thi
+            k += 1
+            μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+            Thi, Tlo = Thi + (k*cst/T(k-1))*μhi, Thi
+            k += 1
+        else
+            μhi, μlo = inv(k+2-z + k*z*μhi), μhi
+            Thi, Tlo = ((k+2-z)*Thi + k*z*Tlo*μlo)*μhi, Thi
+            k += 1
+        end
     end
     k < kmax || @warn "Rational approximation to "*pFq2string(Val(0), Val(0))*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Thi) ? Thi : Tlo

@@ -362,6 +362,17 @@ end
             @test pFqdrummond((), (), z) ≈ CS(pFq((), (), CT(z))) atol=atol rtol=rtol
             @test pFqweniger((), (), z) ≈ CS(pFq((), (), CT(z))) atol=atol rtol=rtol
         end
+        @test pFqweniger((), (), S(2)) ≈ S(pFq((), (), T(2))) atol=atol rtol=rtol
+        @test pFqdrummond((), (), S(2)) ≈ S(pFq((), (), T(2))) atol=atol rtol=rtol
+        # real root of z³-6z²+18z-24
+        z = big"2.62581681895846671601188893376528333127944414121175230343105061856653653362177"
+        @test pFqdrummond((), (), S(z)) ≈ S(pFq((), (), T(z))) atol=atol rtol=rtol
+        # real root of z³-12z²+60z-120
+        z = big"4.64437070925217118582294142140806396986328876579916801835768782380859352462557"
+        @test pFqweniger((), (), S(z)) ≈ S(pFq((), (), T(z))) atol=atol rtol=rtol
+        # real root of z⁵-30z⁴+420z³-3360z²+15120z-30240
+        z = big"7.29347719065928651947033927231889084041392903533230450877470222528006165013418"
+        @test pFqweniger((), (), S(z)) ≈ S(pFq((), (), T(z))) atol=atol rtol=rtol
     end
 end
 
