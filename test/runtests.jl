@@ -387,6 +387,11 @@ end
             @test pFqdrummond((α, ), (), z) ≈ S(pFq((T(α), ), (), T(z))) atol=atol rtol=rtol
             @test pFqweniger((α, ), (), z) ≈ S(pFq((T(α), ), (), T(z))) atol=atol rtol=rtol
         end
+        #for α = S(-1.5):S(0.5):S(1.5)
+        #    z = 2/(α+1)
+        #    @test pFqdrummond((α, ), (), z) ≈ S(pFq((T(α), ), (), 2/(T(α)+1))) atol=atol rtol=rtol
+        #    @test pFqweniger((α, ), (), z) ≈ S(pFq((T(α), ), (), 2/(T(α)+1))) atol=atol rtol=rtol
+        #end
         atol *= 2
         rtol *= 2
         for α in S(-1.5):S(0.5):S(1.5), x in S(-0.75):S(0.25):S(0.25), y in S(-0.75):S(0.25):S(0.25)
@@ -394,7 +399,14 @@ end
             @test pFqdrummond((α, ), (), z) ≈ CS(pFq((T(α), ), (), CT(z))) atol=atol rtol=rtol
             @test pFqweniger((α, ), (), z) ≈ CS(pFq((T(α), ), (), CT(z))) atol=atol rtol=rtol
         end
+        z = S(2.0)^-104
+        α = S(0)+S(1)*im
+        @test real(pFq((α, ), (), z)) ≈ real(exp(-α*log1p(-z)))
+        @test imag(pFq((α, ), (), z)) ≈ imag(exp(-α*log1p(-z))) # High relative accuracy in the imaginary part is precisely why we don't use (1-z)^-α
     end
+    z = 0.43019497816657903
+    α = 8.5
+    @test pFqweniger((α, ), (), z) ≈ pFq((α, ), (), z)
 end
 
 @testset "₀F₁" begin

@@ -60,24 +60,71 @@ function pFqweniger(α::Tuple{T1}, ::Tuple{}, z::T2; kmax::Int = KMAX) where {T1
     if norm(z) < eps(real(T)) || norm(α) < eps(absα)
         return one(T)
     end
-    μlo = α
-    μhi = inv(2-(α+1)*z)
-    Rlo = one(T)
-    Rhi = Rlo + 2z*μhi*μlo
-    if norm(α+1) < eps(absα+1)
-        return Rhi
-    end
-    μhi *= α+1
-    k = 1
     z2 = z*z
-    while k < kmax && errcheck(Rlo, Rhi, 8eps(real(T)))
+    μlo = α
+    Rlo = one(T)
+    k = 0
+    if iszero(2-(α+1)*z)
+        μhi = inv(2-(α+1)*z)
+        Rhi = Rlo + 2z*μhi*μlo
+        μhi *= α+1
+        k += 1
         μhi, μlo = inv((2k+1)*(2-z) - (k-α)*z2*μhi), μhi
-        Rhi, Rlo = ((2k+1)*(2-z)*Rhi - (k-α)*z2*Rlo*μlo)*μhi, Rhi
+        Rhi, Rlo = Rlo - (2k+1)*(2-z)*2*α/(z*(α+1)*(k-α)), Rhi
         if norm(α+k+1) < eps(absα+k+1)
             return Rhi
         end
         μhi *= α+k+1
         k += 1
+        μhi, μlo = inv((2k+1)*(2-z) - (k-α)*z2*μhi), μhi
+        Rhi, Rlo = Rhi + 2z*(k-α)*α*(α+2)/((1-α)*(α+1))*μhi, Rhi
+        if norm(α+k+1) < eps(absα+k+1)
+            return Rhi
+        end
+        μhi *= α+k+1
+        k += 1
+    else
+        μhi = inv(2-(α+1)*z)
+        Rhi = Rlo + 2z*μhi*μlo
+        if norm(α+1) < eps(absα+1)
+            return Rhi
+        end
+        μhi *= α+1
+        k += 1
+    end
+    while k < kmax && errcheck(Rlo, Rhi, 8eps(real(T)))
+        if iszero((2k+1)*(2-z) - (k-α)*z2*μhi)
+            μhi, μlo = inv((2k+1)*(2-z) - (k-α)*z2*μhi), μhi
+            cst = (2k+1)*(2-z)*Rhi - (k-α)*z2*Rlo*μlo
+            Rhi, Rlo = cst*μhi, Rhi
+            if norm(α+k+1) < eps(absα+k+1)
+                return Rhi
+            end
+            μhi *= α+k+1
+            k += 1
+            μhi, μlo = inv((2k+1)*(2-z) - (k-α)*z2*μhi), μhi # ✓
+            Rhi, Rlo = Rlo - (2k+1)*(2-z)*cst/((k-α)*z2*(α+k)), Rhi
+            if norm(α+k+1) < eps(absα+k+1)
+                return Rhi
+            end
+            μhi *= α+k+1
+            k += 1
+            μhi, μlo = inv((2k+1)*(2-z) - (k-α)*z2*μhi), μhi
+            Rhi, Rlo = Rhi + cst*(k-α)*(α+k)/((k-1-α)*(α+k-1))*μhi, Rhi
+            if norm(α+k+1) < eps(absα+k+1)
+                return Rhi
+            end
+            μhi *= α+k+1
+            k += 1
+        else
+            μhi, μlo = inv((2k+1)*(2-z) - (k-α)*z2*μhi), μhi
+            Rhi, Rlo = ((2k+1)*(2-z)*Rhi - (k-α)*z2*Rlo*μlo)*μhi, Rhi
+            if norm(α+k+1) < eps(absα+k+1)
+                return Rhi
+            end
+            μhi *= α+k+1
+            k += 1
+        end
     end
     k < kmax || @warn "Rational approximation to "*pFq2string(Val(1), Val{0}())*" reached the maximum type of ("*string(kmax, ", ", kmax)*")."
     return isfinite(Rhi) ? Rhi : Rlo
