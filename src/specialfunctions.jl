@@ -81,20 +81,16 @@ const ρϵ = 0.71
 struct ℕ end
 
 Base.in(n::Integer, ::Type{ℕ}) = n > 0
-Base.in(n::Real, ::Type{ℕ}) = (ν = round(Int, n); n == ν && ν ∈ ℕ)
-Base.in(n::Complex, ::Type{ℕ}) = imag(n) == 0 && real(n) ∈ ℕ
+Base.in(n::Number, ::Type{ℕ}) = isinteger(n) && round(Int, n) ∈ ℕ
 
 struct ℕ₀ end
 
 Base.in(n::Integer, ::Type{ℕ₀}) = n ≥ 0
-Base.in(n::Real, ::Type{ℕ₀}) = (ν = round(Int, n); n == ν && ν ∈ ℕ₀)
-Base.in(n::Complex, ::Type{ℕ₀}) = imag(n) == 0 && real(n) ∈ ℕ₀
+Base.in(n::Number, ::Type{ℕ₀}) = isinteger(n) && round(Int, n) ∈ ℕ₀
 
 struct ℤ end
 
-Base.in(n::Integer, ::Type{ℤ}) = true
-Base.in(n::Real, ::Type{ℤ}) = n == round(Int, n)
-Base.in(n::Complex, ::Type{ℤ}) = imag(n) == 0 && real(n) ∈ ℤ
+Base.in(n::Number, ::Type{ℤ}) = isinteger(n)
 
 abeqcd(a, b, cd) = isequal(a, b) && isequal(b, cd)
 abeqcd(a, b, c, d) = isequal(a, c) && isequal(b, d)
