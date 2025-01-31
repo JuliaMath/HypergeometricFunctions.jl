@@ -77,7 +77,7 @@ using ComplexPhasePortrait, HypergeometricFunctions, Images
 x = range(-1, stop=3, length=300)
 y = range(-2, stop=2, length=300)
 z = x' .+ im*y
-img = portrait(map(z->pFq((4.25, -10.5), (7.5 + 20.0*im, ), z), z), ctype = "nist")
+img = portrait(map(z->pFq((4.25, -10.5), (7.5 + 10.0*im, ), z), z), ctype = "nist")
 save("assets/logo.png", img)
 nothing # hide
 ```
