@@ -54,6 +54,7 @@ pFq
 
 pFq(::Tuple{}, ::Tuple{}, z; kwds...) = exp(z)
 pFq(α::NTuple{1}, ::Tuple{}, z; kwds...) = exp(-α[1]*log1p(-z))
+pFq(α::NTuple{1, <: Integer}, ::Tuple{}, z; kwds...) = (1-z)^-α[1]
 pFq(α::NTuple{1}, β::NTuple{1}, z; kwds...) = _₁F₁(α[1], β[1], z; kwds...)
 pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1], z; kwds...)
 

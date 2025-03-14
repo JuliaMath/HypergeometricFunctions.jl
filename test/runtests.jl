@@ -527,6 +527,15 @@ end
     @testset "Integer arguments" begin
         @test _₂F₁(1, 0, 3, -1) ≡ _₂F₁(1.0, 0, 3, -1) ≡ 1.0
     end
+
+    @test "a or b == c" begin
+        pFq((-1, 0), (-1, ), 2) == 1.0 # From #86
+    end
+
+    @testset "a or b == 0" begin
+        @test pFq((0, 0), (1/2, ), 5/4) == 1.0 # From #75
+        @test pFq((0.5, 0.0), (1.5, ), 1) == 1.0 # From #75
+    end
 end
 
 @testset "₅F₄" begin # Tests the generic algorithms for pFqdrummond and pFqweniger

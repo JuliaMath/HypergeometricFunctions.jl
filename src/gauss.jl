@@ -8,9 +8,11 @@ function _₂F₁(a, b, c, z; method::Symbol = :general, kwds...)
     if real(b) < real(a)
         return _₂F₁(b, a, c, z; method = method, kwds...) # ensure a ≤ b
     elseif isequal(a, c) # 1. 15.4.6
-        return exp(-b*log1p(-z))
+        return pFq((b, ), (), z)
     elseif isequal(b, c) # 1. 15.4.6
-        return exp(-a*log1p(-z))
+        return pFq((a, ), (), z)
+    elseif isequal(a, 0) || isequal(b, 0)
+        return one(z)
     elseif isequal(c, 0.5)
         if isequal(a+b, 0) # 31. 15.4.11 & 15.4.12
             return cosnasinsqrt(2b, z)
