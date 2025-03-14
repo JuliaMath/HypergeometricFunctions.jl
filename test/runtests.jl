@@ -528,8 +528,8 @@ end
         @test _₂F₁(1, 0, 3, -1) ≡ _₂F₁(1.0, 0, 3, -1) ≡ 1.0
     end
 
-    @test "a or b == c" begin
-        pFq((-1, 0), (-1, ), 2) == 1.0 # From #86
+    @testset "a or b == c" begin
+        @test pFq((-1, 0), (-1, ), 2) == 1.0 # From #86
     end
 
     @testset "a or b == 0" begin
