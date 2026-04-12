@@ -602,6 +602,11 @@ end
 @testset "U" begin
     @test U(1, 1, 1.f0) ≈ 0.5963473623231942 # the Euler series
     @test U(1, 1, 1) ≈ 0.5963473623231942
+    @test U(1, 1, 1 + 0.2im) ≈ exp(1 + 0.2im) * expint(1 + 0.2im)
+    @test U(1, 1, ComplexF32(1 + 0.2im)) ≈ ComplexF32(exp(ComplexF64(1 + 0.2im)) * expint(ComplexF64(1 + 0.2im)))
+    @test U(-2, 3/2, 0.3) ≈ 0.3^2 - 2 * (3/2 + 1) * 0.3 + (3/2) * (3/2 + 1)
+    @test U(1, 2, 0.3) ≈ inv(0.3)
+    @test U(3/2, 0, 0.3) ≈ 0.3 * U(5/2, 2, 0.3)
     for (S, T) in ((Float64, BigFloat),)
         b = 0
         x = T(1)/3
