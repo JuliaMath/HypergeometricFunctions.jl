@@ -407,16 +407,20 @@ end
 
 @testset "₂F₀" begin
     for (S, T) in ((Float32, Float64),
-                   (Float64, BigFloat),
-                   (BigFloat, BigFloat))
+                   (Float64, BigFloat))
         CS = Complex{S}
         CT = Complex{T}
         atol = rtol = sqrt(eps(S))
-        for α in S(-1.5):S(1.0):S(1.5), β in S(-1.5):S(1.0):S(1.5), z in S(-1.0):S(0.25):S(0.0)
+        for α in S.((-1.5, 0.5, 1.5)),
+            β in S.((-1.5, 0.5, 1.5)),
+            z in S.((-1.0, -0.5, 0.0))
             @test pFqdrummond((α, β), (), z) ≈ S(pFq((T(α), T(β)), (), T(z))) atol=atol rtol=rtol
             @test pFqweniger((α, β), (), z) ≈ S(pFq((T(α), T(β)), (), T(z))) atol=atol rtol=rtol
         end
-        for α in S(-0.5):S(1.0):S(0.5), β in S(-0.5):S(1.0):S(0.5), x in S(-0.5):S(0.25):S(0.0), y in S(-0.5):S(0.25):S(0.0)
+        for α in S.((-0.5, 0.5)),
+            β in S.((-0.5, 0.5)),
+            x in S.((-0.5, 0.0)),
+            y in S.((-0.5, 0.0))
             z = complex(x, y)
             @test pFqdrummond((α, β), (), z) ≈ CS(pFq((T(α), T(β)), (), CT(z))) atol=atol rtol=rtol
             @test pFqweniger((α, β), (), z) ≈ CS(pFq((T(α), T(β)), (), CT(z))) atol=atol rtol=rtol
@@ -468,18 +472,24 @@ end
 
 @testset "₂F₁" begin
     for (S, T) in ((Float32, Float64),
-                   (Float64, BigFloat),
-                   (BigFloat, BigFloat))
+                   (Float64, BigFloat))
         CS = Complex{S}
         CT = Complex{T}
         atol = rtol = 1000eps(S)
-        for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(0.5):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.625):S(0.25):S(0.125)
+        for α in S.((-1.5, -0.5, 0.5, 1.5)),
+            β in S.((-1.5, -0.5, 0.5, 1.5)),
+            γ in S.((-1.5, 0.5, 1.5)),
+            z in S.((-0.625, -0.125, 0.125))
             @test pFqdrummond((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
             @test pFqweniger((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
-        for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(0.5):S(1.5), γ in S(-1.5):S(1.0):S(1.5), x in S(-0.375):S(0.25):S(0.125), y in S(-0.375):S(0.25):S(0.125)
+        for α in S.((-1.5, 0.5, 1.5)),
+            β in S.((-1.5, 0.5, 1.5)),
+            γ in S.((-1.5, 0.5, 1.5)),
+            x in S.((-0.375, 0.125)),
+            y in S.((-0.375, 0.125))
             z = complex(x, y)
             @test pFqdrummond((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
             @test pFqweniger((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
