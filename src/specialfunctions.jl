@@ -153,6 +153,40 @@ end
 speciallogseries(x::Float64) = @clenshaw(5.0x, 1.0087391788544393911192, 1.220474262857857637288e-01, 8.7957928919918696061703e-03, 6.9050958578444820505037e-04, 5.7037120050065804396306e-05, 4.8731405131379353370205e-06, 4.2648797509486828820613e-07, 3.800372208946157617901e-08, 3.434168059359993493634e-09, 3.1381484326392473547608e-10, 2.8939845618385022798906e-11, 2.6892186934806386106143e-12, 2.5150879096374730760324e-13, 2.3652490233687788117887e-14, 2.2349973917002118259929e-15, 2.120769988408948118084e-16)
 speciallogseries(x::ComplexF64) = @evalpoly(x, 1.0000000000000000000000, 5.9999999999999999999966e-01, 4.2857142857142857142869e-01, 3.3333333333333333333347e-01, 2.7272727272727272727292e-01, 2.3076923076923076923072e-01, 1.9999999999999999999996e-01, 1.7647058823529411764702e-01, 1.5789473684210526315786e-01, 1.4285714285714285714283e-01, 1.3043478260869565217384e-01, 1.2000000000000000000000e-01, 1.1111111111111111111109e-01, 1.0344827586206896551722e-01, 9.6774193548387096774217e-02, 9.0909090909090909090938e-02, 8.5714285714285714285696e-02, 8.1081081081081081081064e-02, 7.6923076923076923076907e-02, 7.3170731707317073170688e-02)
 
+function terminating_order(α::Tuple, β::Tuple)
+    n = nothing
+    for αi in α
+        if αi ∈ ℤ && real(αi) ≤ 0
+            m = -round(Int, real(αi))
+            n = isnothing(n) ? m : min(n, m)
+        end
+    end
+    isnothing(n) && return nothing
+    for βi in β
+        if βi ∈ ℤ && real(βi) ≤ 0 && -round(Int, real(βi)) < n
+            return nothing
+        end
+    end
+    return n
+end
+
+function pFqterminating(α::NTuple{p, S}, β::NTuple{q, U}, z::V, n::Int) where {p, q, S, U, V}
+    T = promote_type(eltype(α), eltype(β), V)
+    term = one(T)
+    sum = one(T)
+    for k = 0:n-1
+        term *= z / (k + one(T))
+        for i = 1:p
+            term *= α[i] + k
+        end
+        for i = 1:q
+            term /= β[i] + k
+        end
+        sum += term
+    end
+    return sum
+end
+
 
 const libm = OpenLibm_jll.libopenlibm
 
@@ -537,6 +571,8 @@ function pFqmaclaurin(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where 
 end
 
 function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V; kmax::Int = KMAX) where {p, q, S, U, V}
+    n = terminating_order(a, b)
+    !isnothing(n) && return pFqterminating(a, b, z, n)
     T = promote_type(eltype(a), eltype(b), V)
     S₀, S₁, k = one(T), one(T)+prod(a)*z/prod(b), 1
     while k < kmax && errcheck(S₀, S₁, 8eps(real(T)))
