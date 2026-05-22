@@ -60,6 +60,8 @@ pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1
 
 function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
     z = float(z)
+    n = terminating_order(α, β)
+    !isnothing(n) && return pFqmaclaurin(α, β, z; kwds...)
     if p ≤ q
         if real(z) > 0
             return pFqmaclaurin(α, β, z; kwds...)
