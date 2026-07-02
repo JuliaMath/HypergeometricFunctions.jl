@@ -1,6 +1,6 @@
 name = "HypergeometricFunctions"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
-version = "0.3.28"
+version = "0.3.29"
 
 [deps]
 Gamma = "a0844989-3bd2-4988-8bea-c9407ab0941b"

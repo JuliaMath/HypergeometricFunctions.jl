@@ -33,10 +33,10 @@ end
 end
 
 """
-Implement `r(z; [m::Int]) = (1-(1-z)^(1/m))/(1+(1-z)^(1/m))` without subtractive cancellation near the origin.
+Implement `r(z, ::Val{m}) = (1-(1-z)^(1/m))/(1+(1-z)^(1/m))` without subtractive cancellation near the origin.
 """
 function r(z)
-    return r(z, Val(3))
+    return r(z, Val(4))
 end
 function r(z, ::Val{2})
     t = sqrt(1-z)
@@ -170,7 +170,7 @@ end
 """
 Maclaurin series of ₚ₊₁Fₚ(α, β; z = 1 - ((1-ζ)/(1+ζ))^m)
 """
-pFqconformalrational(α, β, z; kwds...) = pFqconformalrational(α, β, z, Val(3); kwds...)
+pFqconformalrational(α, β, z; kwds...) = pFqconformalrational(α, β, z, Val(4); kwds...)
 function pFqconformalrational(α::Tuple{Any, Vararg{Any, q}}, β::NTuple{q, Any}, z, m; kwds...) where q
     T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
     T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
