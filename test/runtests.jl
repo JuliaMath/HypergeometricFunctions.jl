@@ -36,6 +36,7 @@ end
     @test signbit(unsafe_gamma(-0.0))
     @test unsafe_gamma(BigFloat(-0.0)) == -Inf
     @test signbit(unsafe_gamma(BigFloat(-0.0)))
+    @test unsafe_gamma(1.2+0.4im) == gamma(1.2+0.4im)
 end
 
 @testset "Hypergeometric Functions" begin
