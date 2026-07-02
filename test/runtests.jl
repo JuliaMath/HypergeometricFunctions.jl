@@ -1,4 +1,4 @@
-using HypergeometricFunctions, SpecialFunctions, Test
+using HypergeometricFunctions, Gamma, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
                                 pochhammer, _₂F₁general, _₂F₁general2,
