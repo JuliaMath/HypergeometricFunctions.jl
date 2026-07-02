@@ -97,7 +97,7 @@ function _₂F₁general(a, b, c, z; kwds...)
     elseif abs(inv(1-z)) ≤ ρ
         return exp(-a*log1p(-z))*_₂F₁one(a, c-b, c, z/(z-1); kwds...)
     else
-        return pFqweniger((a, b), (c, ), z; kwds...) # _₂F₁taylor(a, b, c, z; kwds...)
+        return pFqconformalrational((a, b), (c, ), z; kwds...) # pFqweniger((a, b), (c, ), z; kwds...) # _₂F₁taylor(a, b, c, z; kwds...)
     end
 end
 
@@ -155,7 +155,7 @@ function _₂F₁general2(a, b, c, z; kwds...)
             return gamma(c)*(gamma(b-a)/gamma(b)/gamma(c-a)*(0.5-z)^(-a)*_₂F₁continuation(a, a+b, c, 0.5, z; kwds...) + gamma(a-b)/gamma(a)/gamma(c-b)*(0.5-z)^(-b)*_₂F₁continuation(b, a+b, c, 0.5, z; kwds...))
         end
     end
-    return pFqweniger((a, b), (c, ), z; kwds...) # _₂F₁taylor(a, b, c, z; kwds...)
+    return pFqconformalrational((a, b), (c, ), z; kwds...) # pFqweniger((a, b), (c, ), z; kwds...) # _₂F₁taylor(a, b, c, z; kwds...)
 end
 
 # Special case of (-x)^a*_₂F₁ to handle LogNumber correctly in RiemannHilbert.jl

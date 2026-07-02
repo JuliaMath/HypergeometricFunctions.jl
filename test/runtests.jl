@@ -1,9 +1,9 @@
 using HypergeometricFunctions, Gamma, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
-                                pochhammer, _₂F₁general, _₂F₁general2,
+                                pochhammer, unsafe_gamma, _₂F₁general, _₂F₁general2,
                                 pFqdrummond, pFqweniger, pFq2string,
-                                unsafe_gamma
+                                p, r, pFqconformalpolynomial, pFqconformalrational
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -517,6 +517,8 @@ end
         for α in S(-1.5):S(0.5):S(1.5), β in S(-1.5):S(0.5):S(1.5), γ in S(-1.5):S(1.0):S(1.5), z in S(-0.625):S(0.25):S(0.125)
             @test pFqdrummond((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
             @test pFqweniger((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
+            @test pFqconformalpolynomial((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
+            @test pFqconformalrational((α, β), (γ, ), z) ≈ S(pFq((T(α), T(β)), (T(γ), ), T(z))) atol=atol rtol=rtol
         end
         atol *= 2
         rtol *= 2
@@ -524,6 +526,8 @@ end
             z = complex(x, y)
             @test pFqdrummond((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
             @test pFqweniger((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
+            @test pFqconformalpolynomial((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
+            @test pFqconformalrational((α, β), (γ, ), z) ≈ CS(pFq((T(α), T(β)), (T(γ), ), CT(z))) atol=atol rtol=rtol
         end
     end
 
@@ -565,6 +569,7 @@ end
             z = eps(T)^2
             @test pFqdrummond(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
             @test pFqweniger(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+            @test pFqconformalrational(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
         end
         @testset "Terminating hypergeometrics, multiple dispatch" begin
             α = Real[1//1, 2, 3, 4, -5]
@@ -580,7 +585,54 @@ end
             for z in T(-5):T(0.5):T(0)
                 @test pFqdrummond(S.(α), S.(β), S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
                 @test pFqweniger(S.(α), S.(β), S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
+                @test pFqconformalrational(α, β, S(z)) ≈ S(pFq(α, β, z)) atol=atol rtol=rtol
             end
+        end
+    end
+end
+
+@testset "pFq by conformal polynomial-algebraic and rational-algebraic transformations" begin
+    function p_old(z, ::Val{m}) where m
+        return 1-(1-z)^(one(z)/m)
+    end
+    function r_old(z, ::Val{m}) where m
+        return (1-(1-z)^(one(z)/m))/(1+(1-z)^(one(z)/m))
+    end
+
+    @testset "Polynomial-algebraic functions and simplified equivalent formulas" begin
+        for m in 2:5
+            @test p_old(0.5, Val(m)) ≈ p(0.5, Val(m))
+            @test_broken p_old(0.000000001, Val(m)) ≈ Float64(p_old(big"0.000000001", Val(m)))
+            @test p(0.000000001, Val(m)) ≈ Float64(p(big"0.000000001", Val(m)))
+        end
+    end
+
+    @testset "Rational-algebraic functions and simplified equivalent formulas" begin
+        for m in 2:5
+            @test r_old(0.5, Val(m)) ≈ r(0.5, Val(m))
+            @test_broken r_old(0.000000001, Val(m)) ≈ Float64(r_old(big"0.000000001", Val(m)))
+            @test r(0.000000001, Val(m)) ≈ Float64(r(big"0.000000001", Val(m)))
+        end
+    end
+
+    @testset "Polynomial-algebraic and rational-alegbraic series for 2F1" begin
+        for (α, β, z) in (((1.0, 2.0), (3.0, ), 0.5),
+                          ((1.5, 2.5), (2.0, ), 1.0+im),
+                          ((0.1, 0.2), (0.3, ), -1.0),
+                          ((0.7, 5.0), (-3.6, ), 0.0+im),
+                          ((1.0, -9/2), (-9/4, ), -1.0+im))
+            @test pFqconformalpolynomial(α, β, z, Val(2)) ≈ pFqconformalpolynomial(α, β, z, Val(3)) ≈ pFqconformalpolynomial(α, β, z, Val(4)) ≈ pFq(α, β, z)
+            @test pFqconformalrational(α, β, z, Val(2)) ≈ pFqconformalrational(α, β, z, Val(3)) ≈ pFqconformalrational(α, β, z, Val(4)) ≈ pFq(α, β, z)
+        end
+    end
+
+    @testset "Rational-alegbraic series for pFq" begin
+        for (α, β, z) in (((1, 2, 3), (4, 5), 0.5),
+                          ((1e4, 2e4, 3.0), (4.0, 5.0), 0.00001),
+                          ((1.1, 1.2, 1.3), (2.6, 2.7), 0.5),
+                          ((1.1, 1.2, 1.3, 1.4), (2.6, 2.7, 2.8), 0.5),
+                          ((1.1, 1.2, 1.3, 1.4, 1.5), (2.6, 2.7, 2.8, 2.9), 2.0+im))
+            @test pFqconformalrational(α, β, z, Val(2)) ≈ pFqconformalrational(α, β, z, Val(3)) ≈ pFqconformalrational(α, β, z, Val(4)) ≈ pFq(α, β, z)
         end
     end
 end

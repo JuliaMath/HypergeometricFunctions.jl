@@ -12,5 +12,6 @@ include("confluent.jl")
 include("generalized.jl")
 include("drummond.jl")
 include("weniger.jl")
+include("conformal.jl")
 
 end #module
