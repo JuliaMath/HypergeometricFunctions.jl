@@ -44,15 +44,7 @@ end
 ogamma(x::Number) = (isinteger(x) && x<0) ? zero(float(x)) : inv(gamma(x))
 
 unsafe_gamma(z) = gamma(z)
-function unsafe_gamma(x::Real)
-    try
-        gamma(x)
-    catch err
-        err isa DomainError || rethrow()
-        x == 0 && return inv(zero(float(x)))
-        oftype(float(x), NaN)
-    end
-end
+unsafe_gamma(x::Real) = (x == -Inf || (isinteger(x) && x < 0)) ? oftype(float(x), NaN) : gamma(x)
 
 """
     @clenshaw(x, c...)
