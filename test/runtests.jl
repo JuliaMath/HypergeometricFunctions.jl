@@ -617,7 +617,12 @@ end
 
 @testset "U" begin
     @test U(1, 1, 1.f0) ≈ 0.5963473623231942 # the Euler series
-    @test U(1, 1, 1) == 0.5963473623231942
+    @test U(1, 1, 1) ≈ 0.5963473623231942
+    @test U(1, 1, 1 + 0.2im) ≈ exp(1 + 0.2im) * expint(1 + 0.2im)
+    @test U(1, 1, ComplexF32(1 + 0.2im)) ≈ ComplexF32(exp(ComplexF64(1 + 0.2im)) * expint(ComplexF64(1 + 0.2im)))
+    @test U(-2, 3/2, 0.3) ≈ 0.3^2 - 2 * (3/2 + 1) * 0.3 + (3/2) * (3/2 + 1)
+    @test U(1, 2, 0.3) ≈ inv(0.3)
+    @test U(3/2, 0, 0.3) ≈ 0.3 * U(5/2, 2, 0.3)
     for (S, T) in ((Float64, BigFloat),)
         b = 0
         x = T(1)/3
@@ -625,6 +630,13 @@ end
             @test U(a, b, S(x)) ≈ S(U(a, b, x)) # From #55
         end
     end
+
+    # Regression tests from #63, which is related to the negative-real-axis
+    # branch behavior discussed in #61.
+    @test U(0.5, 0.5, Complex(-2.5)) ≈ 0.145492 - 0.810467im atol=1e-6 rtol=1e-6
+    @test U(-0.5, -0.5, Complex(-2.5)) ≈ 0.0727459 + 1.17591im atol=1e-5 rtol=1e-5
+    @test U(-0.5, -0.5, -2.5 - 1.5im) ≈ 0.595921 - 1.34976im atol=1e-5 rtol=1e-5
+    @test U(0.5, 0.5, -2.5) ≈ U(0.5, 0.5, Complex(-2.5))
 end
 
 @testset "Warning symbols" begin
