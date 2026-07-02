@@ -43,10 +43,7 @@ end
     @testset "_₂F₁ vs _₂F₁general vs _₂F₁general2" begin
         e = exp(1.0)
         regression_max_accumulated_error = 2^12*eps() # discovered by running the test
-        zreal = collect(range(0.03, 0.87; length=10))
-        zcomplex = ComplexF64[0.05+0.07im, 0.12+0.31im, 0.18+0.62im, 0.27+0.14im, 0.34+0.48im,
-                              0.42+0.76im, 0.53+0.22im, 0.61+0.58im, 0.74+0.33im, 0.75+0.75im]
-        for z in (zreal, zcomplex)
+        for z in (range(-1.0, 0.875; length = 16), range(-10, 10; length = 10) .+ im*range(-10, 10; length = 10)')
             j = 1
             for (a,b,c) in ((√2/e, 1.3, 1.3), (1.2, √3, 1.2), (-0.4, 0.4, 0.5),
                             (-0.3, 1.3, 0.5), (0.35, 0.85, 0.5), (0.5, 0.5, 1.5),
