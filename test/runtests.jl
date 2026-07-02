@@ -1,8 +1,9 @@
-using HypergeometricFunctions, SpecialFunctions, Test
+using HypergeometricFunctions, Gamma, Test
 import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
                                 pochhammer, _₂F₁general, _₂F₁general2,
-                                pFqdrummond, pFqweniger, pFq2string
+                                pFqdrummond, pFqweniger, pFq2string,
+                                unsafe_gamma
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -23,11 +24,26 @@ const NumberType = Float64
     @test pochhammer(3, 1:5) == [3, 12, 60, 360, 2520]
 end
 
+@testset "unsafe gamma" begin
+    @test isnan(unsafe_gamma(-1.0))
+    @test isnan(unsafe_gamma(-1.0f0))
+    @test isnan(unsafe_gamma(BigFloat(-1)))
+    @test isnan(unsafe_gamma(-Inf))
+    @test isnan(unsafe_gamma(BigFloat(-Inf)))
+    @test unsafe_gamma(0.0) == Inf
+    @test unsafe_gamma(BigFloat(0)) == Inf
+    @test unsafe_gamma(-0.0) == -Inf
+    @test signbit(unsafe_gamma(-0.0))
+    @test unsafe_gamma(BigFloat(-0.0)) == -Inf
+    @test signbit(unsafe_gamma(BigFloat(-0.0)))
+    @test unsafe_gamma(1.2+0.4im) == gamma(1.2+0.4im)
+end
+
 @testset "Hypergeometric Functions" begin
     @testset "_₂F₁ vs _₂F₁general vs _₂F₁general2" begin
         e = exp(1.0)
         regression_max_accumulated_error = 2^12*eps() # discovered by running the test
-        for z in (.9rand(Float64, 10), 10rand(ComplexF64, 10))
+        for z in (range(-1.0, 0.875; length = 16), range(-10, 10; length = 10) .+ im*range(-10, 10; length = 10)')
             j = 1
             for (a,b,c) in ((√2/e, 1.3, 1.3), (1.2, √3, 1.2), (-0.4, 0.4, 0.5),
                             (-0.3, 1.3, 0.5), (0.35, 0.85, 0.5), (0.5, 0.5, 1.5),

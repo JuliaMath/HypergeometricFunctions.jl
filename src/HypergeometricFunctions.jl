@@ -1,6 +1,6 @@
 module HypergeometricFunctions
 
-using LinearAlgebra, SpecialFunctions
+using LinearAlgebra, Gamma
 
 export _₁F₁, _₂F₁, _₃F₂, pFq
 
