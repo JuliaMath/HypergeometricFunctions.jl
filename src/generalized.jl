@@ -53,12 +53,42 @@ julia> pFq((1, 1), (), -big(1))
 pFq
 
 pFq(::Tuple{}, ::Tuple{}, z; kwds...) = exp(z)
-pFq(α::NTuple{1}, ::Tuple{}, z; kwds...) = exp(-α[1]*log1p(-z))
+pFq(α::NTuple{1}, ::Tuple{}, z; kwds...) = isinteger(α[1]) ? (1-z)^(-Int(real(α[1]))) : exp(-α[1]*log1p(-z))
 pFq(α::NTuple{1, <: Integer}, ::Tuple{}, z; kwds...) = (1-z)^-α[1]
 pFq(α::NTuple{1}, β::NTuple{1}, z; kwds...) = _₁F₁(α[1], β[1], z; kwds...)
 pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1], z; kwds...)
 
+"""
+Remove parameters common to `α` and `β`, since `(x)ₖ/(x)ₖ ≡ 1` for any shared `x`.
+Cancelling them avoids loss of accuracy (or a `0/0`,
+if `x` is a nonpositive integer) in the generic algorithms.
+"""
+cancelcommonparameters(α::Tuple{}, β::Tuple) = (α, β)
+function cancelcommonparameters(α::Tuple, β::Tuple)
+    a, resta = first(α), Base.tail(α)
+    β′ = _deletefirstequal(a, β)
+    if length(β′) == length(β)
+        resta′, β″ = cancelcommonparameters(resta, β)
+        return (a, resta′...), β″
+    else
+        return cancelcommonparameters(resta, β′)
+    end
+end
+
+"""
+Remove the first element of `t` that equals `x`, or return `t` unchanged if none does.
+"""
+_deletefirstequal(x, t::Tuple{}) = t
+function _deletefirstequal(x, t::Tuple)
+    y, rest = first(t), Base.tail(t)
+    return y == x ? rest : (y, _deletefirstequal(x, rest)...)
+end
+
 function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
+    α′, β′ = cancelcommonparameters(α, β)
+    if length(α′) != p || length(β′) != q
+        return pFq(α′, β′, z; kwds...)
+    end
     z = float(z)
     if p ≤ q
         if real(z) > 0

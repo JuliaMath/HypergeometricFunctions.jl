@@ -3,7 +3,8 @@ import LinearAlgebra: norm
 import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
                                 pochhammer, unsafe_gamma, _₂F₁general, _₂F₁general2,
                                 pFqdrummond, pFqweniger, pFq2string,
-                                p, r, pFqconformalpolynomial, pFqconformalrational
+                                p, r, pFqconformalpolynomial, pFqconformalrational,
+                                cancelcommonparameters
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -635,6 +636,63 @@ end
             @test pFqconformalrational(α, β, z, Val(2)) ≈ pFqconformalrational(α, β, z, Val(3)) ≈ pFqconformalrational(α, β, z, Val(4)) ≈ pFq(α, β, z)
         end
     end
+end
+
+@testset "Cancellation of common parameters (issue #99)" begin
+    # pFq((2,3,5,7,11), (2,3,5,7), 2) reduces to ₁F₀(11;;2) = (1-2)^-11 = -1,
+    @test cancelcommonparameters((2.0, 3.0, 5.0, 7.0, 11.0), (2.0, 3.0, 5.0, 7.0)) == ((11.0,), ())
+    @test cancelcommonparameters((2, 3, 5, 7, 11), (2, 3, 5, 7)) == ((11,), ())
+    @test cancelcommonparameters((1.0, 2.0), (3.0, 4.0)) == ((1.0, 2.0), (3.0, 4.0)) # no common parameters
+    @test cancelcommonparameters((1.0, 2.0, 2.0), (2.0,)) == ((1.0, 2.0), ()) # only one instance of a repeated value cancels
+
+    # direct tests of cancelcommonparameters with known input/output pairs
+    @test cancelcommonparameters((), ()) == ((), ())
+    @test cancelcommonparameters((1, 2), ()) == ((1, 2), ()) # empty β
+    @test cancelcommonparameters((), (1, 2)) == ((), (1, 2)) # empty α
+    @test cancelcommonparameters((2, 2, 3), (2, 2)) == ((3,), ()) # both repeats in β cancel
+    @test cancelcommonparameters((1, 2, 3), (3, 2, 1)) == ((), ()) # order-independent, fully cancels
+    @test cancelcommonparameters((2, 3.0), (2.0,)) == ((3.0,), ()) # cross-type equality (Int 2 == Float64 2.0) still cancels
+    @test cancelcommonparameters((1, 2, 2, 2), (2, 2)) == ((1, 2), ()) # only as many repeats as present in β cancel
+    @test cancelcommonparameters((-4, 3, 5), (-4, 9)) == ((3, 5), (9,)) # negative-integer shared value cancels too
+    @test cancelcommonparameters((2+3im, 5, 7), (2+3im, 11)) == ((5, 7), (11,)) # complex shared value cancels too
+
+    @test pFq((2, 3, 5, 7, 11), (2, 3, 5, 7), 2) == -1
+    @test pFq((2.0, 3.0, 5.0, 7.0, 11.0), (2.0, 3.0, 5.0, 7.0), 2) ≈ -1
+    @test pFq((2.0, 3.0, 5.0, 7.0, 11.0), (2.0, 3.0, 5.0, 7.0), 2.0) ≈ -1
+
+    @test pFq((11.0,), (), 2.0) ≈ -1
+    @test pFq((11,), (), 2.0) ≈ -1
+    @test pFq((3.0,), (), 2.0) ≈ (1-2.0)^-3
+
+    # mpmath-verified for partial cancellation (5,4) -> (2,1), dispatching to _₂F₁
+    # (2,3,5)/(2,9) shares one instance of 2, reducing to ₂F₁(3,5;9;z)
+    @test pFq((2.0, 3.0, 5.0), (2.0, 9.0), 0.6) ≈ 3.8221321795566633764968891799659909691674241972884 rtol=1e-14
+    @test pFq((2.0, 3.0, 5.0), (2.0, 9.0), 2.5+0.3im) ≈ 3.1843854566761547967203420790164337826115013001485 - 2.2442108035075555665197783547023487205554825758548im rtol=1e-13
+    @test setprecision(BigFloat, 256) do
+        pFq((big"2.0", big"3.0", big"5.0"), (big"2.0", big"9.0"), big"2.5"+big"0.3"*im)
+    end ≈ big"3.1843854566761547967203420790164337826115013001485" - big"2.2442108035075555665197783547023487205554825758548"*im rtol=big"1e-45"
+
+    # (2,2,5)/(2,9) -> ₂F₁(2,5;9;z)
+    @test pFq((2.0, 2.0, 5.0), (2.0, 9.0), 0.6) ≈ 2.3935247476730296104161785284089699334168880681495 rtol=1e-14
+    @test pFq((2.0, 2.0, 5.0), (2.0, 9.0), 3.0+0.3im) ≈ -0.68847175473130399454827127423033037335042418493526 - 2.0499142693960598881134873942939907992166384424191im rtol=1e-13
+
+    # (4,3) -> (3,2), residual call still dispatches to the generic pFq method
+    @test pFq((1.5, 2.5, 3.5, 9.5), (1.5, 4.5, 6.5), 0.3) ≈ 2.8474959586954557115949150507520688701294357489327 rtol=1e-14
+    @test pFq((1.5, 2.5, 3.5, 9.5), (1.5, 4.5, 6.5), 2.0+0.3im) ≈ 0.36311499245824637618815668424357819249646478168082 + 0.044468831058723770609686622207959873127727841990114im rtol=1e-13
+    @test setprecision(BigFloat, 256) do
+        pFq((big"1.5", big"2.5", big"3.5", big"9.5"), (big"1.5", big"4.5", big"6.5"), big"0.3")
+    end ≈ big"2.8474959586954557115949150507520688701294357489327" rtol=big"1e-45"
+    @test setprecision(BigFloat, 256) do
+        pFq((big"1.5", big"2.5", big"3.5", big"9.5"), (big"1.5", big"4.5", big"6.5"), big"2.0"+big"0.3"*im)
+    end ≈ big"0.36311499245824637618815668424357819249646478168082" + big"0.044468831058723770609686622207959873127727841990114"*im rtol=big"1e-45"
+
+    # complex shared parameter: (2+3i,5,7)/(2+3i,11) -> ₂F₁(5,7;11;z)
+    @test pFq((2+3im, 5.0, 7.0), (2+3im, 11.0), 0.5) ≈ 7.8980686689603196904351965185103895678759514838929 rtol=1e-13
+    @test pFq((2+3im, 5.0, 7.0), (2+3im, 11.0), 2.0+0.4im) ≈ -8.0770498974904127024880285713277690589469878865714 + 3.9137854809550620135070534078680089419979389342632im rtol=1e-13
+
+    # uncancelled call agrees with the manually-reduced call
+    @test pFq((1.5, 2.5, 3.5, 9.5), (1.5, 4.5, 6.5), 2.0+0.3im) ≈ pFq((2.5, 3.5, 9.5), (4.5, 6.5), 2.0+0.3im)
+    @test pFq((2+3im, 5.0, 7.0), (2+3im, 11.0), 2.0+0.4im) ≈ pFq((5.0, 7.0), (11.0,), 2.0+0.4im)
 end
 
 @testset "M" begin
