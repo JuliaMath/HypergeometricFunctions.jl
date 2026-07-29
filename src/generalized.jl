@@ -58,6 +58,57 @@ pFq(α::NTuple{1, <: Integer}, ::Tuple{}, z; kwds...) = (1-z)^-α[1]
 pFq(α::NTuple{1}, β::NTuple{1}, z; kwds...) = _₁F₁(α[1], β[1], z; kwds...)
 pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1], z; kwds...)
 
+function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
+    T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
+    T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
+    pFq(T1.(α), T2.(β), z; kwds...)
+end
+function pFq(α::NTuple{p, T1}, β::Tuple{}, z; kwds...) where {p, T1}
+    z = float(z)
+    T = promote_type(T1, typeof(z))
+    if isterminating(α)
+        return pFqmaclaurin(α, β, z, getterminatinglength(α); kwds...)::T
+    else
+        return pFqweniger(α, β, z; kwds...)::T
+    end
+end
+function pFq(α::Tuple{}, β::NTuple{q, T2}, z; kwds...) where {q, T2}
+    z = float(z)
+    T = promote_type(T2, typeof(z))
+    if real(z) > 0
+        return pFqmaclaurin(α, β, z; kwds...)::T
+    else
+        return pFqweniger(α, β, z; kwds...)::T
+    end
+end
+function pFq(α::NTuple{p, T1}, β::NTuple{q, T2}, z; kwds...) where {p, q, T1, T2}
+    z = float(z)
+    T = promote_type(T1, T2, typeof(z))
+    if isacommonparameter(α, β)
+        return pFq(cancelacommonparameter(α, β)..., z; kwds...)::T
+    end
+    if isterminating(α)
+        return pFqmaclaurin(α, β, z, getterminatinglength(α); kwds...)::T
+    end
+    if p ≤ q
+        if real(z) > 0
+            return pFqmaclaurin(α, β, z; kwds...)::T
+        else
+            return pFqweniger(α, β, z; kwds...)::T
+        end
+    elseif p == q + 1
+        if ispositivelybalanced(α, β)
+            #return pFqconformalrationalgeneralizedeuler(α, β, z; kwds...)::T
+            return pFqconformalrational(α, β, z; kwds...)::T
+        else
+            return pFqconformalrational(α, β, z; kwds...)::T
+        end
+    else
+        return pFqweniger(α, β, z; kwds...)::T
+    end
+end
+
+#=
 """
 Remove parameters common to `α` and `β`, since `(x)ₖ/(x)ₖ ≡ 1` for any shared `x`.
 Cancelling them avoids loss of accuracy (or a `0/0`,
@@ -107,19 +158,71 @@ function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
     end
 end
 
-pFq(α::AbstractVector, β::AbstractVector, z; kwds...) = pFq(Tuple(α), Tuple(β), z; kwds...)
 
-"""
-Compute the generalized hypergeometric function `pFq(α, β, z)` by continued fraction.
-"""
-function pFqcontinuedfraction(α::AbstractVector{S}, β::AbstractVector{U}, z::V) where {S, U, V}
-    T = promote_type(S, U, V)
-    numerator(i) = - z * prod(i .+ α) / prod(i .+ β) / (i + 1)
-    denominator(i) = 1 - numerator(i)
-    K = continuedfraction(denominator, numerator, 10eps(real(T))) - denominator(0)
-    # iszero(K + 1) leads to Inf, when e.g. Float64s run out of digits
-    return 1 + z * prod(α) / prod(β) / (1 + K)
-end
+```
+julia> using HypergeometricFunctions, BenchmarkTools
+
+julia> α = (3,4,5)
+(3, 4, 5)
+
+julia> β = (2,6,7)
+(2, 6, 7)
+
+julia> z = 0.123
+0.123
+
+julia> @time pFq(α, β, z)
+  0.253318 seconds (363.21 k allocations: 22.849 MiB, 10.90% gc time, 99.98% compilation time)
+1.091834662493663
+
+julia> @btime pFq($α, $β, $z)
+  1.605 μs (25 allocations: 624 bytes)
+1.091834662493663
+
+julia> α = (1,1,1,1,1,3,4,5)
+(1, 1, 1, 1, 1, 3, 4, 5)
+
+julia> β = (1,1,1,1,1,2,6,7)
+(1, 1, 1, 1, 1, 2, 6, 7)
+
+julia> @btime pFq($α, $β, $z)
+  3.035 μs (50 allocations: 1.22 KiB)
+1.091834662493663
+```
+
+```julia
+julia> using HypergeometricFunctions, BenchmarkTools
+
+julia> α = (3,4,5)
+(3, 4, 5)
+
+julia> β = (2,6,7)
+(2, 6, 7)
+
+julia> z = 0.123
+0.123
+
+julia> @time pFq(α, β, z)
+  0.463688 seconds (1.07 M allocations: 68.306 MiB, 5.75% gc time, 99.99% compilation time)
+1.091834662493663
+
+julia> @btime pFq($α, $β, $z)
+  76.297 ns (0 allocations: 0 bytes)
+1.091834662493663
+
+julia> α = (1,1,1,1,1,3,4,5)
+(1, 1, 1, 1, 1, 3, 4, 5)
+
+julia> β = (1,1,1,1,1,2,6,7)
+(1, 1, 1, 1, 1, 2, 6, 7)
+
+julia> @btime pFq($α, $β, $z)
+  317.771 ns (32 allocations: 1.19 KiB)
+1.091834662493663
+```
+=#
+
+pFq(α::AbstractVector, β::AbstractVector, z; kwds...) = pFq(Tuple(α), Tuple(β), z; kwds...)
 
 """
 Compute the generalized hypergeometric function `₃F₂(a₁, 1, 1, b₁, 2, z)`.

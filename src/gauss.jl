@@ -84,7 +84,7 @@ function _₂F₁general(a, b, c, z; kwds...)
         return _₂F₁general(b, a, c, z; kwds...)
     elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
         return _₂F₁maclaurin(a, b, c, z; kwds...)
-    elseif !isalmostwellpoised(a, b, c)
+    elseif ispositivelybalanced(a, b, c)
         return exp((c-a-b)*log1p(-z))*_₂F₁general(c-a, c-b, c, z; kwds...)
     elseif abs(z/(z-1)) ≤ ρ
         return exp(-a*log1p(-z))_₂F₁maclaurin(a, c-b, c, z/(z-1); kwds...)
@@ -115,7 +115,7 @@ function _₂F₁general2(a, b, c, z; kwds...)
         return _₂F₁general2(b, a, c, z; kwds...)
     elseif abs(z) ≤ ρ || -a ∈ ℕ₀ || -b ∈ ℕ₀
         return _₂F₁maclaurin(a, b, c, z; kwds...)
-    elseif !isalmostwellpoised(a, b, c)
+    elseif ispositivelybalanced(a, b, c)
         return exp((c-a-b)*log1p(-z))*_₂F₁general2(c-a, c-b, c, z; kwds...)
     elseif abs(z / (z - 1)) ≤ ρ && absarg(1 - z) < convert(real(T), π) # 15.8.1
         w = z/(z-1)
@@ -175,9 +175,9 @@ end
 function _₂F₁argument_unity(a, b, c, z; kwds...)
     T = promote_type(typeof(a), typeof(b), typeof(c), typeof(z))
     a, b, c = T(a), T(b), T(c)
-    if iswellpoised(a, b, c)
+    if ispositivelybalanced(a, b, c)
         return exp(loggamma(c)-loggamma(c-a)+loggamma(c-a-b)-loggamma(c-b))
-    elseif isalmostwellpoised(a, b, c)
+    elseif isalmostpositivelybalanced(a, b, c)
         if a + b == c
             f = loggamma(c)-loggamma(a)-loggamma(b)
             if isreal(f)
@@ -188,7 +188,7 @@ function _₂F₁argument_unity(a, b, c, z; kwds...)
         else
             return T(NaN)
         end
-    else # !isalmostwellpoised(a, b, c)
+    else # !isalmostpositivelybalanced(a, b, c)
         f = loggamma(c)-loggamma(a)+gamma(a+b-c)-loggamma(b)
         if isreal(f)
             return T(Inf)

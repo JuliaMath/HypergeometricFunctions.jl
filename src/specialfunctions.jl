@@ -82,12 +82,12 @@ const ρϵ = 0.71
 struct ℕ end
 
 Base.in(n::Integer, ::Type{ℕ}) = n > 0
-Base.in(n::Number, ::Type{ℕ}) = isinteger(n) && round(Int, n) ∈ ℕ
+Base.in(n::Number, ::Type{ℕ}) = isinteger(n) && Int(real(n)) ∈ ℕ
 
 struct ℕ₀ end
 
 Base.in(n::Integer, ::Type{ℕ₀}) = n ≥ 0
-Base.in(n::Number, ::Type{ℕ₀}) = isinteger(n) && round(Int, n) ∈ ℕ₀
+Base.in(n::Number, ::Type{ℕ₀}) = isinteger(n) && Int(real(n)) ∈ ℕ₀
 
 struct ℤ end
 
@@ -96,8 +96,56 @@ Base.in(n::Number, ::Type{ℤ}) = isinteger(n)
 abeqcd(a, b, cd) = isequal(a, b) && isequal(b, cd)
 abeqcd(a, b, c, d) = isequal(a, c) && isequal(b, d)
 
-iswellpoised(a, b, c) = real(c - a - b) > 0
-isalmostwellpoised(a, b, c) = real(c - a - b) ≥ 0
+ispositivelybalanced(a, b, c) = real(c - a - b) > 0
+isalmostpositivelybalanced(a, b, c) = real(c - a - b) ≥ 0
+
+ispositivelybalanced(α::NTuple{p, Any}, β::NTuple{q, Any}) where {p, q} = real(sum(β)-sum(α)) > 0
+isalmostpositivelybalanced(α::NTuple{p, Any}, β::NTuple{q, Any}) where {p, q} = real(sum(β)-sum(α)) ≥ 0
+
+function isacommonparameter(α::NTuple{p, S}, β::NTuple{q, T}) where {p, q, S, T}
+    for i in 1:p
+        for j in 1:q
+            if α[i] == β[j] return true end
+        end
+    end
+    return false
+end
+
+function findacommonparameter(α::NTuple{p, S}, β::NTuple{q, T}) where {p, q, S, T}
+    for i in 1:p
+        for j in 1:q
+            if α[i] == β[j] return (i, j) end
+        end
+    end
+    return (p+1, q+1)
+end
+
+"""
+Cancel a common parameter in `α` and `β`, since `(x)ₖ/(x)ₖ ≡ 1` for any shared `x`.
+Cancelling them avoids loss of accuracy (or a `0/0`,
+if `x` is a nonpositive integer) in the generic algorithms.
+"""
+function cancelacommonparameter(α::NTuple{p, S}, β::NTuple{q, T}) where {p, q, S, T}
+    i, j = findacommonparameter(α, β)
+    γ = ntuple(k -> k < i ? α[k] : α[k+1], Val(p-1))
+    δ = ntuple(k -> k < j ? β[k] : β[k+1], Val(q-1))
+    return γ, δ
+end
+
+function isterminating(α::NTuple{p, Any}) where p
+    for i in 1:p
+        if -α[i] ∈ ℕ₀ return true end
+    end
+    return false
+end
+
+function getterminatinglength(α::NTuple{p, Any}) where p
+    kmax = KMAX
+    for i in 1:p
+        if -α[i] ∈ ℕ₀ kmax = min(kmax, Int(-α[i])) end
+    end
+    return kmax
+end
 
 absarg(z) = abs(angle(z))
 
@@ -391,10 +439,9 @@ function AInf(a, b, c, w, m::Int, ϵ)
     ret
 end
 
-function BInf(a, b, c, win, m::Int, ϵ)
-    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(win), typeof(m), typeof(ϵ))
-    w = win
-    βₙ, γₙ = recInfβ₀(a, b, c, win, m, ϵ)*one(w), recInfγ₀(a, b, c, win, m, ϵ)*w
+function BInf(a, b, c, w, m::Int, ϵ)
+    T = promote_type(typeof(a), typeof(b), typeof(c), typeof(w), typeof(m), typeof(ϵ))
+    βₙ, γₙ = recInfβ₀(a, b, c, w, m, ϵ)*one(w), recInfγ₀(a, b, c, w, m, ϵ)*w
     ret, n = βₙ, 0
     while abs(βₙ) > 8abs(ret)*eps(real(T)) || n ≤ 0
         βₙ = (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/((m+n+1+ϵ)*(n+1))*w*βₙ + ( (a+m+n)*(1-c+a+m+n)/(m+n+1) - (a+m+n) - (1-c+a+m+n) - ϵ + (a+m+n+ϵ)*(1-c+a+m+n+ϵ)/(n+1) )*γₙ/((m+n+1+ϵ)*(n+1-ϵ))
@@ -406,6 +453,9 @@ function BInf(a, b, c, win, m::Int, ϵ)
 end
 
 function _₂F₁Inf(a, b, c, z)
+    if real(b-a) < 0
+        return _₂F₁Inf(b, a, c, z)
+    end
     m = round(Int, real(b-a))
     ϵ = b-a-m
     w = inv(z)
@@ -538,6 +588,36 @@ function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V; kmax::Int = KMAX) 
     end
     k < kmax || @warn "Maclaurin approximation to "*pFq2string(Val(p), Val(q))*" reached the maximum degree of "*string(kmax)*"."
     return S₁
+end
+
+function pFqmaclaurin(α::NTuple{p, Any}, β::NTuple{q, Any}, z, kmax; kwds...) where {p, q}
+    T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
+    T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
+    pFqmaclaurin(T1.(α), T2.(β), z, kmax; kwds...)
+end
+
+function pFqmaclaurin(a::NTuple{p, S}, b::NTuple{q, U}, z::V, kmax) where {p, q, S, U, V}
+    T = promote_type(eltype(a), eltype(b), V)
+    S₀, S₁, k = one(T), one(T)+prod(a)*z/prod(b), 1
+    for k in 1:kmax-1
+        rₖ = z/(k+one(T))
+        for i=1:p rₖ *= a[i]+k end
+        for i=1:q rₖ /= b[i]+k end
+        S₀, S₁ = S₁, S₁+(S₁-S₀)*rₖ
+    end
+    return S₁
+end
+
+"""
+Compute the generalized hypergeometric function `pFq(α, β, z)` by continued fraction.
+"""
+function pFqcontinuedfraction(α::AbstractVector{S}, β::AbstractVector{U}, z::V) where {S, U, V}
+    T = promote_type(S, U, V)
+    numerator(i) = - z * prod(i .+ α) / prod(i .+ β) / (i + 1)
+    denominator(i) = 1 - numerator(i)
+    K = continuedfraction(denominator, numerator, 10eps(real(T))) - denominator(0)
+    # iszero(K + 1) leads to Inf, when e.g. Float64s run out of digits
+    return 1 + z * prod(α) / prod(β) / (1 + K)
 end
 
 function continuedfraction(v::V, u::U, rtol::T) where {V<:Function, U<:Function, T<:Number}
