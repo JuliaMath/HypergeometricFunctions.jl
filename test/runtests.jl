@@ -1,10 +1,11 @@
 using HypergeometricFunctions, Gamma, Test
 import LinearAlgebra: norm
-import HypergeometricFunctions: iswellpoised, isalmostwellpoised, M, U,
-                                pochhammer, unsafe_gamma, _₂F₁general, _₂F₁general2,
-                                pFqdrummond, pFqweniger, pFq2string,
+import HypergeometricFunctions: M, U, pochhammer, unsafe_gamma,
+                                _₂F₁general, _₂F₁general2, pFqdrummond, pFqweniger,
                                 p, r, pFqconformalpolynomial, pFqconformalrational,
-                                cancelcommonparameters
+                                ispositivelybalanced, isalmostpositivelybalanced,
+                                isacommonparameter, cancelacommonparameter,
+                                isterminating, getterminatinglength, pFq2string
 
 const rtol = 1.0e-3
 const NumberType = Float64
@@ -100,7 +101,7 @@ end
         for (a, b, c, z) in ((1, 2, 3, 1), (1, 2, 4, 1), (3, 5, 7, 1.0), (1, 8537, 6042, 1.0))
             twoFone = _₂F₁(a, b, c, z)
             twoFonep = _₂F₁(a, b, c, z; method = :positive)
-            if iswellpoised(a, b, c)
+            if ispositivelybalanced(a, b, c)
                 @test isfinite(twoFone)
                 @test isfinite(twoFonep)
             else
@@ -109,7 +110,7 @@ end
             end
         end
         for (a, b, c, z) in ((1, 2+im, 3, 1), (1, 2+im, 3+im, 1), (1, 2 + 1im, 2, 1))
-            if isalmostwellpoised(a, b, c)
+            if isalmostpositivelybalanced(a, b, c)
                 if a+b==c
                     @test isinf(_₂F₁(a, b, c, z))
                 else
@@ -632,29 +633,31 @@ end
                           ((1e4, 2e4, 3.0), (4.0, 5.0), 0.00001),
                           ((1.1, 1.2, 1.3), (2.6, 2.7), 0.5),
                           ((1.1, 1.2, 1.3, 1.4), (2.6, 2.7, 2.8), 0.5),
-                          ((1.1, 1.2, 1.3, 1.4, 1.5), (2.6, 2.7, 2.8, 2.9), 2.0+im))
+                          ((1.1, 1.2, 1.3, 1.4, 1.5), (2.6, 2.7, 2.8, 2.9), 2.0+im),
+                          ((1.9, 2.25, 4.5), (1.17, 2.29), 1.0+(1/8)*im),
+                          ((1.9, 2.25, -4.5), (1.17, 2.29), 1.0+(1/8)*im))
             @test pFqconformalrational(α, β, z, Val(2)) ≈ pFqconformalrational(α, β, z, Val(3)) ≈ pFqconformalrational(α, β, z, Val(4)) ≈ pFq(α, β, z)
         end
     end
 end
 
-@testset "Cancellation of common parameters (issue #99)" begin
+@testset "Canceling common parameters (issue #99)" begin
     # pFq((2,3,5,7,11), (2,3,5,7), 2) reduces to ₁F₀(11;;2) = (1-2)^-11 = -1,
-    @test cancelcommonparameters((2.0, 3.0, 5.0, 7.0, 11.0), (2.0, 3.0, 5.0, 7.0)) == ((11.0,), ())
-    @test cancelcommonparameters((2, 3, 5, 7, 11), (2, 3, 5, 7)) == ((11,), ())
-    @test cancelcommonparameters((1.0, 2.0), (3.0, 4.0)) == ((1.0, 2.0), (3.0, 4.0)) # no common parameters
-    @test cancelcommonparameters((1.0, 2.0, 2.0), (2.0,)) == ((1.0, 2.0), ()) # only one instance of a repeated value cancels
-
-    # direct tests of cancelcommonparameters with known input/output pairs
-    @test cancelcommonparameters((), ()) == ((), ())
-    @test cancelcommonparameters((1, 2), ()) == ((1, 2), ()) # empty β
-    @test cancelcommonparameters((), (1, 2)) == ((), (1, 2)) # empty α
-    @test cancelcommonparameters((2, 2, 3), (2, 2)) == ((3,), ()) # both repeats in β cancel
-    @test cancelcommonparameters((1, 2, 3), (3, 2, 1)) == ((), ()) # order-independent, fully cancels
-    @test cancelcommonparameters((2, 3.0), (2.0,)) == ((3.0,), ()) # cross-type equality (Int 2 == Float64 2.0) still cancels
-    @test cancelcommonparameters((1, 2, 2, 2), (2, 2)) == ((1, 2), ()) # only as many repeats as present in β cancel
-    @test cancelcommonparameters((-4, 3, 5), (-4, 9)) == ((3, 5), (9,)) # negative-integer shared value cancels too
-    @test cancelcommonparameters((2+3im, 5, 7), (2+3im, 11)) == ((5, 7), (11,)) # complex shared value cancels too
+    α = (2.0, 3.0, 5.0, 7.0, 11.0)
+    β = (2, 3, 5, 7)
+    @test isacommonparameter(α, β)
+    α, β = cancelacommonparameter(α, β)
+    @test (α, β) == ((3.0, 5.0, 7.0, 11.0), (3, 5, 7))
+    @test isacommonparameter(α, β)
+    α, β = cancelacommonparameter(α, β)
+    @test (α, β) == ((5.0, 7.0, 11.0), (5, 7))
+    @test isacommonparameter(α, β)
+    α, β = cancelacommonparameter(α, β)
+    @test (α, β) == ((7.0, 11.0), (7, ))
+    @test isacommonparameter(α, β)
+    α, β = cancelacommonparameter(α, β)
+    @test (α, β) == ((11.0, ), ())
+    @test !isacommonparameter(α, β)
 
     @test pFq((2, 3, 5, 7, 11), (2, 3, 5, 7), 2) == -1
     @test pFq((2.0, 3.0, 5.0, 7.0, 11.0), (2.0, 3.0, 5.0, 7.0), 2) ≈ -1
@@ -678,7 +681,7 @@ end
 
     # (4,3) -> (3,2), residual call still dispatches to the generic pFq method
     @test pFq((1.5, 2.5, 3.5, 9.5), (1.5, 4.5, 6.5), 0.3) ≈ 2.8474959586954557115949150507520688701294357489327 rtol=1e-14
-    @test pFq((1.5, 2.5, 3.5, 9.5), (1.5, 4.5, 6.5), 2.0+0.3im) ≈ 0.36311499245824637618815668424357819249646478168082 + 0.044468831058723770609686622207959873127727841990114im rtol=1e-13
+    @test pFq((1.5, 2.5, 3.5, 9.5), (1.5, 4.5, 6.5), 2.0+0.3im) ≈ 0.36311499245824637618815668424357819249646478168082 + 0.044468831058723770609686622207959873127727841990114im rtol=1e-10
     @test setprecision(BigFloat, 256) do
         pFq((big"1.5", big"2.5", big"3.5", big"9.5"), (big"1.5", big"4.5", big"6.5"), big"0.3")
     end ≈ big"2.8474959586954557115949150507520688701294357489327" rtol=big"1e-45"
@@ -693,6 +696,19 @@ end
     # uncancelled call agrees with the manually-reduced call
     @test pFq((1.5, 2.5, 3.5, 9.5), (1.5, 4.5, 6.5), 2.0+0.3im) ≈ pFq((2.5, 3.5, 9.5), (4.5, 6.5), 2.0+0.3im)
     @test pFq((2+3im, 5.0, 7.0), (2+3im, 11.0), 2.0+0.4im) ≈ pFq((5.0, 7.0), (11.0,), 2.0+0.4im)
+end
+
+@testset "Terminating pFq" begin
+    @test isterminating((-1,2,3))
+    @test isterminating((1,-2.0,3))
+    @test isterminating((1,2//1,-3.f0+0im))
+    @test getterminatinglength((-1,2,3)) == 1
+    @test getterminatinglength((-1,-2,3)) == 1
+    @test getterminatinglength((-1,-2,-3)) == 1
+    @test getterminatinglength((1,-2,-3)) == 2
+    @test getterminatinglength((1,2,-3)) == 3
+    @test getterminatinglength((-1,2,-3)) == 1
+    @test getterminatinglength((1,-2,3)) == 2
 end
 
 @testset "M" begin

@@ -283,7 +283,7 @@ function pFqconformalrational(α::Tuple{T1, Vararg{T1, q}}, β::NTuple{q, T2}, z
     α = Tuple(2*m .* T.(α))
     β = Tuple(2*m .* (T.(β) .- 1))
 
-    # Defining factors L_k and R_k as operators     # L_0...L_q w= R_1...R_{q+1}
+    # Defining factors L_k and R_k as operators     # L_0⋯L_q w = R_1⋯R_{q+1} w
     L = zeros(T, m+2, q)
     for j in 1:q-1
         for k in 0:m+1
@@ -414,4 +414,142 @@ function pFqconformalrational(α::Tuple{T1, Vararg{T1, q}}, β::NTuple{q, T2}, z
     end
 
     return Shi
+end
+
+"""
+Maclaurin series of ₚ₊₁Fₚ(α, β; z) via the generalized Euler transformation with γ = ∑β-∑α:
+
+ₚ₊₁Fₚ(α, β; z) = (1-z)^γ w(z = 1 - ((1-ζ)/(1+ζ))^m)
+
+"""
+pFqconformalrationalgeneralizedeuler(α, β, z; kwds...) = pFqconformalrationalgeneralizedeuler(α, β, z, Val(4); kwds...)
+function pFqconformalrationalgeneralizedeuler(α::Tuple{Any, Vararg{Any, q}}, β::NTuple{q, Any}, z, m; kwds...) where q
+    T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
+    T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
+    pFqconformalrationalgeneralizedeuler(T1.(α), T2.(β), z, m; kwds...)
+end
+
+
+function pFqconformalrationalgeneralizedeuler(α::Tuple{T1, Vararg{T1, q}}, β::NTuple{q, T2}, z::T3, ::Val{m}; kmax::Int = KMAX) where {q, m, T1, T2, T3}
+    T = promote_type(T1, T2, T3)
+    if abs(z) < eps(real(T))
+        return one(T)
+    end
+    γ = sum(β)-sum(α)
+    # Transform alpha and beta
+    β = Tuple(2*m .* (T.(β) .- 1))
+    α = Tuple(2*m .* T.(α))
+    # Defining factors L_k and R_k as operators     # L_0⋯L_q w = R_1⋯R_{q+1} w
+
+    L = zeros(T, m+2, q)
+    for j in 1:q
+        for k in 0:m+1
+            L[k+1, j] = (binomial(m, k+1) * (1 - (-1)^(k+1)) - binomial(m, k-1) * (1 - (-1)^(k-1))) * (0 - k)- (1 - (-1)^k)* binomial(m, k) *((q - j) * m + β[j]+2m*(γ-q+j))+ (1 - (-1)^(k-1))*binomial(m, k-1)*(q-j)*m+ β[j] * binomial(m, k)
+        end
+    end
+    ΔL = zeros(T, m+2)
+    for k in 0:2:m+1
+        ΔL[k+1] = 2*(binomial(m, k+1) - binomial(m, k-1))
+    end
+
+    R = zeros(T, m+2, q+1)
+    for j in 1:q+1
+        for k in 0:m+1
+            R[k+1, j] = (binomial(m, k+1) * (1 - (-1)^(k+1)) - binomial(m, k-1) * (1 - (-1)^(k-1))) * (0 - k) - (1 - (-1)^k)*binomial(m, k) *((q - j + 1) *m + α[j] + 2m*(γ-q+j-1)) +  (1 - (-1)^(k-1))*binomial(m, k-1)*(q-j+1)*m+ α[j] * binomial(m, k)
+        end
+    end
+    ΔR = zeros(T, m+2)
+    for k in 0:2:m+1
+        ΔR[k+1] = 2*(binomial(m, k+1) - binomial(m, k-1))
+    end
+
+    # Truncated L_0
+    Lt0 = zeros(T, m+3)
+    for k in 0:m+2
+        Lt0[k+1] = (binomial(m, k+1) - binomial(m, k-1)) * (0 - k) + q*m*binomial(m, k-1)+m*(q-2γ)*binomial(m,k)
+    end
+    ΔLt0 = zeros(T, m+2)
+    for k in 0:m+1
+        ΔLt0[k+1] = binomial(m, k+1) - binomial(m, k-1)
+    end
+
+    # Initial values for the sum
+    ζ   = r(T(z), Val(m))
+    Slo = zero(T)
+    Shi = one(T)
+
+    ##############################################################################################################
+    # Matrices of auxiliary sequences, Z and Zt
+    Z  = zeros(T, m+2, q+1)
+    Zt = zeros(T, m+2, q)
+    # Initialize Z (n=0)
+    Z[m+2, 1] = one(T)
+    for i in 0:q-1
+        Z[m+2, i+2] = sum(L[k+1, q-i]*Z[m+3-(k+1), i+1] for k in 0:m+1)/ζ
+    end
+
+    # Initialize Zt (n=0)
+    Zt[m+2, 1] = sum(R[k+1, q+1]*Z[m+3-(k+1), 1] for k in 0:m+1)
+    for i in 1:q-1
+        Zt[m+2, i+1] = sum(R[k+1, q+1-i]*Zt[m+3-(k+1), i] for k in 0:m+1)/ζ
+    end
+
+    #############   Main loop updating matrices and summing
+
+    n = 0
+    @inbounds while (n < kmax && errcheck(Shi, Slo, 8eps(real(T))))
+        # Increment L
+        for j in 1:q
+            for k in 0:2:m+1
+                L[k+1, j] += ΔL[k+1]
+            end
+        end
+
+        # Increment Z
+        vn_new = (sum(R[k+1, 1]*Zt[m+3-(k+1), q] for k in 0:m+1) - ζ*sum(Lt0[k+1]*Z[m+3-(k+1), q+1] for k in 0:m+1)) / (n+1)
+        for j in 1:m+1
+            Z[j, q+1] = ζ*Z[j+1, q+1]
+        end
+        Z[m+2, q+1] = vn_new
+
+        for i in 1:q
+            zni_new = ζ*(Z[m+2, q+1-i+1] - sum(L[k+1, i]*Z[m+4-(k+1), q+1-i] for k in 1:m+1)) / (2*(n+1)*m + β[i])
+            for j in 1:m+1
+                Z[j, q+1-i] = ζ*Z[j+1, q+1-i]
+            end
+            Z[m+2, q+1-i] = zni_new
+        end
+
+        # Increment Lt0
+        for k in 0:m+1
+            Lt0[k+1] += ΔLt0[k+1]
+        end
+
+        # Increment R
+        for j in 1:q+1
+            for k in 0:2:m+1
+                R[k+1, j] += ΔR[k+1]
+            end
+        end
+
+        # Increment Zt
+        zt1_new = sum(R[k+1, q+1]*Z[m+3-(k+1), 1] for k in 0:m+1)
+        for j in 1:m+1
+            Zt[j, 1] = ζ*Zt[j+1, 1]
+        end
+        Zt[m+2, 1] = zt1_new
+
+        for i in 1:q-1
+            ztni_new = sum(R[k+1, q+1-i]*Zt[m+3-(k+1), i] for k in 0:m+1)/ζ
+            for j in 1:m+1
+                Zt[j, i+1] = ζ*Zt[j+1, i+1]
+            end
+            Zt[m+2, i+1] = ztni_new
+        end
+
+        Shi, Slo = Shi + Z[m+2, 1], Shi
+        n += 1
+    end
+
+    return Shi*exp(γ*log1p(-z))
 end

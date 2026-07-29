@@ -58,68 +58,57 @@ pFq(α::NTuple{1, <: Integer}, ::Tuple{}, z; kwds...) = (1-z)^-α[1]
 pFq(α::NTuple{1}, β::NTuple{1}, z; kwds...) = _₁F₁(α[1], β[1], z; kwds...)
 pFq(α::NTuple{2, Any}, β::NTuple{1}, z; kwds...) = _₂F₁(α[1], α[2], β[1], z; kwds...)
 
-"""
-Remove parameters common to `α` and `β`, since `(x)ₖ/(x)ₖ ≡ 1` for any shared `x`.
-Cancelling them avoids loss of accuracy (or a `0/0`,
-if `x` is a nonpositive integer) in the generic algorithms.
-"""
-cancelcommonparameters(α::Tuple{}, β::Tuple) = (α, β)
-function cancelcommonparameters(α::Tuple, β::Tuple)
-    a, resta = first(α), Base.tail(α)
-    β′ = _deletefirstequal(a, β)
-    if length(β′) == length(β)
-        resta′, β″ = cancelcommonparameters(resta, β)
-        return (a, resta′...), β″
-    else
-        return cancelcommonparameters(resta, β′)
-    end
-end
-
-"""
-Remove the first element of `t` that equals `x`, or return `t` unchanged if none does.
-"""
-_deletefirstequal(x, t::Tuple{}) = t
-function _deletefirstequal(x, t::Tuple)
-    y, rest = first(t), Base.tail(t)
-    return y == x ? rest : (y, _deletefirstequal(x, rest)...)
-end
-
 function pFq(α::NTuple{p, Any}, β::NTuple{q, Any}, z; kwds...) where {p, q}
-    α′, β′ = cancelcommonparameters(α, β)
-    if length(α′) != p || length(β′) != q
-        return pFq(α′, β′, z; kwds...)
-    end
+    T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
+    T2 = isempty(β) ? Any : mapreduce(typeof, promote_type, β)
+    pFq(T1.(α), T2.(β), z; kwds...)
+end
+function pFq(α::NTuple{p, T1}, β::Tuple{}, z; kwds...) where {p, T1}
     z = float(z)
+    T = promote_type(T1, typeof(z))
+    if isterminating(α)
+        return pFqmaclaurin(α, β, z, getterminatinglength(α); kwds...)::T
+    else
+        return pFqweniger(α, β, z; kwds...)::T
+    end
+end
+function pFq(α::Tuple{}, β::NTuple{q, T2}, z; kwds...) where {q, T2}
+    z = float(z)
+    T = promote_type(T2, typeof(z))
+    if real(z) > 0
+        return pFqmaclaurin(α, β, z; kwds...)::T
+    else
+        return pFqweniger(α, β, z; kwds...)::T
+    end
+end
+function pFq(α::NTuple{p, T1}, β::NTuple{q, T2}, z; kwds...) where {p, q, T1, T2}
+    z = float(z)
+    T = promote_type(T1, T2, typeof(z))
+    if isacommonparameter(α, β)
+        return pFq(cancelacommonparameter(α, β)..., z; kwds...)::T
+    end
+    if isterminating(α)
+        return pFqmaclaurin(α, β, z, getterminatinglength(α); kwds...)::T
+    end
     if p ≤ q
         if real(z) > 0
-            return pFqmaclaurin(α, β, z; kwds...)
+            return pFqmaclaurin(α, β, z; kwds...)::T
         else
-            return pFqweniger(α, β, z; kwds...)
+            return pFqweniger(α, β, z; kwds...)::T
         end
     elseif p == q + 1
-        if abs(z) ≤ ρ
-            return pFqmaclaurin(α, β, z; kwds...)
+        if ispositivelybalanced(α, β)
+            #return pFqconformalrationalgeneralizedeuler(α, β, z; kwds...)::T
+            return pFqconformalrational(α, β, z; kwds...)::T
         else
-            return pFqweniger(α, β, z; kwds...)
+            return pFqconformalrational(α, β, z; kwds...)::T
         end
     else
-        return pFqweniger(α, β, z; kwds...)
+        return pFqweniger(α, β, z; kwds...)::T
     end
 end
 
 pFq(α::AbstractVector, β::AbstractVector, z; kwds...) = pFq(Tuple(α), Tuple(β), z; kwds...)
-
-"""
-Compute the generalized hypergeometric function `pFq(α, β, z)` by continued fraction.
-"""
-function pFqcontinuedfraction(α::AbstractVector{S}, β::AbstractVector{U}, z::V) where {S, U, V}
-    T = promote_type(S, U, V)
-    numerator(i) = - z * prod(i .+ α) / prod(i .+ β) / (i + 1)
-    denominator(i) = 1 - numerator(i)
-    K = continuedfraction(denominator, numerator, 10eps(real(T))) - denominator(0)
-    # iszero(K + 1) leads to Inf, when e.g. Float64s run out of digits
-    return 1 + z * prod(α) / prod(β) / (1 + K)
-end
 
 """
 Compute the generalized hypergeometric function `₃F₂(a₁, 1, 1, b₁, 2, z)`.
