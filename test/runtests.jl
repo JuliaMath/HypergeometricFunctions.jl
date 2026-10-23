@@ -593,7 +593,7 @@ end
     end
 end
 
-@testset "pFq by conformal polynomial-algebraic and rational-algebraic transformations" begin
+@testset "pFq by conformal polynomial and rational maps" begin
     function p_old(z, ::Val{m}) where m
         return 1-(1-z)^(one(z)/m)
     end
@@ -602,7 +602,7 @@ end
     end
 
     @testset "Polynomial-algebraic functions and simplified equivalent formulas" begin
-        for m in 2:5
+        for m in 1:5
             @test p_old(0.5, Val(m)) ≈ p(0.5, Val(m))
             @test_broken p_old(0.000000001, Val(m)) ≈ Float64(p_old(big"0.000000001", Val(m)))
             @test p(0.000000001, Val(m)) ≈ Float64(p(big"0.000000001", Val(m)))
@@ -610,7 +610,7 @@ end
     end
 
     @testset "Rational-algebraic functions and simplified equivalent formulas" begin
-        for m in 2:5
+        for m in 1:5
             @test r_old(0.5, Val(m)) ≈ r(0.5, Val(m))
             @test_broken r_old(0.000000001, Val(m)) ≈ Float64(r_old(big"0.000000001", Val(m)))
             @test r(0.000000001, Val(m)) ≈ Float64(r(big"0.000000001", Val(m)))
