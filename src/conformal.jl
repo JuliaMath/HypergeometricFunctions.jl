@@ -77,7 +77,7 @@ end
     pFqconformalpolynomial(α, β, z; kmax)
 Compute the Gauss hypergeometric function by Maclaurin series in w of ₂F₁(α, β; z = 1 - (1-w)^m) with m = 4, as described in
 
-> C. Jacobs, C. Piret and B. Fornberg, [Efficient and accurate evaluation of the {G}auss hypergeometric function](https://doi.org/10.1007/s11075-026-02436-2), *Numer. Algor.*, 2026.
+> C. Jacobs, C. Piret and B. Fornberg, [Efficient and accurate evaluation of the Gauss hypergeometric function](https://doi.org/10.1007/s11075-026-02436-2), *Numer. Algor.*, 2026.
 """
 pFqconformalpolynomial
 
