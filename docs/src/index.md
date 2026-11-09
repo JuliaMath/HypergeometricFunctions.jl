@@ -62,6 +62,8 @@ HypergeometricFunctions._₂F₁general
 HypergeometricFunctions._₂F₁general2
 HypergeometricFunctions.pFqdrummond
 HypergeometricFunctions.pFqweniger
+HypergeometricFunctions.pFqconformalpolynomial
+HypergeometricFunctions.pFqconformalrational
 HypergeometricFunctions.pFqcontinuedfraction
 HypergeometricFunctions.pochhammer
 HypergeometricFunctions.@clenshaw
