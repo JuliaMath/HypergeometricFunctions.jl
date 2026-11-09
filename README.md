@@ -31,3 +31,5 @@ julia> pFq((1, 2+im), (3.5, ), exp(im*π/3)) # ₂F₁ at that special point in 
 [2] J. W. Pearson, S. Olver and M. A. Porter, [Numerical methods for the computation of the confluent and Gauss hypergeometric functions](https://doi.org/10.1007/s11075-016-0173-0), *Numer. Algor.*, **74**:821–866, 2017.
 
 [3] R. M. Slevinsky, [Fast and stable rational approximation of generalized hypergeometric functions](https://doi.org/10.1007/s11075-024-01808-w), *Numer. Algor.*, **98**:587–624, 2025.
+
+[4] J. Lopez and R. M. Slevinsky, [Computing ${}_{q+1}F_q$ via rational conformal maps](https://arxiv.org/abs/2610.35577), arXiv:2610.35577, 2026.

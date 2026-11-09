@@ -72,9 +72,15 @@ end
     Meta.parse(str)
 end
 
+
+@doc raw"""
+    pFqconformalpolynomial(α, β, z; kmax)
+Compute the Gauss hypergeometric function by Maclaurin series in w of ₂F₁(α, β; z = 1 - (1-w)^m) with m = 4, as described in
+
+> C. Jacobs, C. Piret and B. Fornberg, [Efficient and accurate evaluation of the {G}auss hypergeometric function](https://doi.org/10.1007/s11075-026-02436-2), *Numer. Algor.*, 2026.
 """
-Maclaurin series of ₚ₊₁Fₚ(α, β; z = 1 - (1-w)^m)
-"""
+pFqconformalpolynomial
+
 pFqconformalpolynomial(α, β, z; kwds...) = pFqconformalpolynomial(α, β, z, Val(4); kwds...)
 function pFqconformalpolynomial(α::Tuple{Any, Vararg{Any, q}}, β::NTuple{q, Any}, z, m; kwds...) where q
     T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
@@ -173,9 +179,14 @@ function pFqconformalpolynomial(α::Tuple{T1, T1}, β::Tuple{T2}, z::T3, ::Val{4
     return Shi
 end
 
+@doc raw"""
+    pFqconformalrational(α, β, z; kmax)
+Compute the generalized hypergeometric function [`pFq`](@ref) by Maclaurin series in w of ₚ₊₁Fₚ(α, β; z = 1 - ((1-w)/(1+w))^m) with m = 4, as described in
+
+> J. Lopez and R. M. Slevinsky, [Computing ${}_{q+1}F_q$ via rational conformal maps](https://arxiv.org/abs/2610.35577), arXiv:2610.35577, 2026.
 """
-Maclaurin series of ₚ₊₁Fₚ(α, β; z = 1 - ((1-w)/(1+w))^m)
-"""
+pFqconformalrational
+
 pFqconformalrational(α, β, z; kwds...) = pFqconformalrational(α, β, z, Val(4); kwds...)
 function pFqconformalrational(α::Tuple{Any, Vararg{Any, q}}, β::NTuple{q, Any}, z, m; kwds...) where q
     T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
@@ -422,12 +433,14 @@ function pFqconformalrational(α::Tuple{T1, Vararg{T1, q}}, β::NTuple{q, T2}, z
     return Shi
 end
 
-"""
-Maclaurin series of ₚ₊₁Fₚ(α, β; z) via the generalized Euler transformation with δ = ∑β-∑α:
+@doc raw"""
+    pFqconformalrationalgeneralizedeuler(α, β, z; kmax)
+Compute the generalized hypergeometric function [`pFq`](@ref) via the generalized Euler transformation with δ = ∑β-∑α and by Maclaurin series in w of ₚ₊₁Fₚ(α, β; z) = (1-z)^δ v(α, β; z = 1 - ((1-w)/(1+w))^m) with m = 4, as described in
 
-ₚ₊₁Fₚ(α, β; z) = (1-z)^δ v(z = 1 - ((1-w)/(1+w))^m)
-
+> J. Lopez and R. M. Slevinsky, [Computing ${}_{q+1}F_q$ via rational conformal maps](https://arxiv.org/abs/2610.35577), arXiv:2610.35577, 2026.
 """
+pFqconformalrationalgeneralizedeuler
+
 pFqconformalrationalgeneralizedeuler(α, β, z; kwds...) = pFqconformalrationalgeneralizedeuler(α, β, z, Val(4); kwds...)
 function pFqconformalrationalgeneralizedeuler(α::Tuple{Any, Vararg{Any, q}}, β::NTuple{q, Any}, z, m; kwds...) where q
     T1 = isempty(α) ? Any : mapreduce(typeof, promote_type, α)
