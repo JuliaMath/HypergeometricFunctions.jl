@@ -284,6 +284,36 @@ end
 G(z::T, ϵ::T) where {T<:Number} = ϵ == 0 ? digamma(z)/unsafe_gamma(z) : (inv(unsafe_gamma(z))-inv(unsafe_gamma(z+ϵ)))/ϵ
 G(z::Number, ϵ::Number) = G(promote(z, ϵ)...)
 
+# For `BigFloat`, the difference quotient cancels catastrophically when `ϵ` is small,
+# e.g., when `ϵ` is the rounding error of a parameter combination that is an integer
+# mathematically (see issue #102). Since `z` and `ϵ` are exact, the difference is
+# evaluated with enough extra bits of precision to absorb the cancellation. If `ϵ` is
+# below the working precision squared, the limit `ϵ → 0` is used instead.
+function G(z::T, ϵ::T) where {T <: Union{BigFloat, Complex{BigFloat}}}
+    p = precision(BigFloat)
+    iszero(ϵ) && return _G0(z)
+    e = -exponent(abs(ϵ))
+    e > 2p && return _G0(z)
+    extra = max(e, 0) + max(exponent(abs(z)+1), 0) + 32
+    ret = setprecision(BigFloat, p+extra) do
+        (_rgamma(z)-_rgamma(z+ϵ))/ϵ
+    end
+    return _roundbig(ret, p)
+end
+
+_isnonpositiveinteger(z::Number) = isinteger(z) && real(z) ≤ 0
+_rgamma(z::Number) = _isnonpositiveinteger(z) ? zero(z) : inv(unsafe_gamma(z))
+function _G0(z::Number)
+    if _isnonpositiveinteger(z)
+        n = round(Int, real(z))
+        return (-1)^(n+1)*unsafe_gamma(one(z)-n)
+    else
+        return digamma(z)/unsafe_gamma(z)
+    end
+end
+_roundbig(x::BigFloat, p::Int) = BigFloat(x; precision = p)
+_roundbig(x::Complex{BigFloat}, p::Int) = Complex(_roundbig(real(x), p), _roundbig(imag(x), p))
+
 """
 Compute the function ``\\dfrac{(z+\\epsilon)_m-(z)_m}{\\epsilon}`` by the method dscribed in
 
