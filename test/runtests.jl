@@ -698,6 +698,22 @@ end
     @test pFq((2+3im, 5.0, 7.0), (2+3im, 11.0), 2.0+0.4im) ≈ pFq((5.0, 7.0), (11.0,), 2.0+0.4im)
 end
 
+@testset "BigFloat ₂F₁ with integer c-a-b or b-a inexact by rounding (issue #102)" begin
+    setprecision(BigFloat, 256) do
+        # c-a-b = 0 mathematically, but not in BigFloat; ₂F₁(1, 1/3; 4/3; z) = Σ zⁿ/(3n+1)
+        @test _₂F₁(big(1.0), big(1)/3, big(4)/3, big(3)/4) ≈ big"1.3772586798183393177512276582454870771737008674697" rtol=big"1e-45"
+        @test _₂F₁(big(1.0)+0im, big(1)/3, big(4)/3, big(3)/4) ≈ big"1.3772586798183393177512276582454870771737008674697" rtol=big"1e-45"
+        # c-a-b = 1
+        @test _₂F₁(big(1)/3, big(2)/3, big(2.0), big(9)/10) ≈ big"1.1749511745115656583255139024976054866982830815781" rtol=big"1e-45"
+        # b-a = 1, w = 1/z transformation
+        @test _₂F₁(big(1)/3, big(4)/3, big(5)/2, big(-5.0)) ≈ big"0.67287486758383419936215908076227067024134795847034" rtol=big"1e-45"
+        # G is accurate for tiny ϵ and at the poles of Γ
+        @test HypergeometricFunctions.G(big(4)/3, big(10.0)^-77) ≈ HypergeometricFunctions.G(big(4)/3, big(0.0)) rtol=big"1e-70"
+        @test HypergeometricFunctions.G(big(-2.0), big(10.0)^-30) ≈ -2 rtol=big"1e-25"
+        @test HypergeometricFunctions.G(big(-2.0), big(0.0)) == -2
+    end
+end
+
 @testset "Terminating pFq" begin
     @test isterminating((-1,2,3))
     @test isterminating((1,-2.0,3))
